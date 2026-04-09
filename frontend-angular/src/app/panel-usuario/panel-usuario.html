@@ -1,0 +1,155 @@
+<header class="panel-header">
+  <h2 style="margin: 0; font-size: 18px; font-weight: 800;">Plataforma de Gestión - Farmapatria</h2>
+  <button (click)="cerrarSesion()" class="ui-button" style="background: white; color: var(--color-secondary); padding: 8px 15px; width: auto; font-size: 14px;">Cerrar Sesión</button>
+</header>
+
+<div style="background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+  <div>
+    <h3 style="margin: 0; color: #273376; font-weight: 700;">¡Hola, {{ usuarioActual().nombre }} {{ usuarioActual().apellido }}!</h3>
+    <small style="color: #666; font-weight: 400;">Gerencia: {{ usuarioActual().gerencia }}</small>
+  </div>
+  
+  <div style="position: relative; cursor: pointer;" (click)="toggleCampanita()">
+    <span style="font-size: 24px;">🔔</span>
+    
+    @if (noLeidas() > 0) {
+      <span style="position: absolute; top: -5px; right: -5px; background: #A70336; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; font-weight: 700;">{{ noLeidas() }}</span>
+    }
+    
+    @if (mostrarMenuNotificaciones()) {
+      <div style="position: absolute; right: 0; top: 35px; background: white; border: 1px solid #ccc; width: 250px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 10px; z-index: 100;">
+        <h4 style="margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #273376;">Notificaciones Recientes</h4>
+        
+        @if (notificaciones().length === 0) {
+          <p style="margin: 0; font-size: 12px; color: #666;">No tienes notificaciones en tu historial.</p>
+        } @else {
+          @for (notif of notificaciones(); track notif.id) {
+            <div style="margin: 5px 0; border-bottom: 1px solid #f9f9f9; padding-bottom: 5px;">
+              <p style="margin: 0; font-size: 12px; color: #333;" [style.fontWeight]="notif.leida ? '400' : '700'">
+                {{ notif.mensaje }}
+              </p>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<div class="panel-container responsive-flex">
+  
+  <div class="responsive-col" style="display: flex; flex-direction: column; gap: 20px;">
+    
+    <div class="panel-card">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--color-primary); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h3 style="margin: 0; color: var(--color-primary); font-weight: 800; font-size: 20px;">Historial de Reportes</h3>
+        
+        <div style="position: relative; flex: 1; min-width: 200px; max-width: 320px;">
+          <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #a0a5ad; font-size: 14px;">🔍</span>
+          <input type="text" placeholder="Buscar ticket..." (input)="actualizarBusqueda($event)" class="ui-input" style="padding-left: 45px;">
+        </div>
+      </div>
+      
+      <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+        
+        @if (historialFiltrado().length === 0) {
+          <div style="background: #f8f9fa; padding: 15px; text-align: center; border-radius: 4px; color: #666;">
+            No se encontraron tickets en el historial.
+          </div>
+        } @else {
+          <div style="border-left: 2px solid #e9ecef; margin-left: 10px; padding-left: 20px; position: relative;">
+            
+            @for (ticket of historialFiltrado(); track ticket.id) {
+              <div style="margin-bottom: 25px; position: relative;">
+                
+                <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"
+                     [style.background]="ticket.estado_ticket === 'Resuelto' ? '#28a745' : '#FFC907'"
+                     [style.boxShadow]="ticket.estado_ticket === 'Resuelto' ? '0 0 0 2px #28a745' : '0 0 0 2px #FFC907'">
+                </div>
+
+                <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 15px; transition: 0.2s;" onmouseover="this.style.boxShadow='0 4px 8px rgba(0,0,0,0.05)'" onmouseout="this.style.boxShadow='none'">
+                  
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                      <strong style="color: #273376; font-size: 14px; font-weight: 700;">{{ ticket.numero_reporte }}</strong>
+                      <div style="font-size: 12px; color: #888; margin-top: 2px;">📅 {{ ticket.fecha_creacion | date:'dd/MM/yyyy hh:mm a' }}</div>
+                    </div>
+                    
+                    <span [style.background]="ticket.estado_ticket === 'Resuelto' ? '#d4edda' : '#fff3cd'"
+                          [style.color]="ticket.estado_ticket === 'Resuelto' ? '#155724' : '#856404'"
+                          style="padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">
+                      {{ ticket.estado_ticket }}
+                    </span>
+                  </div>
+
+                  <div style="font-size: 13px; color: #444; margin-bottom: 10px;">
+                    <div><strong>Afectada:</strong> {{ ticket.unidad_afectada }}</div>
+                    <div style="color: #A70336;"><strong>Problema:</strong> {{ ticket.tipificacion_falla }}</div>
+                  </div>
+
+                  @if (ticket.descripcion) {
+                    <div style="background: white; border: 1px dashed #ccc; padding: 8px; border-radius: 4px; font-size: 12px; color: #666; margin-bottom: 10px; max-height: 50px; overflow-y: auto;">
+                      {{ ticket.descripcion }}
+                    </div>
+                  }
+
+                  <div style="text-align: right;">
+                    <button (click)="descargarPDF(ticket)" style="background: white; border: 1px solid #273376; color: #273376; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 700; transition: 0.2s; font-family: 'Georama', sans-serif;" onmouseover="this.style.backgroundColor='#273376'; this.style.color='white'" onmouseout="this.style.backgroundColor='white'; this.style.color='#273376'">
+                      📄 Descargar Soporte
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+    
+    <div class="panel-card">
+      <h3 style="margin-top: 0; color: #273376; border-bottom: 2px solid #273376; padding-bottom: 5px; font-weight: 700;">Buzón de Estatus</h3>
+      
+      <h4 style="color: #856404; margin-bottom: 10px; font-weight: 700;">⏳ Tickets Pendientes ({{ ticketsPendientes().length }})</h4>
+      <div style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
+        @for (ticket of ticketsPendientes(); track ticket.id) {
+          <div style="background: #fff3cd; border-left: 4px solid #FFC907; padding: 10px; margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
+            <div><strong style="color: #273376;">{{ ticket.numero_reporte }}</strong> - {{ ticket.tipificacion_falla }}</div>
+            <button (click)="descargarPDF(ticket)" style="background: none; border: none; cursor: pointer; color: #273376; font-size: 16px;" title="Descargar Soporte">📄</button>
+          </div>
+        }
+        @if (ticketsPendientes().length === 0) { <p style="font-size: 12px; color: #666;">No hay tickets pendientes.</p> }
+      </div>
+
+      <h4 style="color: #155724; margin-bottom: 10px; font-weight: 700;">✅ Tickets Resueltos ({{ ticketsResueltos().length }})</h4>
+      <div style="max-height: 200px; overflow-y: auto;">
+        @for (ticket of ticketsResueltos(); track ticket.id) {
+          <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 10px; margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
+            <div><strong style="color: #273376;">{{ ticket.numero_reporte }}</strong> - {{ ticket.tipificacion_falla }}</div>
+            <button (click)="descargarPDF(ticket)" style="background: none; border: none; cursor: pointer; color: #273376; font-size: 16px;" title="Descargar Soporte">📄</button>
+          </div>
+        }
+        @if (ticketsResueltos().length === 0) { <p style="font-size: 12px; color: #666;">No hay tickets resueltos aún.</p> }
+      </div>
+    </div>
+  </div>
+
+  <div class="responsive-col">
+    
+    <div class="panel-card">
+      <h3 style="margin-top: 0; color: #273376; border-bottom: 2px solid #273376; padding-bottom: 5px; font-weight: 700;">Mis Fallas Frecuentes</h3>
+      <div style="height: 250px; position: relative;">
+        @if (misTickets().length === 0) {
+          <p style="text-align: center; color: #666; font-size: 13px; margin-top: 50px;">No hay datos suficientes para graficar.</p>
+        }
+        <canvas id="miGraficoFallas"></canvas>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <h3 style="margin-top: 0; color: var(--color-primary); border-bottom: 2px solid var(--color-primary); padding-bottom: 5px; font-weight: 800;">Gestión Técnica</h3>
+      <button routerLink="/generar-reporte" class="ui-button btn-primary">Abrir Nuevo Ticket</button>
+    </div>
+  </div>
+</div>

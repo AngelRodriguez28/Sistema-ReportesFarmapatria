@@ -1,0 +1,46 @@
+<div class="auth-wrapper">
+    
+    <!-- Left panel: Branding Banner -->
+    <div class="auth-banner">
+        <img src="logo.png" alt="Logo Farmapatria">
+        <h1>Bienvenidos a Farmapatria</h1>
+        <p>Plataforma Logística y de Gestión Global</p>
+    </div>
+
+    <!-- Right panel: Login Form -->
+    <div class="auth-side">
+        <div class="auth-card">
+            <div class="auth-content">
+                <div class="auth-header">
+                    <h2>Log In</h2>
+                    <p>Acceso a la plataforma</p>
+                </div>
+
+                <form (ngSubmit)="iniciarSesion()">
+                    <div class="input-group">
+                        <input type="email" [(ngModel)]="credenciales.email" name="email" required placeholder="Username or Email" class="ui-input">
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" [(ngModel)]="credenciales.password" name="password" required placeholder="Password" class="ui-input">
+                    </div>
+
+                    <div class="remember-me">
+                        <label>
+                            <input type="checkbox"> Remember Me
+                        </label>
+                    </div>
+
+                    <button type="submit" class="ui-button btn-login">
+                        Log in
+                    </button>
+
+                    <div class="auth-footer">
+                        <p>Don't Have An Account? <a routerLink="/registro">Sign Up</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>

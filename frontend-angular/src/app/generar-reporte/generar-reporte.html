@@ -1,0 +1,84 @@
+<div class="panel-container" style="max-width: 900px;">
+    
+    <div class="panel-card" style="padding: 0; overflow: hidden;">
+        
+        <div class="panel-header" style="flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h2 style="margin: 0; font-size: 22px; font-weight: 800;">Nueva Incidencia Técnica</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Plataforma de Gestión - Farmapatria</p>
+            </div>
+            <button routerLink="/panel-usuario" class="ui-button btn-outline" style="color: white; border-color: white; padding: 8px 15px; width: auto; font-size: 13px;">Volver al Panel</button>
+        </div>
+
+        <form (ngSubmit)="enviarReporte()" style="padding: 30px;">
+            
+            <div class="responsive-flex" style="margin-bottom: 20px;">
+                <div class="responsive-col">
+                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Número de Contacto *</label>
+                    <input type="text" [(ngModel)]="nuevoReporte.contacto" name="contacto" required placeholder="Ej: 0412-0000000" class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
+                </div>
+                <div class="responsive-col">
+                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Nivel de Reporte *</label>
+                    <select [(ngModel)]="nuevoReporte.nivelReporte" name="nivelReporte" required class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
+                        <option value="" disabled selected>Seleccione el nivel...</option>
+                        @for (nivel of nivelesReporte; track nivel) {
+                            <option [value]="nivel">{{ nivel }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="responsive-flex" style="margin-bottom: 20px;">
+                <div class="responsive-col">
+                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Unidad que Reporta *</label>
+                    <select [(ngModel)]="nuevoReporte.unidadReporta" name="unidadReporta" required class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
+                        <option value="" disabled selected>Seleccione la unidad emisora...</option>
+                        @for (unidad of unidadesQueReportan; track unidad) {
+                            <option [value]="unidad">{{ unidad }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="responsive-col">
+                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Unidad Afectada *</label>
+                    <select [(ngModel)]="nuevoReporte.unidadAfectada" name="unidadAfectada" required class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
+                        <option value="" disabled selected>Seleccione la farmacia o unidad afectada...</option>
+                        @for (unidad of unidadesAfectadas; track unidad) {
+                            <option [value]="unidad">{{ unidad }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="responsive-flex" style="margin-bottom: 20px;">
+                <div class="responsive-col" style="flex: 2;">
+                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Tipificación de la Falla *</label>
+                    <select [(ngModel)]="nuevoReporte.tipificacionFalla" name="tipificacionFalla" required class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
+                        <option value="" disabled selected>Seleccione el tipo de incidencia...</option>
+                        @for (falla of tipificaciones; track falla) {
+                            <option [value]="falla">{{ falla }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="responsive-col">
+                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">N° Anydesk (Opcional)</label>
+                    <input type="text" [(ngModel)]="nuevoReporte.anydesk" name="anydesk" placeholder="Ej: 123 456 789" class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Descripción Detallada del Evento *</label>
+                <textarea [(ngModel)]="nuevoReporte.descripcion" name="descripcion" rows="4" required placeholder="Describa el problema presentado con el mayor detalle posible..." class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da; resize: vertical; height: auto;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 25px; padding: 15px; border: 1px dashed #ccc; border-radius: 6px; background: #f9f9f9;">
+                <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Evidencia / Archivo Adjunto (Opcional)</label>
+                <input type="file" (change)="capturarArchivo($event)" style="font-size: 13px; color: #666; width: 100%;">
+            </div>
+
+            <button type="submit" class="ui-button" style="background-color: var(--color-primary); color: white; border-radius: 6px;">
+                Generar Ticket de Soporte
+            </button>
+
+        </form>
+    </div>
+</div>

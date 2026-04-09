@@ -1,0 +1,328 @@
+@import url('https://fonts.googleapis.com/css2?family=Georama:wght@300;400;500;700;800&display=swap');
+
+:root {
+  --color-primary: #273376;    /* Azul Institucional */
+  --color-secondary: #A70336;  /* Rojo Cereza Institucional */
+  --color-bg: #f4f6f9;         /* Fondo General */
+  --color-text: #333333;       /* Texto General */
+  --font-family: 'Georama', sans-serif;
+}
+
+* {
+  font-family: var(--font-family);
+  box-sizing: border-box; /* Crucial para diseño responsivo fluido */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  overflow-x: hidden;
+}
+
+/* Utilidades Globales para Responsividad */
+.responsive-flex {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.responsive-col {
+  flex: 1;
+  min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  .responsive-flex {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .responsive-col {
+    width: 100%;
+    min-width: 100%; /* Forzar 1 columna en móvil */
+  }
+}
+
+/* =========================================================
+   UI Kit Authentication Styles & Global Theme
+   ========================================================= */
+
+/* =========================================================
+   UI Kit Authentication Styles (Split Layout)
+   ========================================================= */
+
+/* The main container becomes a 100vh flexbox */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-wrap: wrap; /* Allows stacking on mobile */
+    background-color: white;
+}
+
+/* Left side: Banner area with corporate color */
+.auth-banner {
+    flex: 1;
+    min-width: 350px;
+    background-color: var(--color-primary);
+    background-image: linear-gradient(135deg, var(--color-primary) 0%, #1a2352 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Optional subtle overlay pattern on banner */
+.auth-banner::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(167, 3, 54, 0.4) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.auth-banner img {
+    max-width: 100%;
+    height: auto;
+    max-height: 80px; /* Adjust according to the wide logo provided */
+    margin-bottom: 25px;
+    z-index: 1;
+}
+
+.auth-banner h1 {
+    font-size: 36px;
+    font-weight: 800;
+    margin: 0;
+    z-index: 1;
+    font-family: var(--font-family);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.auth-banner p {
+    font-size: 16px;
+    opacity: 0.9;
+    margin-top: 10px;
+    z-index: 1;
+}
+
+/* Right side: Form container */
+.auth-side {
+    flex: 1;
+    min-width: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background-color: white;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 450px;
+    padding: 30px;
+    background: white;
+    /* We remove the background container shadow on desktop since it blends with side */
+}
+
+/* Small adjustments for mobile fallback */
+@media (max-width: 768px) {
+    .auth-banner {
+        min-height: 250px;
+        flex: none; /* stop flex growing */
+        padding: 30px 20px;
+    }
+    .auth-banner h1 {
+        font-size: 26px;
+    }
+    .auth-card {
+        box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+        border-radius: 12px;
+        padding: 40px 20px;
+    }
+}
+
+.auth-card-large {
+    max-width: 700px; /* Registro form needs more space */
+}
+
+/* Hide the pseudo-phone curves */
+.card-wave-top, .card-wave-bottom {
+    display: none;
+}
+
+.auth-content {
+    z-index: 2;
+    background: transparent;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-header h2 {
+    color: var(--color-secondary);
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.auth-header p {
+    color: #888;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* Reusable UI Inputs for global application */
+.ui-input {
+    width: 100%;
+    padding: 14px 20px;
+    border: 1px solid #e1e5eb;
+    background-color: #f8f9fc;
+    border-radius: 30px; /* Pill shape */
+    font-size: 14px;
+    font-family: var(--font-family);
+    color: var(--color-text);
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.ui-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(39, 51, 118, 0.1);
+    background-color: #fff;
+}
+
+.ui-input::placeholder {
+    color: #a0a5ad;
+    font-weight: 500;
+}
+
+.ui-input[type="date"] {
+    color: #666;
+    height: 48px;
+}
+select.ui-input {
+    cursor: pointer;
+}
+
+.remember-me {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 13px;
+    color: #666;
+}
+
+.remember-me label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.remember-me input[type="checkbox"] {
+    accent-color: var(--color-secondary);
+    width: 16px;
+    height: 16px;
+}
+
+/* Reusable buttons */
+.ui-button {
+    width: 100%;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 30px; /* Pill shape */
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-login {
+    background-color: var(--color-secondary);
+    color: white;
+    box-shadow: 0 4px 15px rgba(167,3,54,0.25);
+}
+
+.btn-login:hover {
+    background-color: #8a022d;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(167,3,54,0.35);
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1a2352;
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-outline:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: #888;
+}
+
+.auth-footer a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* General Layout for Panels */
+.panel-header {
+    background-color: var(--color-primary);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.panel-container {
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.panel-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-bottom: 20px;
+}

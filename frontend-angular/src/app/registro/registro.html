@@ -1,0 +1,75 @@
+<div class="auth-wrapper">
+    
+    <!-- Left panel: Branding Banner -->
+    <div class="auth-banner">
+        <img src="logo.png" alt="Logo Farmapatria">
+        <h1>Únete a Farmapatria</h1>
+        <p>Plataforma Logística y de Gestión Global</p>
+    </div>
+
+    <!-- Right panel: Form -->
+    <div class="auth-side">
+        <div class="auth-card auth-card-large">
+            <div class="auth-content">
+                <div class="auth-header">
+                    <h2>Sign Up</h2>
+                    <p>Registro de usuario interno</p>
+                </div>
+
+                <form (ngSubmit)="registrarse()">
+                    
+                    <div class="responsive-flex">
+                        <div class="input-group responsive-col">
+                            <input type="text" [(ngModel)]="nuevoUsuario.nombre" name="nombre" required placeholder="Nombre *" class="ui-input">
+                        </div>
+                        <div class="input-group responsive-col">
+                            <input type="text" [(ngModel)]="nuevoUsuario.apellido" name="apellido" required placeholder="Apellido *" class="ui-input">
+                        </div>
+                    </div>
+
+                    <div class="responsive-flex">
+                        <div class="input-group responsive-col">
+                            <input type="text" [(ngModel)]="nuevoUsuario.cedula" name="cedula" required placeholder="Cédula *" class="ui-input">
+                        </div>
+                        <div class="input-group responsive-col">
+                            <input type="date" [(ngModel)]="nuevoUsuario.fecha_nac" name="fecha_nac" class="ui-input" title="Fecha de Nacimiento">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <select [(ngModel)]="nuevoUsuario.gerencia" name="gerencia" required class="ui-input">
+                            <option value="" disabled selected>Seleccione su gerencia asignada...</option>
+                            <option value="Sistemas / Tecnología">Sistemas / Tecnología</option>
+                            <option value="Operaciones">Operaciones</option>
+                            <option value="Recursos Humanos">Recursos Humanos</option>
+                            <option value="Presidencia">Presidencia</option>
+                            <option value="Farmacia Comercial">Farmacia Comercial</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="email" [(ngModel)]="nuevoUsuario.email" name="email" required placeholder="Correo Institucional o Personal *" class="ui-input">
+                    </div>
+
+                    <div class="responsive-flex">
+                        <div class="input-group responsive-col">
+                            <input type="password" [(ngModel)]="nuevoUsuario.password" name="password" required placeholder="Contraseña *" class="ui-input">
+                        </div>
+                        <div class="input-group responsive-col">
+                            <input type="password" [(ngModel)]="nuevoUsuario.confirmarPassword" name="confirmarPassword" required placeholder="Confirmar Contraseña *" class="ui-input">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="ui-button btn-login">
+                        Sign Up
+                    </button>
+
+                    <div class="auth-footer">
+                        <p>Already have an account? <a routerLink="/login">Log In</a></p>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
