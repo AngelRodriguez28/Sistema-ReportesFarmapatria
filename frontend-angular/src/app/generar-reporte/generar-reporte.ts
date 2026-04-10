@@ -158,10 +158,16 @@ export class GenerarReporte implements OnInit {
     const doc = new jsPDF('p', 'mm', 'a4'); 
 
     const img = new Image();
-    img.src = '/cintillo.png'; // IMPORTANTE: Asegúrate de que cintillo.png esté en tu carpeta 'public'
+    img.src = '/cintillo.png';
 
-    img.onload = () => {
-      doc.addImage(img, 'PNG', 10, 10, 190, 30); 
+    const construirDocumento = (tieneMembrete: boolean = true) => {
+      if (tieneMembrete) {
+        try {
+          doc.addImage(img, 'PNG', 10, 10, 190, 30); 
+        } catch (e) {
+          console.warn("Error al intentar añadir la imagen del membrete.", e);
+        }
+      }
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(18);
@@ -209,7 +215,7 @@ export class GenerarReporte implements OnInit {
       
       y += 5;
       doc.setFillColor(245, 245, 245); 
-      const descLines = doc.splitTextToSize(this.nuevoReporte.descripcion, 175);
+      const descLines = doc.splitTextToSize(this.nuevoReporte.descripcion || 'Sin descripción', 175);
       const rectHeight = (descLines.length * 6) + 10;
       doc.roundedRect(15, y, 180, rectHeight, 2, 2, 'F');
       
@@ -223,11 +229,12 @@ export class GenerarReporte implements OnInit {
       doc.save(`Ticket_${numeroReporte}.pdf`);
     };
 
+    img.onload = () => construirDocumento(true);
+
     img.onerror = () => {
-        alert("Aviso: No se encontró la imagen cintillo.png en la carpeta 'public'.");
-        doc.text(`Ticket N°: ${numeroReporte}`, 10, 20);
-        doc.save(`Ticket_${numeroReporte}.pdf`);
-    }
+        console.warn("Aviso: No se encontró la imagen cintillo.png en la carpeta 'public'. Generando panel en modo soporte.");
+        construirDocumento(false);
+    };
   }
 
   async enviarReporte() {

@@ -19,8 +19,8 @@ const upload = multer({ storage: storage });
 // ---------------------------------------------------------
 
 const app = express();
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 const PORT = 3000;
 
@@ -45,8 +45,10 @@ app.post('/api/registro', async (req, res) => {
     const { nombre, apellido, cedula, fecha_nac, estado, gerencia, email, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const query = `INSERT INTO usuarios (nombre, apellido, cedula, fecha_nacimiento, estado, gerencia, email, password) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`;
-        const result = await pool.query(query, [nombre, apellido, cedula, fecha_nac, estado, gerencia, email, hashedPassword]);
+        const estadoFinal = estado || 'Activo';
+        const rolPredeterminado = 2; // Todo nuevo usuario entra como Usuario Normal
+        const query = `INSERT INTO usuarios (nombre, apellido, cedula, fecha_nacimiento, estado, gerencia, email, password, rol_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`;
+        const result = await pool.query(query, [nombre, apellido, cedula, fecha_nac, estadoFinal, gerencia, email, hashedPassword, rolPredeterminado]);
         res.status(201).json({ message: 'Usuario registrado con éxito', userId: result.rows[0].id });
     } catch (error) {
         if (error.code === '23505') return res.status(400).json({ error: 'La cédula o correo ya existen.' });
@@ -150,6 +152,50 @@ app.get('/api/tickets/:usuarioId', async (req, res) => {
         res.status(200).json(result.rows);
     } catch (error) { res.status(500).json({ error: 'Error al obtener los tickets.' }); }
 });
+// ==========================================
+// RUTA ADMIN: Obtener TODOS los usuarios
+// ==========================================
+app.get('/api/admin/usuarios', async (req, res) => {
+    try {
+        const query = `SELECT id, nombre, apellido, email, cedula, gerencia, estado, rol_id FROM usuarios ORDER BY id ASC`;
+        const result = await pool.query(query);
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error("Error obteniendo usuarios:", error);
+        res.status(500).json({ error: 'Error al obtener usuarios.' });
+    }
+});
+
+// ==========================================
+// RUTA ADMIN: Cambiar Rol de un Usuario
+// ==========================================
+app.put('/api/admin/usuarios/:id/rol', async (req, res) => {
+    try {
+        const { rol_id } = req.body;
+        const result = await pool.query(`UPDATE usuarios SET rol_id = $1 WHERE id = $2 RETURNING *`, [rol_id, req.params.id]);
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.status(200).json({ message: 'Rol actualizado exitosamente', usuario: result.rows[0] });
+    } catch (error) {
+        console.error("Error cambiando rol:", error);
+        res.status(500).json({ error: 'Error interno al cambiar rol.' });
+    }
+});
+
+// ==========================================
+// RUTA ADMIN: Cambiar Estado de un Usuario (Activo/Inactivo/Bloqueado)
+// ==========================================
+app.put('/api/admin/usuarios/:id/estado', async (req, res) => {
+    try {
+        const { estado } = req.body;
+        const result = await pool.query(`UPDATE usuarios SET estado = $1 WHERE id = $2 RETURNING *`, [estado, req.params.id]);
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.status(200).json({ message: 'Estado actualizado exitosamente', usuario: result.rows[0] });
+    } catch (error) {
+        console.error("Error cambiando estado:", error);
+        res.status(500).json({ error: 'Error interno al cambiar estado.' });
+    }
+});
+
 // ==========================================
 // RUTA ADMIN: Obtener TODOS los tickets con datos del usuario
 // ==========================================
