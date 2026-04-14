@@ -18,10 +18,28 @@ Chart.register(...registerables);
 })
 export class PanelUsuario implements OnInit, OnDestroy { 
   
-  usuarioActual = signal<any>({ id: 0, nombre: 'Cargando...', apellido: '', gerencia: '' });
+  usuarioActual = signal<any>({ id: 0, nombre: 'Cargando...', apellido: '', gerencia: '', farmacia: '' });
   notificaciones = signal<any[]>([]);
   noLeidas = computed(() => this.notificaciones().filter(n => !n.leida).length); 
   mostrarMenuNotificaciones = signal<boolean>(false); 
+
+  isSidebarOpen = signal<boolean>(true);
+  inicial = computed(() => {
+    const nombre = this.usuarioActual().nombre;
+    return nombre ? nombre.substring(0,1).toUpperCase() : 'U';
+  });
+
+  // --- NUEVO: ROL LABORAL DINÁMICO ---
+  cargoLaboral = computed(() => {
+    const usr = this.usuarioActual();
+    if (usr.farmacia && usr.farmacia.toUpperCase().includes('FP')) {
+      return `Jefe de Farmacia`;
+    }
+    if (usr.gerencia && usr.gerencia.includes('ESTADAL')) {
+      return 'Gerente Estadal';
+    }
+    return 'Analista / Especialista';
+  });
 
   misTickets = signal<any[]>([]); 
   terminoBusqueda = signal<string>('');
@@ -37,7 +55,10 @@ export class PanelUsuario implements OnInit, OnDestroy {
     );
   });
 
+  pestanaActual = signal<'estatus' | 'historico'>('estatus');
+
   ticketsPendientes = signal<any[]>([]);
+  ticketsSinConfirmar = signal<any[]>([]);
   ticketsResueltos = signal<any[]>([]);
 
   private motorDeTiempo: Subscription | undefined;
@@ -91,6 +112,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
       .subscribe(todos => {
         this.misTickets.set(todos); 
         this.ticketsPendientes.set(todos.filter(t => t.estado_ticket === 'Pendiente'));
+        this.ticketsSinConfirmar.set(todos.filter(t => t.estado_ticket === 'Sin Confirmar'));
         this.ticketsResueltos.set(todos.filter(t => t.estado_ticket === 'Resuelto'));
         
         // --- NUEVO: Renderizamos el gráfico con los datos frescos ---
@@ -100,6 +122,8 @@ export class PanelUsuario implements OnInit, OnDestroy {
 
   // --- NUEVO: Lógica del Gráfico ---
   renderizarGrafico() {
+    if (this.usuarioActual().rol_id === 2) return; // Jefes de Farmacia no consumen recursos gráficos
+
     const canvas = document.getElementById('miGraficoFallas') as HTMLCanvasElement;
     if (!canvas) return;
 
@@ -149,6 +173,18 @@ export class PanelUsuario implements OnInit, OnDestroy {
       localStorage.removeItem('usuarioLogueado');
       this.router.navigate(['/login']);
     }
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen.update(v => !v);
+  }
+
+  cambiarPestana(pestana: 'estatus' | 'historico') {
+    this.pestanaActual.set(pestana);
+  }
+
+  irAlPerfil() {
+    this.router.navigate(['/perfil']);
   }
 
   descargarPDF(ticket: any) { /* Tu código de PDF intacto */ }

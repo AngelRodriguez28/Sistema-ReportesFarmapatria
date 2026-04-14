@@ -18,6 +18,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   
   adminActual = signal<any>({ id: 0, nombre: 'Cargando...', apellido: '', gerencia: '', rol_id: 0 });
   pestanaActual = signal<'tickets' | 'usuarios' | 'estadisticas'>('tickets');
+  isSidebarOpen = signal<boolean>(true);
   
   // Variable de Estado para la Ventana Modal
   ticketSeleccionado = signal<any>(null); 
@@ -95,6 +96,14 @@ export class PanelAdmin implements OnInit, OnDestroy {
     if (pestana === 'estadisticas') {
       setTimeout(() => this.renderizarGraficosGlobales(), 100);
     }
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen.update(v => !v);
+  }
+
+  irAlPerfil() {
+    this.router.navigate(['/perfil']);
   }
 
   renderizarGraficosGlobales() {

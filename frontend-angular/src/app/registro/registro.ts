@@ -20,6 +20,7 @@ export class Registro {
     fecha_nac: '',
     estado: 'Activo', // Por defecto todos nacen activos
     gerencia: '',
+    farmacia: '',
     email: '',
     password: '',
     confirmarPassword: '' // Campo temporal solo para validar

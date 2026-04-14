@@ -42,13 +42,19 @@ pool.connect((err, client, release) => {
 // RUTA 1: Registro
 // ==========================================
 app.post('/api/registro', async (req, res) => {
-    const { nombre, apellido, cedula, fecha_nac, estado, gerencia, email, password } = req.body;
+    const { nombre, apellido, cedula, fecha_nac, estado, gerencia, farmacia, email, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const estadoFinal = estado || 'Activo';
-        const rolPredeterminado = 2; // Todo nuevo usuario entra como Usuario Normal
-        const query = `INSERT INTO usuarios (nombre, apellido, cedula, fecha_nacimiento, estado, gerencia, email, password, rol_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`;
-        const result = await pool.query(query, [nombre, apellido, cedula, fecha_nac, estadoFinal, gerencia, email, hashedPassword, rolPredeterminado]);
+        
+        // Auto-Asignación de roles según unidad de trabajo
+        let rolAsignado = 2; // Por defecto: Jefe de Farmacia / Estándar
+        if (gerencia && gerencia.includes('ESTADAL')) {
+            rolAsignado = 6; // Gerentes Estadales
+        }
+
+        const query = `INSERT INTO usuarios (nombre, apellido, cedula, fecha_nacimiento, estado, gerencia, farmacia, email, password, rol_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`;
+        const result = await pool.query(query, [nombre, apellido, cedula, fecha_nac, estadoFinal, gerencia, farmacia, email, hashedPassword, rolAsignado]);
         res.status(201).json({ message: 'Usuario registrado con éxito', userId: result.rows[0].id });
     } catch (error) {
         if (error.code === '23505') return res.status(400).json({ error: 'La cédula o correo ya existen.' });

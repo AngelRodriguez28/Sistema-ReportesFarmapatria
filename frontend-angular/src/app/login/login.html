@@ -12,31 +12,32 @@
         <div class="auth-card">
             <div class="auth-content">
                 <div class="auth-header">
-                    <h2>Log In</h2>
+                    <h2>Iniciar Sesión</h2>
                     <p>Acceso a la plataforma</p>
                 </div>
 
                 <form (ngSubmit)="iniciarSesion()">
                     <div class="input-group">
-                        <input type="email" [(ngModel)]="credenciales.email" name="email" required placeholder="Username or Email" class="ui-input">
+                        <input type="email" [(ngModel)]="credenciales.email" name="email" required placeholder="Usuario o Correo" class="ui-input">
                     </div>
 
                     <div class="input-group">
-                        <input type="password" [(ngModel)]="credenciales.password" name="password" required placeholder="Password" class="ui-input">
+                        <input type="password" [(ngModel)]="credenciales.password" name="password" required placeholder="Contraseña" class="ui-input">
                     </div>
 
-                    <div class="remember-me">
+                    <div class="remember-me" style="display: flex; justify-content: space-between; align-items: center;">
                         <label>
-                            <input type="checkbox"> Remember Me
+                            <input type="checkbox"> Recordarme
                         </label>
+                        <a routerLink="/recuperar-contrasena" style="background:none; border:none; color:inherit; font-size:14px; cursor:pointer; text-decoration:underline; padding:0;">¿Olvidó Contraseña?</a>
                     </div>
 
                     <button type="submit" class="ui-button btn-login">
-                        Log in
+                        Iniciar sesión
                     </button>
 
                     <div class="auth-footer">
-                        <p>Don't Have An Account? <a routerLink="/registro">Sign Up</a></p>
+                        <p>¿No tienes una cuenta? <a routerLink="/registro">Regístrate</a></p>
                     </div>
                 </form>
             </div>

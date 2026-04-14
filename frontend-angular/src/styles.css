@@ -117,13 +117,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px;
+    padding: 40px 20px 60px 20px; /* Restaurado a un padding prudente sin desbordar */
     background-color: white;
 }
 
 .auth-card {
     width: 100%;
-    max-width: 450px;
+    max-width: 420px;
     padding: 30px;
     background: white;
     /* We remove the background container shadow on desktop since it blends with side */
@@ -132,22 +132,29 @@ body {
 /* Small adjustments for mobile fallback */
 @media (max-width: 768px) {
     .auth-banner {
-        min-height: 250px;
-        flex: none; /* stop flex growing */
-        padding: 30px 20px;
+        min-height: 200px;
+        flex: 1 1 100%; /* Toma todo el ancho disponible */
+        min-width: 100%;
+        padding: 20px 15px;
     }
     .auth-banner h1 {
-        font-size: 26px;
+        font-size: 24px;
+    }
+    .auth-side {
+        flex: 1 1 100%;
+        min-width: 100%;
+        padding: 30px 15px 50px 15px;
     }
     .auth-card {
         box-shadow: 0 5px 25px rgba(0,0,0,0.05);
         border-radius: 12px;
-        padding: 40px 20px;
+        padding: 25px 15px;
     }
 }
 
 .auth-card-large {
-    max-width: 700px; /* Registro form needs more space */
+    max-width: 650px; /* Registro form needs more space */
+    padding: 25px; /* Menos espacio interior para que quepan todos los items */
 }
 
 /* Hide the pseudo-phone curves */
@@ -162,12 +169,12 @@ body {
 
 .auth-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .auth-header h2 {
     color: var(--color-secondary);
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
     margin: 0;
 }
@@ -179,18 +186,18 @@ body {
 }
 
 .input-group {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     width: 100%;
 }
 
 /* Reusable UI Inputs for global application */
 .ui-input {
     width: 100%;
-    padding: 14px 20px;
+    padding: 12px 20px;
     border: 1px solid #e1e5eb;
     background-color: #f8f9fc;
     border-radius: 30px; /* Pill shape */
-    font-size: 14px;
+    font-size: 13px;
     font-family: var(--font-family);
     color: var(--color-text);
     outline: none;
@@ -210,7 +217,7 @@ body {
 
 .ui-input[type="date"] {
     color: #666;
-    height: 48px;
+    height: 42px;
 }
 select.ui-input {
     cursor: pointer;
@@ -240,10 +247,10 @@ select.ui-input {
 /* Reusable buttons */
 .ui-button {
     width: 100%;
-    padding: 14px 24px;
+    padding: 12px 24px;
     border: none;
     border-radius: 30px; /* Pill shape */
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -314,9 +321,44 @@ select.ui-input {
 }
 
 .panel-container {
-    padding: 30px;
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Estándar de la web responsiva (Breakpoints) */
+@media (min-width: 576px) {
+    .panel-container {
+        max-width: 540px;
+    }
+}
+@media (min-width: 768px) {
+    .panel-container {
+        max-width: 720px;
+    }
+}
+@media (min-width: 992px) {
+    .panel-container {
+        max-width: 960px;
+    }
+}
+@media (min-width: 1200px) {
+    .panel-container {
+        max-width: 1140px;
+    }
+}
+@media (min-width: 1400px) {
+    .panel-container {
+        max-width: 1320px;
+    }
+}
+
+/* Espaciado adicional sugerido para vistas de escritorio */
+.panel-wrapper {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
 .panel-card {
@@ -325,4 +367,79 @@ select.ui-input {
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     padding: 25px;
     margin-bottom: 20px;
+}
+
+/* Sidebar & Layout Styles */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--color-primary);
+    color: white;
+    transition: margin-left 0.3s ease;
+    flex-shrink: 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.admin-layout.sidebar-closed .sidebar {
+    margin-left: -250px;
+}
+
+.sidebar-brand {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+}
+
+.sidebar-nav {
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sidebar-link {
+    padding: 12px 25px;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.sidebar-link.active {
+    background-color: var(--color-secondary);
+    color: white;
+    font-weight: 700;
+    border-left: 4px solid #fff;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.hamburger {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 15px;
 }

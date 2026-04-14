@@ -28,7 +28,7 @@ export class LoginLoginComponent implements OnInit { // 2. Implementamos OnInit 
         const rolUsuario = Number(usuario.rol_id);
         
         // Lo redirige inmediatamente a su panel reemplazando el historial para evitar bucles
-        if (rolUsuario === 1 || rolUsuario === 3) {
+        if ([1, 3, 4, 5].includes(rolUsuario)) {
           this.router.navigate(['/panel-admin'], { replaceUrl: true });
         } else {
           this.router.navigate(['/panel-usuario'], { replaceUrl: true });
@@ -56,7 +56,7 @@ export class LoginLoginComponent implements OnInit { // 2. Implementamos OnInit 
         const rolUsuario = Number(data.usuario.rol_id);
 
         // 4. Redirección limpia manipulando el stack de navegación del navegador
-        if (rolUsuario === 1 || rolUsuario === 3) {
+        if ([1, 3, 4, 5].includes(rolUsuario)) {
           this.router.navigate(['/panel-admin'], { replaceUrl: true }); 
         } else {
           this.router.navigate(['/panel-usuario'], { replaceUrl: true }); 
