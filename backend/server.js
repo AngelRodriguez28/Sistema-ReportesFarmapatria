@@ -8,12 +8,12 @@ const multer = require('multer');
 const path = require('path');
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/') 
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname)
-  }
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
 });
 const upload = multer({ storage: storage });
 // ---------------------------------------------------------
@@ -46,7 +46,7 @@ app.post('/api/registro', async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const estadoFinal = estado || 'Activo';
-        
+
         // Auto-Asignación de roles según unidad de trabajo
         let rolAsignado = 2; // Por defecto: Jefe de Farmacia / Estándar
         if (gerencia && gerencia.includes('ESTADAL')) {
@@ -85,54 +85,78 @@ app.post('/api/login', async (req, res) => {
     }
 });
 // ==========================================
+// RUTA: Recuperar Contraseña
+// ==========================================
+app.put('/api/recuperar-contrasena', async (req, res) => {
+    const { email, nuevaPassword } = req.body;
+    try {
+        // 1. Verificar que el correo exista en la base de datos
+        const result = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'El correo electrónico no está registrado en el sistema.' });
+        }
+
+        // 2. Hashear la nueva contraseña
+        const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
+
+        // 3. Actualizar la contraseña en la base de datos
+        await pool.query('UPDATE usuarios SET password = $1 WHERE email = $2', [hashedPassword, email]);
+
+        res.status(200).json({ message: 'Contraseña actualizada exitosamente.' });
+    } catch (error) {
+        console.error('Error en recuperar contraseña:', error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+});
+// ==========================================
 // RUTA 2: Generación de Tickets (LÓGICA ESTRUCTURAL PURA)
 // ==========================================
 app.post('/api/tickets', upload.single('archivoAdjunto'), async (req, res) => {
-  try {
-    const { usuario_id, contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion } = req.body;
-    const archivoRuta = req.file ? req.file.path : null;
-    const estado_ticket = 'Pendiente';
-    
-    // 1. Buscamos el último ticket registrado en la base de datos
-    const lastTicketResult = await pool.query(`
+    try {
+        const { usuario_id, contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion } = req.body;
+        const archivoRuta = req.file ? req.file.path : null;
+        const estado_ticket = 'Pendiente';
+
+        // 1. Buscamos el último ticket registrado en la base de datos
+        const lastTicketResult = await pool.query(`
       SELECT numero_reporte 
       FROM tickets 
       WHERE numero_reporte LIKE 'REP-%'
       ORDER BY id DESC 
       LIMIT 1
     `);
-    
-    let correlativo = 1;
-    
-    // Si ya existen tickets, extraemos el número del último y le sumamos 1
-    if (lastTicketResult.rows.length > 0) {
-        const ultimoCodigo = lastTicketResult.rows[0].numero_reporte;
-        const extraerNumero = ultimoCodigo.match(/\d+/); // Extrae los números (Ej: de "REP-0045" saca "0045")
-        
-        if (extraerNumero) {
-            correlativo = parseInt(extraerNumero[0], 10) + 1;
+
+        let correlativo = 1;
+
+        // Si ya existen tickets, extraemos el número del último y le sumamos 1
+        if (lastTicketResult.rows.length > 0) {
+            const ultimoCodigo = lastTicketResult.rows[0].numero_reporte;
+            const extraerNumero = ultimoCodigo.match(/\d+/); // Extrae los números (Ej: de "REP-0045" saca "0045")
+
+            if (extraerNumero) {
+                correlativo = parseInt(extraerNumero[0], 10) + 1;
+            }
         }
-    }
-    
-    // 2. Formateamos el número para que siempre tenga 4 ceros iniciales (Ej: REP-0001)
-    const numero_reporte = 'REP-' + String(correlativo).padStart(4, '0');
-    
-    // 3. Insertamos el nuevo ticket en la base de datos
-    const queryInsert = `
+
+        // 2. Formateamos el número para que siempre tenga 4 ceros iniciales (Ej: REP-0001)
+        const numero_reporte = 'REP-' + String(correlativo).padStart(4, '0');
+
+        // 3. Insertamos el nuevo ticket en la base de datos
+        const queryInsert = `
       INSERT INTO tickets (numero_reporte, usuario_id, numero_contacto, nivel_reporte, tipificacion_falla, unidad_reporta, unidad_afectada, anydesk, descripcion, archivo_adjunto, estado_ticket)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *;
     `;
-    const resultInsert = await pool.query(queryInsert, [numero_reporte, usuario_id, contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion, archivoRuta, estado_ticket]);
-    
-    // 4. Disparamos la notificación de éxito para la campanita del usuario
-    const msjNotificacion = `Generaste el ticket ${numero_reporte} exitosamente.`;
-    await pool.query('INSERT INTO notificaciones (usuario_id, mensaje, leida) VALUES ($1, $2, false)', [usuario_id, msjNotificacion]);
+        const resultInsert = await pool.query(queryInsert, [numero_reporte, usuario_id, contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion, archivoRuta, estado_ticket]);
 
-    res.status(201).json({ mensaje: "Ticket creado exitosamente", ticket: resultInsert.rows[0] });
-  } catch (error) {
-    console.error("Error estructural al crear ticket:", error);
-    res.status(500).json({ error: "Error interno al procesar la creación del ticket" });
-  }
+        // 4. Disparamos la notificación de éxito para la campanita del usuario
+        const msjNotificacion = `Generaste el ticket ${numero_reporte} exitosamente.`;
+        await pool.query('INSERT INTO notificaciones (usuario_id, mensaje, leida) VALUES ($1, $2, false)', [usuario_id, msjNotificacion]);
+
+        res.status(201).json({ mensaje: "Ticket creado exitosamente", ticket: resultInsert.rows[0] });
+    } catch (error) {
+        console.error("Error estructural al crear ticket:", error);
+        res.status(500).json({ error: "Error interno al procesar la creación del ticket" });
+    }
 });
 // ==========================================
 // RUTA 4: Obtener Notificaciones (Historial de las últimas 10)
@@ -141,12 +165,12 @@ app.get('/api/notificaciones/:usuarioId', async (req, res) => {
     try {
         // Quitamos el "AND leida = false" y agregamos "LIMIT 10" para tener un historial
         const result = await pool.query(
-            'SELECT * FROM notificaciones WHERE usuario_id = $1 ORDER BY fecha_creacion DESC LIMIT 10', 
+            'SELECT * FROM notificaciones WHERE usuario_id = $1 ORDER BY fecha_creacion DESC LIMIT 10',
             [req.params.usuarioId]
         );
         res.status(200).json(result.rows);
-    } catch (error) { 
-        res.status(500).json({ error: 'Error al obtener notificaciones.' }); 
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener notificaciones.' });
     }
 });
 // ==========================================
@@ -216,9 +240,9 @@ app.get('/api/admin/tickets', async (req, res) => {
         `;
         const result = await pool.query(query);
         res.status(200).json(result.rows);
-    } catch (error) { 
+    } catch (error) {
         console.error("Error obteniendo tickets para el admin:", error);
-        res.status(500).json({ error: 'Error al obtener los tickets globales.' }); 
+        res.status(500).json({ error: 'Error al obtener los tickets globales.' });
     }
 });
 // ==========================================
@@ -227,7 +251,7 @@ app.get('/api/admin/tickets', async (req, res) => {
 app.put('/api/admin/tickets/:id/resolver', async (req, res) => {
     try {
         const ticketId = req.params.id;
-        
+
         // 1. Cambiamos el estatus del ticket
         const queryUpdate = `UPDATE tickets SET estado_ticket = 'Resuelto' WHERE id = $1 RETURNING *`;
         const result = await pool.query(queryUpdate, [ticketId]);
@@ -248,9 +272,9 @@ app.put('/api/notificaciones/marcar-leidas/:usuarioId', async (req, res) => {
     try {
         await pool.query('UPDATE notificaciones SET leida = true WHERE usuario_id = $1', [req.params.usuarioId]);
         res.status(200).json({ message: 'Notificaciones leídas' });
-    } catch (error) { 
+    } catch (error) {
         console.error("Error en PUT marcar-leidas:", error);
-        res.status(500).json({ error: 'Error al actualizar.' }); 
+        res.status(500).json({ error: 'Error al actualizar.' });
     }
 });
 
