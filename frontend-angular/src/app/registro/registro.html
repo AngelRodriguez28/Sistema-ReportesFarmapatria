@@ -1,10 +1,8 @@
 <div class="auth-wrapper">
     
-    <!-- Left panel: Branding Banner -->
+    <!-- Panel izquierdo: Banner Corporativo -->
     <div class="auth-banner">
-        <img src="logo.png" alt="Logo Farmapatria">
-        <h1>Únete a Farmapatria</h1>
-        <p>Plataforma Logística y de Gestión Global</p>
+        <h1>Bienvenidos al Sistema de Gestión de Reportes Farmapatria</h1>
     </div>
 
     <!-- Right panel: Form -->
@@ -12,7 +10,7 @@
         <div class="auth-card auth-card-large">
             <div class="auth-content">
                 <div class="auth-header">
-                    <h2>Sign Up</h2>
+                    <h2>Registrarse</h2>
                     <p>Registro de usuario interno</p>
                 </div>
 
@@ -85,8 +83,8 @@
                             <option value="GERENCIA GENERAL PARA LA INVESTIGACIÓN Y DESARROLLO DE PRODUCTOS NATURALES">GERENCIA GENERAL PARA LA INVESTIGACIÓN Y DESARROLLO DE PRODUCTOS NATURALES</option>
                         </select>
                         @if (nuevoUsuario.gerencia && nuevoUsuario.gerencia.includes('ESTADAL')) {
-                            <div style="margin-top: 8px; font-size: 13px; font-weight: 700; color: #28a745; background: #e8f5e9; padding: 5px 10px; border-radius: 4px; display: inline-block;">
-                                👤 Rol Asignado: Gerente Estadal
+                            <div style="margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--color-primary); background: rgba(39, 51, 118, 0.1); padding: 5px 12px; border-radius: 4px; display: inline-block;">
+                                ● Rol Asignado: Gerente Estadal
                             </div>
                         }
                     </div>
@@ -259,8 +257,8 @@
                             <option value="GERENCIA DE VENTAS ATENCIÓN AL CLIENTE">GERENCIA DE VENTAS ATENCIÓN AL CLIENTE</option>
                         </select>
                         @if (nuevoUsuario.farmacia && (nuevoUsuario.farmacia.includes('FP') || nuevoUsuario.farmacia.includes('Fp'))) {
-                            <div style="margin-top: 8px; font-size: 13px; font-weight: 700; color: #17a2b8; background: #e1f5fe; padding: 5px 10px; border-radius: 4px; display: inline-block;">
-                                🏪 Rol Asignado: Jefe de Farmacia ({{ nuevoUsuario.farmacia }})
+                            <div style="margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--color-secondary); background: rgba(167, 3, 54, 0.1); padding: 5px 12px; border-radius: 4px; display: inline-block;">
+                                ● Rol Asignado: Jefe de Farmacia ({{ nuevoUsuario.farmacia }})
                             </div>
                         }
                     </div>
@@ -279,11 +277,11 @@
                     </div>
 
                     <button type="submit" class="ui-button btn-login">
-                        Sign Up
+                        Registrarse
                     </button>
 
                     <div class="auth-footer">
-                        <p>Already have an account? <a routerLink="/login">Log In</a></p>
+                        <p>¿Ya tienes una cuenta? <a routerLink="/login">Iniciar Sesión</a></p>
                     </div>
 
                 </form>
