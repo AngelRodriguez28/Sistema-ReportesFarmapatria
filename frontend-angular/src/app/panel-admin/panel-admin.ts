@@ -175,7 +175,8 @@ export class PanelAdmin implements OnInit, OnDestroy {
     const nombreRol = event.target.options[event.target.selectedIndex].text;
 
     if(confirm(`¿Estás seguro de cambiar el rol de ${usuario.nombre} a ${nombreRol}?`)) {
-      this.http.put(`http://localhost:3000/api/admin/usuarios/${usuario.id}/rol`, { rol_id: nuevoRolId })
+      // B5-FIX: Convertir a número (event.target.value siempre es string en HTML)
+      this.http.put(`http://localhost:3000/api/admin/usuarios/${usuario.id}/rol`, { rol_id: Number(nuevoRolId) })
         .subscribe(() => {
           alert('Rol actualizado exitosamente');
           this.cargarTodosLosUsuarios();

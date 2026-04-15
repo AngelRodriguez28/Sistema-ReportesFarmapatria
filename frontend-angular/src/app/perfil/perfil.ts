@@ -62,17 +62,33 @@ export class Perfil implements OnInit {
     }
   }
 
-  guardarCambios() {
+  // B9-FIX: guardarCambios ahora persiste los datos en el backend real
+  async guardarCambios() {
     if (!this.usuario.nombre || !this.usuario.apellido) {
       alert('Nombre y Apellido son obligatorios.');
       return;
     }
-    // Guardar en maqueta frontend
-    if (typeof window !== 'undefined' && localStorage) {
-      localStorage.setItem('usuarioLogueado', JSON.stringify(this.usuario));
+    try {
+      const response = await fetch(`http://localhost:3000/api/usuarios/${this.usuario.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: this.usuario.nombre, apellido: this.usuario.apellido })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        // Actualizar localStorage con datos frescos del servidor
+        const usuarioActualizado = { ...this.usuario, ...data.usuario };
+        localStorage.setItem('usuarioLogueado', JSON.stringify(usuarioActualizado));
+        this.usuario = usuarioActualizado;
+        this.actualizarInicial();
+        alert('Cambios guardados con éxito.');
+      } else {
+        alert('Error al guardar: ' + (data.error || 'Intenta de nuevo.'));
+      }
+    } catch (error) {
+      console.error('Error de conexión al guardar perfil:', error);
+      alert('Error de conexión. Verifica que el Backend esté corriendo.');
     }
-    this.actualizarInicial();
-    alert('Cambios guardados con éxito.');
   }
 
   regresar() {

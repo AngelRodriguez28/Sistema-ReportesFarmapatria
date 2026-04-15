@@ -107,8 +107,9 @@
                                 </td>
 
                                 <td style="padding: 15px; text-align: center;">
-                                    <span [style.background]="ticket.estado_ticket === 'Resuelto' ? '#d4edda' : '#fff3cd'"
-                                          [style.color]="ticket.estado_ticket === 'Resuelto' ? '#155724' : '#856404'"
+                                    <!-- B10-FIX: Tres colores distintos por estado -->
+                                    <span [style.background]="ticket.estado_ticket === 'Resuelto' ? '#d4edda' : ticket.estado_ticket === 'Pendiente' ? '#f8d7da' : '#fff3cd'"
+                                          [style.color]="ticket.estado_ticket === 'Resuelto' ? '#155724' : ticket.estado_ticket === 'Pendiente' ? '#721c24' : '#856404'"
                                           style="padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 700;">
                                         {{ ticket.estado_ticket }}
                                     </span>

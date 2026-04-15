@@ -238,8 +238,25 @@ export class GenerarReporte implements OnInit {
   }
 
   async enviarReporte() {
+    // B2-FIX: Validar todos los campos obligatorios antes de enviar
     if (!this.nuevoReporte.nivelReporte) {
-      alert("Error: Debe seleccionar un Nivel de Reporte obligatorio.");
+      alert('Error: Debe seleccionar un Nivel de Reporte.');
+      return;
+    }
+    if (!this.nuevoReporte.tipificacionFalla) {
+      alert('Error: Debe seleccionar una Tipificación de Falla.');
+      return;
+    }
+    if (!this.nuevoReporte.unidadReporta) {
+      alert('Error: Debe seleccionar la Unidad que Reporta.');
+      return;
+    }
+    if (!this.nuevoReporte.unidadAfectada) {
+      alert('Error: Debe seleccionar la Unidad Afectada.');
+      return;
+    }
+    if (!this.nuevoReporte.descripcion || this.nuevoReporte.descripcion.trim() === '') {
+      alert('Error: Debe ingresar una Descripción del evento.');
       return;
     }
 

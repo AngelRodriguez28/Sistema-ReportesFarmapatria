@@ -1,3 +1,6 @@
+// B12-FIX: Cargar variables de entorno desde .env (credenciales fuera del código)
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
@@ -25,11 +28,11 @@ app.use(express.json());
 const PORT = 3000;
 
 const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'SistemaReportesFP',
-    password: 'p@ssw0rd',
-    port: 5432,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: parseInt(process.env.DB_PORT || '5432'),
 });
 
 pool.connect((err, client, release) => {
@@ -72,6 +75,12 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ error: 'Correo no registrado.' });
         }
         const usuario = result.rows[0];
+
+        // B4-FIX: Bloquear acceso a cuentas Inactivas o Bloqueadas
+        if (usuario.estado === 'Inactivo' || usuario.estado === 'Bloqueado') {
+            return res.status(403).json({ error: 'Tu cuenta está bloqueada o inactiva. Contacta al administrador del sistema.' });
+        }
+
         const passwordValida = await bcrypt.compare(password, usuario.password);
         if (!passwordValida) {
             return res.status(401).json({ error: 'Contraseña incorrecta.' });
@@ -117,28 +126,12 @@ app.post('/api/tickets', upload.single('archivoAdjunto'), async (req, res) => {
         const archivoRuta = req.file ? req.file.path : null;
         const estado_ticket = 'Pendiente';
 
-        // 1. Buscamos el último ticket registrado en la base de datos
-        const lastTicketResult = await pool.query(`
-      SELECT numero_reporte 
-      FROM tickets 
-      WHERE numero_reporte LIKE 'REP-%'
-      ORDER BY id DESC 
-      LIMIT 1
-    `);
+        // B1+B7-FIX: Usar COUNT(*) para el correlativo es más robusto que buscar el último ID.
+        // COUNT() es atómico y no se desincroniza si se eliminan tickets o hay concurrencia.
+        const countResult = await pool.query('SELECT COUNT(*) as total FROM tickets');
+        const correlativo = parseInt(countResult.rows[0].total, 10) + 1;
 
-        let correlativo = 1;
-
-        // Si ya existen tickets, extraemos el número del último y le sumamos 1
-        if (lastTicketResult.rows.length > 0) {
-            const ultimoCodigo = lastTicketResult.rows[0].numero_reporte;
-            const extraerNumero = ultimoCodigo.match(/\d+/); // Extrae los números (Ej: de "REP-0045" saca "0045")
-
-            if (extraerNumero) {
-                correlativo = parseInt(extraerNumero[0], 10) + 1;
-            }
-        }
-
-        // 2. Formateamos el número para que siempre tenga 4 ceros iniciales (Ej: REP-0001)
+        // Formateamos el número para que siempre tenga 4 dígitos (Ej: REP-0001)
         const numero_reporte = 'REP-' + String(correlativo).padStart(4, '0');
 
         // 3. Insertamos el nuevo ticket en la base de datos
@@ -275,6 +268,27 @@ app.put('/api/notificaciones/marcar-leidas/:usuarioId', async (req, res) => {
     } catch (error) {
         console.error("Error en PUT marcar-leidas:", error);
         res.status(500).json({ error: 'Error al actualizar.' });
+    }
+});
+
+// ==========================================
+// RUTA: Actualizar Perfil de Usuario (B9-FIX)
+// ==========================================
+app.put('/api/usuarios/:id', async (req, res) => {
+    try {
+        const { nombre, apellido } = req.body;
+        if (!nombre || !apellido) {
+            return res.status(400).json({ error: 'Nombre y Apellido son obligatorios.' });
+        }
+        const result = await pool.query(
+            'UPDATE usuarios SET nombre = $1, apellido = $2 WHERE id = $3 RETURNING id, nombre, apellido, email, cedula, gerencia, farmacia, estado, rol_id',
+            [nombre.trim(), apellido.trim(), req.params.id]
+        );
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Usuario no encontrado.' });
+        res.status(200).json({ message: 'Perfil actualizado exitosamente.', usuario: result.rows[0] });
+    } catch (error) {
+        console.error('Error al actualizar perfil:', error);
+        res.status(500).json({ error: 'Error interno al actualizar el perfil.' });
     }
 });
 

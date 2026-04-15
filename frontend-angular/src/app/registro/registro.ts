@@ -42,10 +42,12 @@ export class Registro {
 
     try {
       // Enviamos los datos a tu Backend en Node.js
+      // B6-FIX: Excluir confirmarPassword del body (es solo validación frontend)
+      const { confirmarPassword, ...datosParaEnviar } = this.nuevoUsuario;
       const response = await fetch('http://localhost:3000/api/registro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.nuevoUsuario)
+        body: JSON.stringify(datosParaEnviar)
       });
 
       const data = await response.json();

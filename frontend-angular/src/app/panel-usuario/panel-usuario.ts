@@ -62,6 +62,8 @@ export class PanelUsuario implements OnInit, OnDestroy {
   ticketsResueltos = signal<any[]>([]);
 
   private motorDeTiempo: Subscription | undefined;
+  // B8-FIX: Guardar referencia a la suscripción del ticketService para poder cancelarla
+  private ticketSub: Subscription | undefined;
   graficoUsuario: any; // <-- Variable para guardar el gráfico
 
   constructor(
@@ -81,7 +83,8 @@ export class PanelUsuario implements OnInit, OnDestroy {
           this.cargarTickets();
         });
 
-        this.ticketService.ticketActualizado$.subscribe(actualizado => {
+        // B8-FIX: Guardar la suscripción en variable
+        this.ticketSub = this.ticketService.ticketActualizado$.subscribe(actualizado => {
           if (actualizado) {
             this.cargarNotificaciones();
             this.cargarTickets();
@@ -95,6 +98,8 @@ export class PanelUsuario implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.motorDeTiempo) this.motorDeTiempo.unsubscribe();
+    // B8-FIX: Cancelar suscripción al ticketService
+    if (this.ticketSub) this.ticketSub.unsubscribe();
     if (this.graficoUsuario) this.graficoUsuario.destroy();
   }
 
@@ -187,5 +192,131 @@ export class PanelUsuario implements OnInit, OnDestroy {
     this.router.navigate(['/perfil']);
   }
 
-  descargarPDF(ticket: any) { /* Tu código de PDF intacto */ }
+  // B3-FIX: Implementación completa del PDF para el Panel Usuario
+  descargarPDF(ticket: any) {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const fechaFormateada = new Date(ticket.fecha_creacion).toLocaleDateString('es-VE');
+    const usuario = this.usuarioActual();
+
+    const imgCintillo = new Image();
+    imgCintillo.src = '/cintillo.png';
+
+    const obtenerRutaImagen = (ruta: string): string => {
+      if (!ruta) return '';
+      return `http://localhost:3000/${ruta.replace(/\\/g, '/')}`;
+    };
+
+    const construirDocumento = (imgEvidencia: HTMLImageElement | null = null, tieneMembrete: boolean = true) => {
+      if (tieneMembrete) {
+        try {
+          doc.addImage(imgCintillo, 'PNG', 10, 10, 190, 30);
+        } catch (e) {
+          console.warn('No se pudo añadir el cintillo.');
+        }
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(39, 51, 118);
+      doc.text('REPORTE DE INCIDENCIA TÉCNICA', 105, 55, { align: 'center' });
+      doc.setDrawColor(39, 51, 118);
+      doc.setLineWidth(1);
+      doc.line(15, 60, 195, 60);
+
+      doc.setFillColor(245, 245, 245);
+      doc.roundedRect(140, 65, 55, 25, 3, 3, 'F');
+      doc.setFontSize(12);
+      doc.setTextColor(167, 3, 54);
+      doc.text('CÓDIGO DE TICKET', 167.5, 73, { align: 'center' });
+      doc.setFontSize(14);
+      doc.text(ticket.numero_reporte, 167.5, 83, { align: 'center' });
+
+      doc.setFontSize(11);
+      doc.setTextColor(33, 33, 33);
+      let y = 70;
+
+      const drawField = (label: string, value: string) => {
+        if (!value || value === '') return;
+        doc.setFont('helvetica', 'bold');
+        doc.text(label, 15, y);
+        doc.setFont('helvetica', 'normal');
+        const splitValue = doc.splitTextToSize(value, 100);
+        doc.text(splitValue, 60, y);
+        y += (splitValue.length * 7);
+      };
+
+      drawField('Fecha de Registro:', fechaFormateada);
+      drawField('Número de Contacto:', ticket.numero_contacto);
+      drawField('Nivel de Reporte:', ticket.nivel_reporte);
+      drawField('Usuario Emisor:', `${usuario.nombre} ${usuario.apellido}`);
+      drawField('Unidad que Reporta:', ticket.unidad_reporta);
+      drawField('Unidad Afectada:', ticket.unidad_afectada);
+      drawField('Tipificación:', ticket.tipificacion_falla);
+      drawField('N° Anydesk:', ticket.anydesk || 'N/A');
+
+      y += 5;
+      doc.setFont('helvetica', 'bold');
+      doc.text('Descripción Detallada del Evento:', 15, y);
+
+      y += 5;
+      doc.setFillColor(245, 245, 245);
+      const descLines = doc.splitTextToSize(ticket.descripcion || 'Sin descripción detallada.', 175);
+      const rectHeight = (descLines.length * 6) + 10;
+      doc.roundedRect(15, y, 180, rectHeight, 2, 2, 'F');
+
+      doc.setFont('helvetica', 'normal');
+      doc.text(descLines, 20, y + 8);
+
+      y += rectHeight + 10;
+
+      if (imgEvidencia) {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(39, 51, 118);
+        doc.text('EVIDENCIA FOTOGRÁFICA ADJUNTA:', 15, y);
+        y += 6;
+
+        const maxW = 180;
+        const maxH = 100;
+        const ratio = Math.min(maxW / imgEvidencia.width, maxH / imgEvidencia.height);
+        const finalW = imgEvidencia.width * ratio;
+        const finalH = imgEvidencia.height * ratio;
+
+        let formato = 'JPEG';
+        if (ticket.archivo_adjunto && ticket.archivo_adjunto.toLowerCase().endsWith('.png')) formato = 'PNG';
+
+        try {
+          doc.addImage(imgEvidencia, formato, 15, y, finalW, finalH);
+        } catch (e) {
+          console.warn('Error adjuntando evidencia', e);
+        }
+      }
+
+      doc.setFontSize(9);
+      doc.setTextColor(158, 158, 158);
+      doc.text('Documento oficial recuperado de la Plataforma de Gestión - Farmapatria', 105, 285, { align: 'center' });
+
+      doc.save(`${ticket.numero_reporte}.pdf`);
+    };
+
+    const resolverEvidenciaYConstruir = (tieneMembrete: boolean) => {
+      if (ticket.archivo_adjunto) {
+        const imgEvidencia = new Image();
+        imgEvidencia.crossOrigin = 'Anonymous';
+        imgEvidencia.src = obtenerRutaImagen(ticket.archivo_adjunto);
+        imgEvidencia.onload = () => construirDocumento(imgEvidencia, tieneMembrete);
+        imgEvidencia.onerror = () => {
+          alert('Aviso: El archivo de evidencia no se encontró en el servidor. Generando PDF sin foto.');
+          construirDocumento(null, tieneMembrete);
+        };
+      } else {
+        construirDocumento(null, tieneMembrete);
+      }
+    };
+
+    imgCintillo.onload = () => resolverEvidenciaYConstruir(true);
+    imgCintillo.onerror = () => {
+      console.warn('Aviso: No se encontró cintillo.png. Generando en modo soporte.');
+      resolverEvidenciaYConstruir(false);
+    };
+  }
 }
