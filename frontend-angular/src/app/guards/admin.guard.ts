@@ -11,11 +11,11 @@ export const adminGuard: CanActivateFn = (route, state) => {
       const usuario = JSON.parse(usuarioGuardado);
       
       // Validamos estrictamente por el ID del Rol
-      // 1 = Administrador, 3 = Soporte
-      if (usuario.rol_id === 1 || usuario.rol_id === 3) {
+      // 1 = Root Administrador, 3 = GTIC, 4 = Redes, 5 = Aplicaciones
+      if (usuario.rol_id === 1 || usuario.rol_id === 3 || usuario.rol_id === 4 || usuario.rol_id === 5) {
         return true; // ¡Acceso concedido al panel de administración!
       } else {
-        // Es un Usuario Estándar (rol_id = 2). Lo mandamos a su panel.
+        // Es un Usuario o Cargo Estándar (rol_id = 2). Lo mandamos a su panel.
         router.navigate(['/panel-usuario']);
         return false; // ¡Acceso denegado!
       }

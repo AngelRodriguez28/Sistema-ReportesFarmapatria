@@ -1,10 +1,8 @@
 <div class="auth-wrapper">
     
-    <!-- Left panel: Branding Banner -->
+    <!-- Panel izquierdo: Banner Corporativo -->
     <div class="auth-banner">
-        <img src="logo.png" alt="Logo Farmapatria">
-        <h1>Únete a Farmapatria</h1>
-        <p>Plataforma Logística y de Gestión Global</p>
+        <h1>Bienvenidos al Sistema de Gestión de Reportes Farmapatria</h1>
     </div>
 
     <!-- Right panel: Form -->
@@ -12,7 +10,7 @@
         <div class="auth-card auth-card-large">
             <div class="auth-content">
                 <div class="auth-header">
-                    <h2>Sign Up</h2>
+                    <h2>Registrarse</h2>
                     <p>Registro de usuario interno</p>
                 </div>
 
@@ -38,13 +36,231 @@
 
                     <div class="input-group">
                         <select [(ngModel)]="nuevoUsuario.gerencia" name="gerencia" required class="ui-input">
-                            <option value="" disabled selected>Seleccione su gerencia asignada...</option>
-                            <option value="Sistemas / Tecnología">Sistemas / Tecnología</option>
-                            <option value="Operaciones">Operaciones</option>
-                            <option value="Recursos Humanos">Recursos Humanos</option>
-                            <option value="Presidencia">Presidencia</option>
-                            <option value="Farmacia Comercial">Farmacia Comercial</option>
+                            <option value="" disabled selected>Seleccione su gerencia</option>
+                            <option value="ESTADAL AMAZONAS">ESTADAL AMAZONAS</option>
+                            <option value="ESTADAL ANZOÁTEGUI">ESTADAL ANZOÁTEGUI</option>
+                            <option value="ESTADAL APURE">ESTADAL APURE</option>
+                            <option value="ESTADAL ARAGUA">ESTADAL ARAGUA</option>
+                            <option value="ESTADAL BARINAS">ESTADAL BARINAS</option>
+                            <option value="ESTADAL BOLÍVAR">ESTADAL BOLÍVAR</option>
+                            <option value="ESTADAL CARABOBO">ESTADAL CARABOBO</option>
+                            <option value="ESTADAL COJEDES">ESTADAL COJEDES</option>
+                            <option value="ESTADAL DELTA AMACURO">ESTADAL DELTA AMACURO</option>
+                            <option value="ESTADAL DISTRITO CAPITAL">ESTADAL DISTRITO CAPITAL</option>
+                            <option value="ESTADAL FALCÓN">ESTADAL FALCÓN</option>
+                            <option value="ESTADAL GUÁRICO">ESTADAL GUÁRICO</option>
+                            <option value="ESTADAL LA GUAIRA">ESTADAL LA GUAIRA</option>
+                            <option value="ESTADAL LARA">ESTADAL LARA</option>
+                            <option value="ESTADAL MÉRIDA">ESTADAL MÉRIDA</option>
+                            <option value="ESTADAL MIRANDA">ESTADAL MIRANDA</option>
+                            <option value="ESTADAL MONAGAS">ESTADAL MONAGAS</option>
+                            <option value="ESTADAL NUEVA ESPARTA">ESTADAL NUEVA ESPARTA</option>
+                            <option value="ESTADAL PORTUGUESA">ESTADAL PORTUGUESA</option>
+                            <option value="ESTADAL SUCRE">ESTADAL SUCRE</option>
+                            <option value="ESTADAL TÁCHIRA">ESTADAL TÁCHIRA</option>
+                            <option value="ESTADAL TRUJILLO">ESTADAL TRUJILLO</option>
+                            <option value="ESTADAL YARACUY">ESTADAL YARACUY</option>
+                            <option value="ESTADAL ZULIA">ESTADAL ZULIA</option>
+                            <option value="PRESIDENCIA">PRESIDENCIA</option>
+                            <option value="DIRECCIÓN DE DESPACHO">DIRECCIÓN DE DESPACHO</option>
+                            <option value="DIRECCIÓN GENERAL">DIRECCIÓN GENERAL</option>
+                            <option value="GERENCIA GENERAL AUDITORIA INTERNA">GERENCIA GENERAL AUDITORIA INTERNA</option>
+                            <option value="GERENCIA GENERAL ATENCIÓN CIUDADANA">GERENCIA GENERAL ATENCIÓN CIUDADANA</option>
+                            <option value="GERENCIA GENERAL DE GESTIÓN ADMINISTRATIVA">GERENCIA GENERAL DE GESTIÓN ADMINISTRATIVA</option>
+                            <option value="CONSULTORÍA JURÍDICA">CONSULTORÍA JURÍDICA</option>
+                            <option value="GERENCIA GENERAL DE PLANIFICACIÓN, PRESUPUESTO Y ORGANIZACIÓN">GERENCIA GENERAL DE PLANIFICACIÓN, PRESUPUESTO Y ORGANIZACIÓN</option>
+                            <option value="GERENCIA GENERAL DE GESTIÓN COMUNICACIONAL">GERENCIA GENERAL DE GESTIÓN COMUNICACIONAL</option>
+                            <option value="GERENCIA GENERAL DE GESTIÓN HUMANA">GERENCIA GENERAL DE GESTIÓN HUMANA</option>
+                            <option value="GERENCIA GENERAL DE TECNOLOGÍA DE LA INFORMACIÓN">GERENCIA GENERAL DE TECNOLOGÍA DE LA INFORMACIÓN</option>
+                            <option value="GERENCIA GENERAL ESTRATEGÍA DE NEGOCIOS">GERENCIA GENERAL ESTRATEGÍA DE NEGOCIOS</option>
+                            <option value="GERENCIA GENERAL DE SEGURIDAD INTEGRAL">GERENCIA GENERAL DE SEGURIDAD INTEGRAL</option>
+                            <option value="GERENCIA GENERAL DE COMERCIALIZACIÓN">GERENCIA GENERAL DE COMERCIALIZACIÓN</option>
+                            <option value="GERENCIA GENERAL DE ALMACENES Y LOGÍSTICA">GERENCIA GENERAL DE ALMACENES Y LOGÍSTICA</option>
+                            <option value="GERENCIA GENERAL DE VENTAS">GERENCIA GENERAL DE VENTAS</option>
+                            <option value="GERENCIA GENERAL GESTIÓN COMERCIAL">GERENCIA GENERAL GESTIÓN COMERCIAL</option>
+                            <option value="GERENCIA GENERAL DE PROGRAMA DE SALUD">GERENCIA GENERAL DE PROGRAMA DE SALUD</option>
+                            <option value="GERENCIA GENERAL DE SISTEMA INTEGRAL DE CONTROL DE MEDICAMENTOS (SICM)">GERENCIA GENERAL DE SISTEMA INTEGRAL DE CONTROL DE MEDICAMENTOS (SICM)</option>
+                            <option value="GERENCIA GENERAL PARA LA INVESTIGACIÓN Y DESARROLLO DE PRODUCTOS NATURALES">GERENCIA GENERAL PARA LA INVESTIGACIÓN Y DESARROLLO DE PRODUCTOS NATURALES</option>
                         </select>
+                        @if (nuevoUsuario.gerencia && nuevoUsuario.gerencia.includes('ESTADAL')) {
+                            <div style="margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--color-primary); background: rgba(39, 51, 118, 0.1); padding: 5px 12px; border-radius: 4px; display: inline-block;">
+                                ● Rol Asignado: Gerente Estadal
+                            </div>
+                        }
+                    </div>
+
+                    <div class="input-group">
+                        <select [(ngModel)]="nuevoUsuario.farmacia" name="farmacia" class="ui-input">
+                            <option value="" disabled selected>Farmacia (Opcional si aplica a su sede)</option>
+                            <option value="FP122 LA GUACAMAYA">FP122 LA GUACAMAYA</option>
+                            <option value="FP264 BOLIPUERTO">FP264 BOLIPUERTO</option>
+                            <option value="FP75 HOSPITAL LUIS RAZETTI">FP75 HOSPITAL LUIS RAZETTI</option>
+                            <option value="FP69 HOSPITAL EL TIGRE">FP69 HOSPITAL EL TIGRE</option>
+                            <option value="FP709 MINHVI">FP709 MINHVI</option>
+                            <option value="FP149 POLICIA DE SOTILLO">FP149 POLICIA DE SOTILLO</option>
+                            <option value="FP750 MERCAL OROPERZA">FP750 MERCAL OROPERZA</option>
+                            <option value="FP33 HOSPITAL PABLO A ORTIZ (HPAO)">FP33 HOSPITAL PABLO A ORTIZ (HPAO)</option>
+                            <option value="FP726 CAGUA">FP726 CAGUA</option>
+                            <option value="FP616 DR. RUBEN AGUIRRE (CAMATAGUA)">FP616 DR. RUBEN AGUIRRE (CAMATAGUA)</option>
+                            <option value="FP253 JESUS OCTAVIO MORAO">FP253 JESUS OCTAVIO MORAO</option>
+                            <option value="FP76 CIUDAD TAVACARE BARINAS">FP76 CIUDAD TAVACARE BARINAS</option>
+                            <option value="FP528 CRUZ PAREDES">FP528 CRUZ PAREDES</option>
+                            <option value="FP152 DOMINGA PAEZ ORTIZ (PEDRAZA)">FP152 DOMINGA PAEZ ORTIZ (PEDRAZA)</option>
+                            <option value="FP114 HOSP. BARINITAS (II)">FP114 HOSP. BARINITAS (II)</option>
+                            <option value="FP602 VIRGEN DE LA PAZ">FP602 VIRGEN DE LA PAZ</option>
+                            <option value="FP43 CENTRO SOCIALISTA SABANETA">FP43 CENTRO SOCIALISTA SABANETA</option>
+                            <option value="FP746 MERCAL JUAN PABLO II">FP746 MERCAL JUAN PABLO II</option>
+                            <option value="FP557 BATALLA DE LOS AZULES">FP557 BATALLA DE LOS AZULES</option>
+                            <option value="FP686 BOLÍVAR RENACE">FP686 BOLÍVAR RENACE</option>
+                            <option value="FP23 LOS SAMANES">FP23 LOS SAMANES</option>
+                            <option value="FP533 YO AMO UPATA">FP533 YO AMO UPATA</option>
+                            <option value="FP90 CORPOELEC VALENCIA">FP90 CORPOELEC VALENCIA</option>
+                            <option value="FP42 INDUSTRIAS DIANA">FP42 INDUSTRIAS DIANA</option>
+                            <option value="FP712 MORON">FP712 MORON</option>
+                            <option value="FP164 VENVIDRIO LOS GUAYOS">FP164 VENVIDRIO LOS GUAYOS</option>
+                            <option value="FP147 POLICIA COJEDES">FP147 POLICIA COJEDES</option>
+                            <option value="FP53 TINACO">FP53 TINACO</option>
+                            <option value="FP52 TINAQUILLO HOSPITAL">FP52 TINAQUILLO HOSPITAL</option>
+                            <option value="FP64 TINAQUILLO PDVAL">FP64 TINAQUILLO PDVAL</option>
+                            <option value="FP722 IBIJI AJOINOKO">FP722 IBIJI AJOINOKO</option>
+                            <option value="FP171 IBIJI">FP171 IBIJI</option>
+                            <option value="FP154 HEROES DE LA PATRIA (MIPPCI)">FP154 HEROES DE LA PATRIA (MIPPCI)</option>
+                            <option value="FP729 CARICUAO UD6">FP729 CARICUAO UD6</option>
+                            <option value="FP118 MOVIL III">FP118 MOVIL III</option>
+                            <option value="FP165 MOVIL II">FP165 MOVIL II</option>
+                            <option value="FP711 EL ARAÑERO DE SABANETA">FP711 EL ARAÑERO DE SABANETA</option>
+                            <option value="FP406 DEFENSA PÚBLICA">FP406 DEFENSA PÚBLICA</option>
+                            <option value="FP434 SEBIN">FP434 SEBIN</option>
+                            <option value="FP440 INTI">FP440 INTI</option>
+                            <option value="FP696 DR JOSÉ GREGORIO HERNÁNDEZ (FISCALIA)">FP696 DR JOSÉ GREGORIO HERNÁNDEZ (FISCALIA)</option>
+                            <option value="FP399 VIRGEN DEL VALLE (COMANDANCIA)">FP399 VIRGEN DEL VALLE (COMANDANCIA)</option>
+                            <option value="FP672 MUSEO DR. JOSE GREGORIO HERNANDEZ (LA PASTORA)">FP672 MUSEO DR. JOSE GREGORIO HERNANDEZ (LA PASTORA)</option>
+                            <option value="FP733 RUIZ PINEDA UD7">FP733 RUIZ PINEDA UD7</option>
+                            <option value="FP400 ATLANTICO">FP400 ATLANTICO</option>
+                            <option value="FP29 PERIFÉRICO DE COCHE">FP29 PERIFÉRICO DE COCHE</option>
+                            <option value="FP4 SAN JOSÉ DE COTIZA">FP4 SAN JOSÉ DE COTIZA</option>
+                            <option value="FP251 CICPC">FP251 CICPC</option>
+                            <option value="FP747 MERCAL JARDINES DEL VALLE">FP747 MERCAL JARDINES DEL VALLE</option>
+                            <option value="FP694 CIUDAD CARIBIA">FP694 CIUDAD CARIBIA</option>
+                            <option value="FP751 MERCAL AQUILES NAZOA">FP751 MERCAL AQUILES NAZOA</option>
+                            <option value="FP690 GUARDIANES DE LA PATRIA">FP690 GUARDIANES DE LA PATRIA</option>
+                            <option value="FP233 MIRAFLORES (CERRADA*)">FP233 MIRAFLORES (CERRADA*)</option>
+                            <option value="FP718 MINPPAL">FP718 MINPPAL</option>
+                            <option value="FP760 MERCAL LOS MANGOS III">FP760 MERCAL LOS MANGOS III</option>
+                            <option value="FP742 MERCAL GRAVEUCA">FP742 MERCAL GRAVEUCA</option>
+                            <option value="FP752 MERCAL LONGARAI">FP752 MERCAL LONGARAI</option>
+                            <option value="FP365 PALMASOLA">FP365 PALMASOLA</option>
+                            <option value="FP61 CAPATARIDA">FP61 CAPATARIDA</option>
+                            <option value="FP117 URUMACO">FP117 URUMACO</option>
+                            <option value="FP736 LA GRAN COMUNA DEL SUR (DABAJURO)">FP736 LA GRAN COMUNA DEL SUR (DABAJURO)</option>
+                            <option value="FP60 PROLONGACION">FP60 PROLONGACION</option>
+                            <option value="FP124 ADICORA FALCON">FP124 ADICORA FALCON</option>
+                            <option value="FP759 MERCAL SAN JOSE">FP759 MERCAL SAN JOSE</option>
+                            <option value="FP293 RIO TIZNADO">FP293 RIO TIZNADO</option>
+                            <option value="FP104 HOSP.DR. FRANCISCO URDANETA">FP104 HOSP.DR. FRANCISCO URDANETA</option>
+                            <option value="FP103 JUAN ROSCIO NIEVES">FP103 JUAN ROSCIO NIEVES</option>
+                            <option value="FP51 VALLE LA PASCUA">FP51 VALLE LA PASCUA</option>
+                            <option value="FP728 ALFALLANO">FP728 ALFALLANO</option>
+                            <option value="FP104 HOSPITAL DR.FRANCISCO URDANETA">FP104 HOSPITAL DR.FRANCISCO URDANETA</option>
+                            <option value="FP17 GUARACARUMBO">FP17 GUARACARUMBO</option>
+                            <option value="FP714 TELÉFERICO">FP714 TELÉFERICO</option>
+                            <option value="FP678 VILLA MARINA LA GUAIRA">FP678 VILLA MARINA LA GUAIRA</option>
+                            <option value="FP515 LOS CISNES DUACA">FP515 LOS CISNES DUACA</option>
+                            <option value="FP31 PORCINO DEL ALBA BARQUISIMETO">FP31 PORCINO DEL ALBA BARQUISIMETO</option>
+                            <option value="FP32 LIBERTADOR">FP32 LIBERTADOR</option>
+                            <option value="FP72 CORE N°4 BARQUISIMETO">FP72 CORE N°4 BARQUISIMETO</option>
+                            <option value="FP71 BASE AEREA VICENTE LANDAETA GIL BARQUISIMETO">FP71 BASE AEREA VICENTE LANDAETA GIL BARQUISIMETO</option>
+                            <option value="FP723 CRISTOBAL PALAVECINO">FP723 CRISTOBAL PALAVECINO</option>
+                            <option value="FP734 PEDRO CAMEJO II">FP734 PEDRO CAMEJO II</option>
+                            <option value="FP516 AMOR Y ESPERANZA">FP516 AMOR Y ESPERANZA</option>
+                            <option value="FP170 ANTONIA ALBARRAN (LA AZULITA)">FP170 ANTONIA ALBARRAN (LA AZULITA)</option>
+                            <option value="FP79 SANTO DOMINGO">FP79 SANTO DOMINGO</option>
+                            <option value="FP275 CONATEL">FP275 CONATEL</option>
+                            <option value="FP562 ALAS SOBERANAS">FP562 ALAS SOBERANAS</option>
+                            <option value="FP545 S.E.N. (SECTOR ELECTRICO NACIONAL)">FP545 S.E.N. (SECTOR ELECTRICO NACIONAL)</option>
+                            <option value="FP756 MERCAL EJIDO">FP756 MERCAL EJIDO</option>
+                            <option value="FP505 JOSÉ GREGORIO HERNÁNDEZ (YARE)">FP505 JOSÉ GREGORIO HERNÁNDEZ (YARE)</option>
+                            <option value="FP134 MAMPORAL">FP134 MAMPORAL</option>
+                            <option value="FP708 IFE">FP708 IFE</option>
+                            <option value="FP20 VTV">FP20 VTV</option>
+                            <option value="FP738 HOSPITAL DE HIGUEROTE">FP738 HOSPITAL DE HIGUEROTE</option>
+                            <option value="FP719 VICTORINO SANTAELLA">FP719 VICTORINO SANTAELLA</option>
+                            <option value="FP563 GRAN MISIÓN TRANSPORTE">FP563 GRAN MISIÓN TRANSPORTE</option>
+                            <option value="FP710 UNEXCA">FP710 UNEXCA</option>
+                            <option value="FP25 JOSÉ TADEO MONAGAS">FP25 JOSÉ TADEO MONAGAS</option>
+                            <option value="FP41 CASINO MILITAR">FP41 CASINO MILITAR</option>
+                            <option value="FP531 NUESTRA SEÑORA DEL VALLE (QUIRIQUIRE)">FP531 NUESTRA SEÑORA DEL VALLE (QUIRIQUIRE)</option>
+                            <option value="FP677 POLIMONAGAS LA AVANZADORA">FP677 POLIMONAGAS LA AVANZADORA</option>
+                            <option value="FP48 CARIPITO">FP48 CARIPITO</option>
+                            <option value="FP24 PUNTA DE MATA">FP24 PUNTA DE MATA</option>
+                            <option value="FP93 FELICIA RONDÓN DE CABELLO">FP93 FELICIA RONDÓN DE CABELLO</option>
+                            <option value="FP713 DR.JOSÉ GREGORIO HERNÁNDEZ (ACARIGUA)">FP713 DR.JOSÉ GREGORIO HERNÁNDEZ (ACARIGUA)</option>
+                            <option value="FP157 VIRGEN DEL VALLE">FP157 VIRGEN DEL VALLE</option>
+                            <option value="FP158 VIRGEN DE GUADALUPE">FP158 VIRGEN DE GUADALUPE</option>
+                            <option value="FP730 VILLA JUANA">FP730 VILLA JUANA</option>
+                            <option value="FP139 JUANA LA AVANZADORA">FP139 JUANA LA AVANZADORA</option>
+                            <option value="FP286 ACARIGUA">FP286 ACARIGUA</option>
+                            <option value="FP534 SANTA ROSALIA">FP534 SANTA ROSALIA</option>
+                            <option value="FP129 OSPINO">FP129 OSPINO</option>
+                            <option value="FP741 MERCAL OSPINO II">FP741 MERCAL OSPINO II</option>
+                            <option value="FP146 CARUPANO">FP146 CARUPANO</option>
+                            <option value="FP717 PESCALBA">FP717 PESCALBA</option>
+                            <option value="FP126 RIBERO CARIACO">FP126 RIBERO CARIACO</option>
+                            <option value="FP753 MERCAL PLAYA GRANDE">FP753 MERCAL PLAYA GRANDE</option>
+                            <option value="FP561 IRENE DE JESUS (CARDENAS)">FP561 IRENE DE JESUS (CARDENAS)</option>
+                            <option value="FP278 LA LOBATERA">FP278 LA LOBATERA</option>
+                            <option value="FP724 PLANTA TACHIRA">FP724 PLANTA TACHIRA</option>
+                            <option value="FP727 SAN JOSÉ DE DELICIAS">FP727 SAN JOSÉ DE DELICIAS</option>
+                            <option value="FP49 SAN CRISTOBAL BARRIO EL CARMEN">FP49 SAN CRISTOBAL BARRIO EL CARMEN</option>
+                            <option value="FP754 MERCAL LA CONCORDIA">FP754 MERCAL LA CONCORDIA</option>
+                            <option value="FP169 FABRICIO OJEDA BOCONO">FP169 FABRICIO OJEDA BOCONO</option>
+                            <option value="FP725 BICENTENARIA CARVAJAL">FP725 BICENTENARIA CARVAJAL</option>
+                            <option value="FP634 DR JOSÉ GREGORIO HERNÁNDEZ ISNOTÚ">FP634 DR JOSÉ GREGORIO HERNÁNDEZ ISNOTÚ</option>
+                            <option value="FP221 HOSPITAL JOSÉ VICENTE SCORZA">FP221 HOSPITAL JOSÉ VICENTE SCORZA</option>
+                            <option value="FP684 CEMENTO ANDINO CANDELARIA">FP684 CEMENTO ANDINO CANDELARIA</option>
+                            <option value="FP123 FRANCISCO DE MIRANDA MOTATAN">FP123 FRANCISCO DE MIRANDA MOTATAN</option>
+                            <option value="FP716 BICENTENARIA SABANA DE MENDOZA">FP716 BICENTENARIA SABANA DE MENDOZA</option>
+                            <option value="FP715 BICENTENARIA BETIJOQUE">FP715 BICENTENARIA BETIJOQUE</option>
+                            <option value="FP721 CRISTÓBAL MENDOZA BOMBEROS">FP721 CRISTÓBAL MENDOZA BOMBEROS</option>
+                            <option value="FP732 DR.PEDRO EMILIO CARRILLO">FP732 DR.PEDRO EMILIO CARRILLO</option>
+                            <option value="FP731 VALLE DEL MOMBOY LA PUERTA">FP731 VALLE DEL MOMBOY LA PUERTA</option>
+                            <option value="FP151 BARBARITA DE LA TORRE PAMPANITO">FP151 BARBARITA DE LA TORRE PAMPANITO</option>
+                            <option value="FP756 MERCAL EL MILAGRO">FP756 MERCAL EL MILAGRO</option>
+                            <option value="FP155 HOSPITAL SAN FELIPE">FP155 HOSPITAL SAN FELIPE</option>
+                            <option value="FP265 LA CAYENA">FP265 LA CAYENA</option>
+                            <option value="FP739 FELIPE ROJAS">FP739 FELIPE ROJAS</option>
+                            <option value="FP740 MARIA GUIZZA AMBULATORIO CAMUNARE">FP740 MARIA GUIZZA AMBULATORIO CAMUNARE</option>
+                            <option value="FP54 URACHICHE YARACUY">FP54 URACHICHE YARACUY</option>
+                            <option value="FP335 BLASINA PEREZ (INTT)">FP335 BLASINA PEREZ (INTT)</option>
+                            <option value="FP144 IPASME CABIMAS">FP144 IPASME CABIMAS</option>
+                            <option value="FP143 IPASME MARACAIBO">FP143 IPASME MARACAIBO</option>
+                            <option value="FP115 FLOR PARRA MARACAIBO">FP115 FLOR PARRA MARACAIBO</option>
+                            <option value="FP720 DOMITILA FLORES PUERTOS DE ALTAGRACIA">FP720 DOMITILA FLORES PUERTOS DE ALTAGRACIA</option>
+                            <option value="FP749 MERCAL SAN JACINTO III">FP749 MERCAL SAN JACINTO III</option>
+                            <option value="GERENCIA DE CONTROL POSTERIOR">GERENCIA DE CONTROL POSTERIOR</option>
+                            <option value="GERENCIA DE DETERMINACIÓN DE RESPONSABILIDADES">GERENCIA DE DETERMINACIÓN DE RESPONSABILIDADES</option>
+                            <option value="GERENCIA DE ADMINISTRACIÓN">GERENCIA DE ADMINISTRACIÓN</option>
+                            <option value="GERENCIA DE COMPRAS Y SUMINISTROS">GERENCIA DE COMPRAS Y SUMINISTROS</option>
+                            <option value="GERENCIA DE SERVICIOS GENERALES">GERENCIA DE SERVICIOS GENERALES</option>
+                            <option value="GERENCIA DE FINANZAS">GERENCIA DE FINANZAS</option>
+                            <option value="GERENCIA DE PLANIFICACIÓN">GERENCIA DE PLANIFICACIÓN</option>
+                            <option value="GERENCIA DE PRESUPUESTO">GERENCIA DE PRESUPUESTO</option>
+                            <option value="GERENCIA DE ORGANIZACIÓN Y SISTEMAS">GERENCIA DE ORGANIZACIÓN Y SISTEMAS</option>
+                            <option value="GERENCIA DE GESTIÓN DE PERSONAL">GERENCIA DE GESTIÓN DE PERSONAL</option>
+                            <option value="GERENCIA DE BIENESTAR SOCIAL">GERENCIA DE BIENESTAR SOCIAL</option>
+                            <option value="GERENCIA DE RECLUTAMIENTO Y SELECCIÓN">GERENCIA DE RECLUTAMIENTO Y SELECCIÓN</option>
+                            <option value="GERENCIA DE FORMACIÓN Y DESARROLLO">GERENCIA DE FORMACIÓN Y DESARROLLO</option>
+                            <option value="GERENCIA DE SISTEMAS DE INFORMACIÓN">GERENCIA DE SISTEMAS DE INFORMACIÓN</option>
+                            <option value="GERENCIA DE TELECOMUNICACIONES">GERENCIA DE TELECOMUNICACIONES</option>
+                            <option value="GERENCIA DE CONTROL ADMINISTRATIVO Y FINACIERO">GERENCIA DE CONTROL ADMINISTRATIVO Y FINACIERO</option>
+                            <option value="GERENCIA DE DISTRIBUCIÓN COMERCIAL">GERENCIA DE DISTRIBUCIÓN COMERCIAL</option>
+                            <option value="GERENCIA DE VENTAS ATENCIÓN AL CLIENTE">GERENCIA DE VENTAS ATENCIÓN AL CLIENTE</option>
+                        </select>
+                        @if (nuevoUsuario.farmacia && (nuevoUsuario.farmacia.includes('FP') || nuevoUsuario.farmacia.includes('Fp'))) {
+                            <div style="margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--color-secondary); background: rgba(167, 3, 54, 0.1); padding: 5px 12px; border-radius: 4px; display: inline-block;">
+                                ● Rol Asignado: Jefe de Farmacia ({{ nuevoUsuario.farmacia }})
+                            </div>
+                        }
                     </div>
 
                     <div class="input-group">
@@ -61,11 +277,11 @@
                     </div>
 
                     <button type="submit" class="ui-button btn-login">
-                        Sign Up
+                        Registrarse
                     </button>
 
                     <div class="auth-footer">
-                        <p>Already have an account? <a routerLink="/login">Log In</a></p>
+                        <p>¿Ya tienes una cuenta? <a routerLink="/login">Iniciar Sesión</a></p>
                     </div>
 
                 </form>

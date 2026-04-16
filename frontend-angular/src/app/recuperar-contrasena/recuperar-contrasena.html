@@ -1,0 +1,42 @@
+<div class="auth-wrapper">
+    
+    <!-- Panel izquierdo: Banner Corporativo -->
+    <div class="auth-banner">
+        <h1>Bienvenidos al Sistema de Gestión de Reportes Farmapatria</h1>
+    </div>
+
+    <!-- Right panel: Recuperar Contraseña Form -->
+    <div class="auth-side">
+        <div class="auth-card">
+            <div class="auth-content">
+                <div class="auth-header">
+                    <h2>Cambiar Contraseña</h2>
+                    <p>Ingresa tus datos para actualizar tu contraseña</p>
+                </div>
+
+                <form (ngSubmit)="cambiarContrasena()">
+                    <div class="input-group">
+                        <input type="email" [(ngModel)]="datos.email" name="email" required placeholder="Usuario o Correo" class="ui-input">
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" [(ngModel)]="datos.nuevaPassword" name="nuevaPassword" required placeholder="Nueva Contraseña" class="ui-input">
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" [(ngModel)]="datos.confirmarPassword" name="confirmarPassword" required placeholder="Confirmar Contraseña" class="ui-input">
+                    </div>
+
+                    <button type="submit" class="ui-button btn-login" style="margin-top: 15px;">
+                        Cambiar y Volver al Login
+                    </button>
+
+                    <div class="auth-footer">
+                        <p>¿Recordaste tu contraseña? <a routerLink="/login">Inicia Sesión</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>

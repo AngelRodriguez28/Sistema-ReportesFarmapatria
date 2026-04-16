@@ -18,6 +18,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   
   adminActual = signal<any>({ id: 0, nombre: 'Cargando...', apellido: '', gerencia: '', rol_id: 0 });
   pestanaActual = signal<'tickets' | 'usuarios' | 'estadisticas'>('tickets');
+  isSidebarOpen = signal<boolean>(true);
   
   // Variable de Estado para la Ventana Modal
   ticketSeleccionado = signal<any>(null); 
@@ -97,6 +98,14 @@ export class PanelAdmin implements OnInit, OnDestroy {
     }
   }
 
+  toggleSidebar() {
+    this.isSidebarOpen.update(v => !v);
+  }
+
+  irAlPerfil() {
+    this.router.navigate(['/perfil']);
+  }
+
   renderizarGraficosGlobales() {
     const canvasEstatus = document.getElementById('chartEstatusAdmin') as HTMLCanvasElement;
     const canvasFallas = document.getElementById('chartFallasAdmin') as HTMLCanvasElement;
@@ -166,7 +175,8 @@ export class PanelAdmin implements OnInit, OnDestroy {
     const nombreRol = event.target.options[event.target.selectedIndex].text;
 
     if(confirm(`¿Estás seguro de cambiar el rol de ${usuario.nombre} a ${nombreRol}?`)) {
-      this.http.put(`http://localhost:3000/api/admin/usuarios/${usuario.id}/rol`, { rol_id: nuevoRolId })
+      // B5-FIX: Convertir a número (event.target.value siempre es string en HTML)
+      this.http.put(`http://localhost:3000/api/admin/usuarios/${usuario.id}/rol`, { rol_id: Number(nuevoRolId) })
         .subscribe(() => {
           alert('Rol actualizado exitosamente');
           this.cargarTodosLosUsuarios();
@@ -209,108 +219,120 @@ export class PanelAdmin implements OnInit, OnDestroy {
     const imgCintillo = new Image();
     imgCintillo.src = '/cintillo.png';
 
-    // Restricción Oficial: Falla en Membrete = Documento Nulo
-    imgCintillo.onerror = () => {
-        alert('ERROR ESTRUCTURAL: No se puede acceder al membrete oficial (cintillo.png). El sistema bloqueó la generación del PDF para garantizar la integridad documental.');
-    };
-
-    imgCintillo.onload = () => {
-        const construirDocumento = (imgEvidencia: HTMLImageElement | null = null) => {
-            doc.addImage(imgCintillo, 'PNG', 10, 10, 190, 30); 
-            
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(18);
-            doc.setTextColor(39, 51, 118); 
-            doc.text('REPORTE DE INCIDENCIA TÉCNICA', 105, 55, { align: 'center' });
-            doc.setDrawColor(39, 51, 118);
-            doc.setLineWidth(1);
-            doc.line(15, 60, 195, 60);
-
-            doc.setFillColor(245, 245, 245); 
-            doc.roundedRect(140, 65, 55, 25, 3, 3, 'F');
-            doc.setFontSize(12);
-            doc.setTextColor(167, 3, 54); 
-            doc.text('CÓDIGO DE TICKET', 167.5, 73, { align: 'center' });
-            doc.setFontSize(14);
-            doc.text(ticket.numero_reporte, 167.5, 83, { align: 'center' });
-
-            doc.setFontSize(11);
-            doc.setTextColor(33, 33, 33); 
-            let y = 70; 
-
-            const drawField = (label: string, value: string) => {
-                if (!value || value === '') return; 
-                doc.setFont("helvetica", "bold");
-                doc.text(label, 15, y);
-                doc.setFont("helvetica", "normal");
-                const splitValue = doc.splitTextToSize(value, 100); 
-                doc.text(splitValue, 60, y);
-                y += (splitValue.length * 7); 
-            };
-
-            drawField('Fecha de Registro:', fechaFormateada);
-            drawField('Número de Contacto:', ticket.numero_contacto);
-            drawField('Nivel de Reporte:', ticket.nivel_reporte);
-            drawField('Usuario Emisor:', `${ticket.nombre} ${ticket.apellido}`);
-            drawField('Unidad que Reporta:', ticket.unidad_reporta);
-            drawField('Unidad Afectada:', ticket.unidad_afectada);
-            drawField('Tipificación:', ticket.tipificacion_falla);
-            drawField('N° Anydesk:', ticket.anydesk || 'N/A');
-
-            y += 5;
-            doc.setFont("helvetica", "bold");
-            doc.text('Descripción Detallada del Evento:', 15, y);
-            
-            y += 5;
-            doc.setFillColor(245, 245, 245); 
-            const descLines = doc.splitTextToSize(ticket.descripcion || 'Sin descripción detallada.', 175);
-            const rectHeight = (descLines.length * 6) + 10;
-            doc.roundedRect(15, y, 180, rectHeight, 2, 2, 'F');
-            
-            doc.setFont("helvetica", "normal");
-            doc.text(descLines, 20, y + 8);
-
-            y += rectHeight + 10;
-
-            if (imgEvidencia) {
-                doc.setFont("helvetica", "bold");
-                doc.setTextColor(39, 51, 118);
-                doc.text('EVIDENCIA FOTOGRÁFICA ADJUNTA:', 15, y);
-                y += 6;
-
-                const maxW = 180;
-                const maxH = 100;
-                const ratio = Math.min(maxW / imgEvidencia.width, maxH / imgEvidencia.height);
-                const finalW = imgEvidencia.width * ratio;
-                const finalH = imgEvidencia.height * ratio;
-
-                let formato = 'JPEG';
-                if (ticket.archivo_adjunto.toLowerCase().endsWith('.png')) formato = 'PNG';
-
-                doc.addImage(imgEvidencia, formato, 15, y, finalW, finalH);
+    const construirDocumento = (imgEvidencia: HTMLImageElement | null = null, tieneMembrete: boolean = true) => {
+        if (tieneMembrete) {
+            try {
+                doc.addImage(imgCintillo, 'PNG', 10, 10, 190, 30); 
+            } catch (e) {
+                console.warn('No se pudo añadir el cintillo.');
             }
+        }
+        
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.setTextColor(39, 51, 118); 
+        doc.text('REPORTE DE INCIDENCIA TÉCNICA', 105, 55, { align: 'center' });
+        doc.setDrawColor(39, 51, 118);
+        doc.setLineWidth(1);
+        doc.line(15, 60, 195, 60);
 
-            doc.setFontSize(9);
-            doc.setTextColor(158, 158, 158); 
-            doc.text('Documento oficial recuperado de la Plataforma de Gestión - Farmapatria', 105, 285, { align: 'center' });
+        doc.setFillColor(245, 245, 245); 
+        doc.roundedRect(140, 65, 55, 25, 3, 3, 'F');
+        doc.setFontSize(12);
+        doc.setTextColor(167, 3, 54); 
+        doc.text('CÓDIGO DE TICKET', 167.5, 73, { align: 'center' });
+        doc.setFontSize(14);
+        doc.text(ticket.numero_reporte, 167.5, 83, { align: 'center' });
 
-            doc.save(`${ticket.numero_reporte}.pdf`);
+        doc.setFontSize(11);
+        doc.setTextColor(33, 33, 33); 
+        let y = 70; 
+
+        const drawField = (label: string, value: string) => {
+            if (!value || value === '') return; 
+            doc.setFont("helvetica", "bold");
+            doc.text(label, 15, y);
+            doc.setFont("helvetica", "normal");
+            const splitValue = doc.splitTextToSize(value, 100); 
+            doc.text(splitValue, 60, y);
+            y += (splitValue.length * 7); 
         };
 
+        drawField('Fecha de Registro:', fechaFormateada);
+        drawField('Número de Contacto:', ticket.numero_contacto);
+        drawField('Nivel de Reporte:', ticket.nivel_reporte);
+        drawField('Usuario Emisor:', `${ticket.nombre} ${ticket.apellido}`);
+        drawField('Unidad que Reporta:', ticket.unidad_reporta);
+        drawField('Unidad Afectada:', ticket.unidad_afectada);
+        drawField('Tipificación:', ticket.tipificacion_falla);
+        drawField('N° Anydesk:', ticket.anydesk || 'N/A');
+
+        y += 5;
+        doc.setFont("helvetica", "bold");
+        doc.text('Descripción Detallada del Evento:', 15, y);
+        
+        y += 5;
+        doc.setFillColor(245, 245, 245); 
+        const descLines = doc.splitTextToSize(ticket.descripcion || 'Sin descripción detallada.', 175);
+        const rectHeight = (descLines.length * 6) + 10;
+        doc.roundedRect(15, y, 180, rectHeight, 2, 2, 'F');
+        
+        doc.setFont("helvetica", "normal");
+        doc.text(descLines, 20, y + 8);
+
+        y += rectHeight + 10;
+
+        if (imgEvidencia) {
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(39, 51, 118);
+            doc.text('EVIDENCIA FOTOGRÁFICA ADJUNTA:', 15, y);
+            y += 6;
+
+            const maxW = 180;
+            const maxH = 100;
+            const ratio = Math.min(maxW / imgEvidencia.width, maxH / imgEvidencia.height);
+            const finalW = imgEvidencia.width * ratio;
+            const finalH = imgEvidencia.height * ratio;
+
+            let formato = 'JPEG';
+            if (ticket.archivo_adjunto && ticket.archivo_adjunto.toLowerCase().endsWith('.png')) formato = 'PNG';
+
+            try {
+                doc.addImage(imgEvidencia, formato, 15, y, finalW, finalH);
+            } catch (e) {
+                console.warn('Error adjuntando evidencia', e);
+            }
+        }
+
+        doc.setFontSize(9);
+        doc.setTextColor(158, 158, 158); 
+        doc.text('Documento oficial recuperado de la Plataforma de Gestión - Farmapatria', 105, 285, { align: 'center' });
+
+        doc.save(`${ticket.numero_reporte}.pdf`);
+    };
+
+    const resolverEvidenciaYConstruir = (tieneMembrete: boolean) => {
         if (ticket.archivo_adjunto) {
             const imgEvidencia = new Image();
             imgEvidencia.crossOrigin = "Anonymous";
             imgEvidencia.src = this.obtenerRutaImagen(ticket.archivo_adjunto);
 
-            imgEvidencia.onload = () => construirDocumento(imgEvidencia);
+            imgEvidencia.onload = () => construirDocumento(imgEvidencia, tieneMembrete);
             
             imgEvidencia.onerror = () => {
                 alert('Atención: El archivo de evidencia física se extravió en el servidor. Generando PDF sin foto.');
-                construirDocumento(null);
+                construirDocumento(null, tieneMembrete);
             };
         } else {
-            construirDocumento(null); 
+            construirDocumento(null, tieneMembrete); 
         }
+    };
+
+    imgCintillo.onload = () => resolverEvidenciaYConstruir(true);
+
+    imgCintillo.onerror = () => {
+        console.warn('Aviso: No se pudo acceder al membrete oficial (cintillo.png). Documento generado modo soporte.');
+        resolverEvidenciaYConstruir(false);
     };
   }
 }
