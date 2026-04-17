@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms'; 
 import { Router, RouterLink } from '@angular/router'; 
 import { CommonModule } from '@angular/common';
+import { environment } from '../../environments/environment'; // B1-FIX
 
 @Component({
   selector: 'app-registro',
@@ -44,7 +45,7 @@ export class Registro {
       // Enviamos los datos a tu Backend en Node.js
       // B6-FIX: Excluir confirmarPassword del body (es solo validación frontend)
       const { confirmarPassword, ...datosParaEnviar } = this.nuevoUsuario;
-      const response = await fetch('http://localhost:3000/api/registro', {
+      const response = await fetch(`${environment.apiUrl}/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datosParaEnviar)

@@ -5,6 +5,7 @@ import { TicketService } from '../services/ticket';
 import { CommonModule } from '@angular/common'; 
 import { jsPDF } from 'jspdf'; 
 import { timer, Subscription } from 'rxjs'; 
+import { environment } from '../../environments/environment'; // B1-FIX
 // --- NUEVO: IMPORTAMOS CHART.JS ---
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
@@ -78,7 +79,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
       if (usuarioGuardado) {
         this.usuarioActual.set(JSON.parse(usuarioGuardado));
         
-        this.motorDeTiempo = timer(0, 5000).subscribe(() => {
+        this.motorDeTiempo = timer(0, 30000).subscribe(() => { // M5-FIX
           this.cargarNotificaciones();
           this.cargarTickets();
         });
@@ -108,12 +109,12 @@ export class PanelUsuario implements OnInit, OnDestroy {
   }
 
   cargarNotificaciones() {
-    this.http.get<any[]>(`http://localhost:3000/api/notificaciones/${this.usuarioActual().id}`)
+    this.http.get<any[]>(`${environment.apiUrl}/notificaciones/${this.usuarioActual().id}`)
       .subscribe(data => this.notificaciones.set(data));
   }
 
   cargarTickets() {
-    this.http.get<any[]>(`http://localhost:3000/api/tickets/${this.usuarioActual().id}`)
+    this.http.get<any[]>(`${environment.apiUrl}/tickets/${this.usuarioActual().id}`)
       .subscribe(todos => {
         this.misTickets.set(todos); 
         this.ticketsPendientes.set(todos.filter(t => t.estado_ticket === 'Pendiente'));
@@ -127,7 +128,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
 
   // --- NUEVO: Lógica del Gráfico ---
   renderizarGrafico() {
-    if (this.usuarioActual().rol_id === 2) return; // Jefes de Farmacia no consumen recursos gráficos
+    // BUG-M4: Removida restricción de Jefes de Farmacia para que puedan ver gráficas
 
     const canvas = document.getElementById('miGraficoFallas') as HTMLCanvasElement;
     if (!canvas) return;
@@ -166,7 +167,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
   toggleCampanita() {
     this.mostrarMenuNotificaciones.set(!this.mostrarMenuNotificaciones());
     if (this.mostrarMenuNotificaciones() && this.noLeidas() > 0) {
-      this.http.put(`http://localhost:3000/api/notificaciones/marcar-leidas/${this.usuarioActual().id}`, {})
+      this.http.put(`${environment.apiUrl}/notificaciones/marcar-leidas/${this.usuarioActual().id}`, {})
         .subscribe(() => {
            this.notificaciones.update(notifs => notifs.map(n => ({ ...n, leida: true })));
         });
@@ -203,7 +204,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
 
     const obtenerRutaImagen = (ruta: string): string => {
       if (!ruta) return '';
-      return `http://localhost:3000/${ruta.replace(/\\/g, '/')}`;
+      return `${environment.serverUrl}/${ruta.replace(/\\/g, '/')}`;
     };
 
     const construirDocumento = (imgEvidencia: HTMLImageElement | null = null, tieneMembrete: boolean = true) => {

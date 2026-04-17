@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common'; 
 import { jsPDF } from 'jspdf';
 import { timer, Subscription } from 'rxjs'; 
+import { environment } from '../../environments/environment'; // B1-FIX
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
@@ -53,7 +54,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
         const admin = JSON.parse(usuarioGuardado);
         this.adminActual.set(admin);
         
-        this.motorDeTiempo = timer(0, 5000).subscribe(() => {
+        this.motorDeTiempo = timer(0, 30000).subscribe(() => { // BUG-M5: Polling menos agresivo
           this.cargarTodosLosTickets();
           if (admin.rol_id === 1) this.cargarTodosLosUsuarios();
         });
@@ -83,7 +84,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   obtenerRutaImagen(ruta: string): string {
     if (!ruta) return '';
     const rutaLimpia = ruta.replace(/\\/g, '/');
-    return `http://localhost:3000/${rutaLimpia}`;
+    return `${environment.serverUrl}/${rutaLimpia}`;
   }
   // ==========================================
 
@@ -112,17 +113,18 @@ export class PanelAdmin implements OnInit, OnDestroy {
     if (!canvasEstatus || !canvasFallas) return;
 
     const pendientes = this.todosLosTickets().filter(t => t.estado_ticket === 'Pendiente').length;
+    const sinConfirmar = this.todosLosTickets().filter(t => t.estado_ticket === 'Sin Confirmar').length; // BUG-M2: Incluir Sin Confirmar
     const resueltos = this.todosLosTickets().filter(t => t.estado_ticket === 'Resuelto').length;
 
     if (this.graficoEstatus) this.graficoEstatus.destroy();
     this.graficoEstatus = new Chart(canvasEstatus, {
        type: 'bar',
        data: {
-           labels: ['Pendientes', 'Resueltos'],
+           labels: ['Pendientes', 'Sin Confirmar', 'Resueltos'],
            datasets: [{
                label: 'Volumen de Tickets',
-               data: [pendientes, resueltos],
-               backgroundColor: ['#FFC907', '#28a745'] 
+               data: [pendientes, sinConfirmar, resueltos],
+               backgroundColor: ['#A70336', '#FFC907', '#28a745'] // Colores que combinan con tickets
            }]
        },
        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
@@ -149,7 +151,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   cargarTodosLosTickets() {
-    this.http.get<any[]>(`http://localhost:3000/api/admin/tickets`).subscribe(tickets => {
+    this.http.get<any[]>(`${environment.apiUrl}/admin/tickets`).subscribe(tickets => {
         
         // ORDENAMIENTO: Del más reciente al más antiguo
         const ticketsOrdenados = tickets.sort((a, b) => {
@@ -167,7 +169,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   cargarTodosLosUsuarios() {
-    this.http.get<any[]>(`http://localhost:3000/api/admin/usuarios`).subscribe(usuarios => this.todosLosUsuarios.set(usuarios));
+    this.http.get<any[]>(`${environment.apiUrl}/admin/usuarios`).subscribe(usuarios => this.todosLosUsuarios.set(usuarios));
   }
 
   cambiarRolUsuario(usuario: any, event: any) {
@@ -176,7 +178,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
     if(confirm(`¿Estás seguro de cambiar el rol de ${usuario.nombre} a ${nombreRol}?`)) {
       // B5-FIX: Convertir a número (event.target.value siempre es string en HTML)
-      this.http.put(`http://localhost:3000/api/admin/usuarios/${usuario.id}/rol`, { rol_id: Number(nuevoRolId) })
+      this.http.put(`${environment.apiUrl}/admin/usuarios/${usuario.id}/rol`, { rol_id: Number(nuevoRolId) })
         .subscribe(() => {
           alert('Rol actualizado exitosamente');
           this.cargarTodosLosUsuarios();
@@ -191,7 +193,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
     const accion = nuevoEstado === 'Inactivo' ? 'BLOQUEAR' : 'DESBLOQUEAR';
 
     if(confirm(`¿Estás seguro de ${accion} a ${usuario.nombre} ${usuario.apellido}?`)) {
-      this.http.put(`http://localhost:3000/api/admin/usuarios/${usuario.id}/estado`, { estado: nuevoEstado })
+      this.http.put(`${environment.apiUrl}/admin/usuarios/${usuario.id}/estado`, { estado: nuevoEstado })
         .subscribe(() => {
           this.cargarTodosLosUsuarios();
         });
@@ -200,7 +202,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
   marcarComoResuelto(ticket: any) {
     if(confirm(`¿Estás seguro de marcar el ticket ${ticket.numero_reporte} como RESUELTO?`)) {
-      this.http.put(`http://localhost:3000/api/admin/tickets/${ticket.id}/resolver`, {})
+      this.http.put(`${environment.apiUrl}/admin/tickets/${ticket.id}/resolver`, {})
         .subscribe(() => this.cargarTodosLosTickets());
     }
   }

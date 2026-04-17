@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core'; // 1. Importamos OnInit
 import { FormsModule } from '@angular/forms'; 
 import { Router, RouterLink } from '@angular/router'; 
+import { environment } from '../../environments/environment'; // B1-FIX
 
 @Component({
   selector: 'app-login',
@@ -41,7 +42,7 @@ export class LoginLoginComponent implements OnInit { // 2. Implementamos OnInit 
     console.log("Intentando iniciar sesión con:", this.credenciales);
 
     try {
-      const response = await fetch('http://localhost:3000/api/login', {
+      const response = await fetch(`${environment.apiUrl}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.credenciales)
@@ -51,6 +52,7 @@ export class LoginLoginComponent implements OnInit { // 2. Implementamos OnInit 
 
       if (response.ok) {
         localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
+        localStorage.setItem('authToken', data.token); // BUG-C3 FIX: Guardar el JWT
         alert('¡Bienvenido a Farmapatria, ' + data.usuario.nombre + '!');
         
         const rolUsuario = Number(data.usuario.rol_id);

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { jsPDF } from 'jspdf';
 import { TicketService } from '../services/ticket';
+import { environment } from '../../environments/environment'; // B1-FIX
 
 @Component({
   selector: 'app-generar-reporte',
@@ -276,8 +277,10 @@ export class GenerarReporte implements OnInit {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/tickets', {
+      const token = localStorage.getItem('authToken') || '';
+      const response = await fetch(`${environment.apiUrl}/tickets`, {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }, // BUG-C3 FIX
         body: formData 
       });
 

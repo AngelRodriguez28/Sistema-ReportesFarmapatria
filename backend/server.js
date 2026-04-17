@@ -5,6 +5,25 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken'); // BUG-C3 FIX
+
+const SECRET_KEY = process.env.JWT_SECRET || 'farmapatria_super_secret_key_2026';
+
+// Middleware de autenticación (BUG-C3 FIX)
+const verificarToken = (req, res, next) => {
+    const token = req.headers['authorization'];
+    if (!token) return res.status(403).json({ error: 'Falta el token de autenticación.' });
+    
+    // El token debe venir como "Bearer <token>"
+    const bearerToken = token.split(' ')[1] || token;
+
+    jwt.verify(bearerToken, SECRET_KEY, (err, decoded) => {
+        if (err) return res.status(401).json({ error: 'Token inválido o expirado.' });
+        req.usuarioId = decoded.id;
+        req.usuarioRol = decoded.rol_id;
+        next();
+    });
+};
 
 // --- 1. CONFIGURACIÓN DE MULTER ---
 const multer = require('multer');
@@ -18,7 +37,22 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + '-' + file.originalname)
     }
 });
-const upload = multer({ storage: storage });
+
+// A2: Filtro de archivos y límites
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Tipo de archivo no permitido. Solo JPG, PNG, GIF o PDF.'), false);
+    }
+};
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: fileFilter
+});
 // ---------------------------------------------------------
 
 const app = express();
@@ -35,9 +69,15 @@ const pool = new Pool({
     port: parseInt(process.env.DB_PORT || '5432'),
 });
 
-pool.connect((err, client, release) => {
+pool.connect(async (err, client, release) => {
     if (err) return console.error('Error al conectar con PostgreSQL:', err.stack);
     console.log('¡Conexión exitosa a la base de datos PostgreSQL!');
+    // A3-FIX: Asegurar que exista la columna avatar
+    try {
+        await client.query("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS avatar VARCHAR(255);");
+    } catch (e) {
+        console.log("Aviso: No se pudo verificar la columna avatar de forma automática.");
+    }
     release();
 });
 
@@ -85,24 +125,29 @@ app.post('/api/login', async (req, res) => {
         if (!passwordValida) {
             return res.status(401).json({ error: 'Contraseña incorrecta.' });
         }
+        
+        // BUG-C3 FIX: Generar JWT
+        const token = jwt.sign({ id: usuario.id, rol_id: usuario.rol_id }, SECRET_KEY, { expiresIn: '8h' });
+
         // No enviar el password al frontend
         const { password: _, ...usuarioSinPassword } = usuario;
-        res.status(200).json({ message: 'Login exitoso', usuario: usuarioSinPassword });
+        res.status(200).json({ message: 'Login exitoso', usuario: usuarioSinPassword, token: token });
     } catch (error) {
         console.error('Error en login:', error);
         res.status(500).json({ error: 'Error interno del servidor.' });
     }
 });
 // ==========================================
-// RUTA: Recuperar Contraseña
+// RUTA: Recuperar Contraseña (BUG-C1 FIX temporal: validar cédula)
 // ==========================================
 app.put('/api/recuperar-contrasena', async (req, res) => {
-    const { email, nuevaPassword } = req.body;
+    const { email, cedula, nuevaPassword } = req.body;
     try {
-        // 1. Verificar que el correo exista en la base de datos
-        const result = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
+        if (!cedula) return res.status(400).json({ error: 'Debe proveer la cédula para verificar identidad.' });
+        // 1. Verificar que el correo y la cédula pertenezcan a un usuario
+        const result = await pool.query('SELECT id FROM usuarios WHERE email = $1 AND cedula = $2', [email, cedula]);
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'El correo electrónico no está registrado en el sistema.' });
+            return res.status(404).json({ error: 'Datos no coinciden o no están registrados.' });
         }
 
         // 2. Hashear la nueva contraseña
@@ -118,18 +163,17 @@ app.put('/api/recuperar-contrasena', async (req, res) => {
     }
 });
 // ==========================================
-// RUTA 2: Generación de Tickets (LÓGICA ESTRUCTURAL PURA)
+// RUTA 2: Generación de Tickets 
 // ==========================================
-app.post('/api/tickets', upload.single('archivoAdjunto'), async (req, res) => {
+app.post('/api/tickets', verificarToken, upload.single('archivoAdjunto'), async (req, res) => {
     try {
         const { usuario_id, contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion } = req.body;
         const archivoRuta = req.file ? req.file.path : null;
         const estado_ticket = 'Pendiente';
 
-        // B1+B7-FIX: Usar COUNT(*) para el correlativo es más robusto que buscar el último ID.
-        // COUNT() es atómico y no se desincroniza si se eliminan tickets o hay concurrencia.
-        const countResult = await pool.query('SELECT COUNT(*) as total FROM tickets');
-        const correlativo = parseInt(countResult.rows[0].total, 10) + 1;
+        // A1-FIX: COUNT(*) se rompe si se borran tickets. Usamos MAX(id)
+        const maxResult = await pool.query('SELECT COALESCE(MAX(id), 0) as max_id FROM tickets');
+        const correlativo = parseInt(maxResult.rows[0].max_id, 10) + 1;
 
         // Formateamos el número para que siempre tenga 4 dígitos (Ej: REP-0001)
         const numero_reporte = 'REP-' + String(correlativo).padStart(4, '0');
@@ -154,7 +198,7 @@ app.post('/api/tickets', upload.single('archivoAdjunto'), async (req, res) => {
 // ==========================================
 // RUTA 4: Obtener Notificaciones (Historial de las últimas 10)
 // ==========================================
-app.get('/api/notificaciones/:usuarioId', async (req, res) => {
+app.get('/api/notificaciones/:usuarioId', verificarToken, async (req, res) => {
     try {
         // Quitamos el "AND leida = false" y agregamos "LIMIT 10" para tener un historial
         const result = await pool.query(
@@ -169,7 +213,7 @@ app.get('/api/notificaciones/:usuarioId', async (req, res) => {
 // ==========================================
 // RUTA EXTRA: Obtener los Tickets del Usuario
 // ==========================================
-app.get('/api/tickets/:usuarioId', async (req, res) => {
+app.get('/api/tickets/:usuarioId', verificarToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM tickets WHERE usuario_id = $1 ORDER BY fecha_creacion DESC', [req.params.usuarioId]);
         res.status(200).json(result.rows);
@@ -178,7 +222,7 @@ app.get('/api/tickets/:usuarioId', async (req, res) => {
 // ==========================================
 // RUTA ADMIN: Obtener TODOS los usuarios
 // ==========================================
-app.get('/api/admin/usuarios', async (req, res) => {
+app.get('/api/admin/usuarios', verificarToken, async (req, res) => {
     try {
         const query = `SELECT id, nombre, apellido, email, cedula, gerencia, estado, rol_id FROM usuarios ORDER BY id ASC`;
         const result = await pool.query(query);
@@ -192,7 +236,7 @@ app.get('/api/admin/usuarios', async (req, res) => {
 // ==========================================
 // RUTA ADMIN: Cambiar Rol de un Usuario
 // ==========================================
-app.put('/api/admin/usuarios/:id/rol', async (req, res) => {
+app.put('/api/admin/usuarios/:id/rol', verificarToken, async (req, res) => {
     try {
         const { rol_id } = req.body;
         const result = await pool.query(`UPDATE usuarios SET rol_id = $1 WHERE id = $2 RETURNING *`, [rol_id, req.params.id]);
@@ -207,7 +251,7 @@ app.put('/api/admin/usuarios/:id/rol', async (req, res) => {
 // ==========================================
 // RUTA ADMIN: Cambiar Estado de un Usuario (Activo/Inactivo/Bloqueado)
 // ==========================================
-app.put('/api/admin/usuarios/:id/estado', async (req, res) => {
+app.put('/api/admin/usuarios/:id/estado', verificarToken, async (req, res) => {
     try {
         const { estado } = req.body;
         const result = await pool.query(`UPDATE usuarios SET estado = $1 WHERE id = $2 RETURNING *`, [estado, req.params.id]);
@@ -222,7 +266,7 @@ app.put('/api/admin/usuarios/:id/estado', async (req, res) => {
 // ==========================================
 // RUTA ADMIN: Obtener TODOS los tickets con datos del usuario
 // ==========================================
-app.get('/api/admin/tickets', async (req, res) => {
+app.get('/api/admin/tickets', verificarToken, async (req, res) => {
     try {
         // Hacemos un JOIN para unir la tabla tickets con la tabla usuarios
         const query = `
@@ -241,7 +285,7 @@ app.get('/api/admin/tickets', async (req, res) => {
 // ==========================================
 // RUTA ADMIN: Cambiar estatus a Resuelto y Notificar al Usuario
 // ==========================================
-app.put('/api/admin/tickets/:id/resolver', async (req, res) => {
+app.put('/api/admin/tickets/:id/resolver', verificarToken, async (req, res) => {
     try {
         const ticketId = req.params.id;
 
@@ -261,7 +305,7 @@ app.put('/api/admin/tickets/:id/resolver', async (req, res) => {
     }
 });
 // NUEVA RUTA: Apagar la campanita
-app.put('/api/notificaciones/marcar-leidas/:usuarioId', async (req, res) => {
+app.put('/api/notificaciones/marcar-leidas/:usuarioId', verificarToken, async (req, res) => {
     try {
         await pool.query('UPDATE notificaciones SET leida = true WHERE usuario_id = $1', [req.params.usuarioId]);
         res.status(200).json({ message: 'Notificaciones leídas' });
@@ -272,23 +316,41 @@ app.put('/api/notificaciones/marcar-leidas/:usuarioId', async (req, res) => {
 });
 
 // ==========================================
-// RUTA: Actualizar Perfil de Usuario (B9-FIX)
+// RUTA: Actualizar Perfil de Usuario (B9-FIX + A4-FIX)
 // ==========================================
-app.put('/api/usuarios/:id', async (req, res) => {
+app.put('/api/usuarios/:id', verificarToken, async (req, res) => {
     try {
-        const { nombre, apellido } = req.body;
+        const { nombre, apellido, fecha_nac } = req.body;
         if (!nombre || !apellido) {
             return res.status(400).json({ error: 'Nombre y Apellido son obligatorios.' });
         }
         const result = await pool.query(
-            'UPDATE usuarios SET nombre = $1, apellido = $2 WHERE id = $3 RETURNING id, nombre, apellido, email, cedula, gerencia, farmacia, estado, rol_id',
-            [nombre.trim(), apellido.trim(), req.params.id]
+            'UPDATE usuarios SET nombre = $1, apellido = $2, fecha_nacimiento = $3 WHERE id = $4 RETURNING id, nombre, apellido, fecha_nacimiento, email, cedula, gerencia, farmacia, estado, rol_id, avatar',
+            [nombre.trim(), apellido.trim(), fecha_nac, req.params.id]
         );
         if (result.rowCount === 0) return res.status(404).json({ error: 'Usuario no encontrado.' });
         res.status(200).json({ message: 'Perfil actualizado exitosamente.', usuario: result.rows[0] });
     } catch (error) {
         console.error('Error al actualizar perfil:', error);
         res.status(500).json({ error: 'Error interno al actualizar el perfil.' });
+    }
+});
+
+// ==========================================
+// RUTA: Subir Avatar de Perfil (A3-FIX)
+// ==========================================
+app.post('/api/usuarios/:id/avatar', verificarToken, upload.single('avatar'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No se subió ningún archivo o tipo no permitido.' });
+        }
+        const avatarUrl = `uploads/${req.file.filename}`;
+        
+        await pool.query('UPDATE usuarios SET avatar = $1 WHERE id = $2', [avatarUrl, req.params.id]);
+        res.status(200).json({ message: 'Avatar actualizado exitosamente', avatarUrl });
+    } catch (error) {
+        console.error('Error al subir avatar:', error);
+        res.status(500).json({ error: 'Error al subir el avatar.', detalle: error.message });
     }
 });
 
