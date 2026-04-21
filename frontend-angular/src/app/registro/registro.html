@@ -30,7 +30,7 @@
                             <input type="text" [(ngModel)]="nuevoUsuario.cedula" name="cedula" required placeholder="Cédula *" class="ui-input">
                         </div>
                         <div class="input-group responsive-col">
-                            <input type="date" [(ngModel)]="nuevoUsuario.fecha_nac" name="fecha_nac" class="ui-input" title="Fecha de Nacimiento">
+                            <input type="date" [(ngModel)]="nuevoUsuario.fecha_nac" name="fecha_nac" [max]="fechaMaxima" class="ui-input" title="Fecha de Nacimiento">
                         </div>
                     </div>
 

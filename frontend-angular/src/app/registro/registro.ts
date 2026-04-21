@@ -29,6 +29,12 @@ export class Registro {
 
   constructor(private router: Router) {}
 
+  // Fecha máxima permitida: hoy (no se permiten fechas futuras)
+  get fechaMaxima(): string {
+    const hoy = new Date();
+    return hoy.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+  }
+
   async registrarse() {
     // Validaciones de seguridad en el Frontend
     if (this.nuevoUsuario.password !== this.nuevoUsuario.confirmarPassword) {
