@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../environments/environment'; // B1-FIX
 
 @Component({
   selector: 'app-perfil',
@@ -49,35 +50,76 @@ export class Perfil implements OnInit {
     }
   }
 
-  onFileSelected(event: any) {
+  async onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.usuario.avatarUrl = e.target.result; // Convierte imagen a Base64 para maqueta
+        this.usuario.avatarUrl = e.target.result; // Convierte imagen a Base64 temporalmente
       };
       reader.readAsDataURL(file);
+
+      // A3-FIX: Subir imagen directamente al backend
+      const formData = new FormData();
+      formData.append('avatar', file);
+      try {
+        const token = localStorage.getItem('authToken') || '';
+        const response = await fetch(`${environment.apiUrl}/usuarios/${this.usuario.id}/avatar`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }, // BUG-C3 FIX
+          body: formData
+        });
+        const data = await response.json();
+        if (response.ok) {
+          const nuevaUrl = `${environment.serverUrl}/${data.avatarUrl.replace(/\\/g, '/')}`;
+          this.usuario.avatarUrl = nuevaUrl;
+          this.usuario.avatar = data.avatarUrl; // guardar también la ruta original
+          localStorage.setItem('usuarioLogueado', JSON.stringify(this.usuario));
+        } else {
+          alert('Error al subir avatar: ' + (data.error || 'Verifica el tamaño o formato.'));
+        }
+      } catch (error) {
+        console.error('Error subiendo avatar:', error);
+      }
     } else {
       alert('Por favor, selecciona un formato de imagen válido (JPG, PNG, GIF).');
     }
   }
 
-  // B9-FIX: guardarCambios ahora persiste los datos en el backend real
+  // B9-FIX + A4-FIX: guardarCambios ahora persiste fecha de nacimiento
   async guardarCambios() {
     if (!this.usuario.nombre || !this.usuario.apellido) {
       alert('Nombre y Apellido son obligatorios.');
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3000/api/usuarios/${this.usuario.id}`, {
+      // Renombramos la variable para mapear con backend
+      const fecha_nac = this.usuario.fecha_nac || this.usuario.fecha_nacimiento;
+      const token = localStorage.getItem('authToken') || '';
+      const response = await fetch(`${environment.apiUrl}/usuarios/${this.usuario.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: this.usuario.nombre, apellido: this.usuario.apellido })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // BUG-C3 FIX
+        },
+        body: JSON.stringify({ 
+          nombre: this.usuario.nombre, 
+          apellido: this.usuario.apellido,
+          fecha_nac: fecha_nac // A4-FIX
+        })
       });
       const data = await response.json();
       if (response.ok) {
         // Actualizar localStorage con datos frescos del servidor
-        const usuarioActualizado = { ...this.usuario, ...data.usuario };
+        // Mantenemos la estructura consistente
+        const usrServer = data.usuario;
+        if (usrServer.avatar) {
+          usrServer.avatarUrl = `${environment.serverUrl}/${usrServer.avatar.replace(/\\/g, '/')}`;
+        }
+        // Usar map de fecha
+        usrServer.fecha_nac = usrServer.fecha_nacimiento || usrServer.fecha_nac;
+        
+        const usuarioActualizado = { ...this.usuario, ...usrServer };
         localStorage.setItem('usuarioLogueado', JSON.stringify(usuarioActualizado));
         this.usuario = usuarioActualizado;
         this.actualizarInicial();

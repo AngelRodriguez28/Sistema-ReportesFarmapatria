@@ -115,7 +115,7 @@
                                     </span>
                                 </td>
                                 <td style="padding: 15px; text-align: center; display: flex; gap: 8px; justify-content: center;">
-                                    @if (ticket.estado_ticket === 'Pendiente') {
+                                    @if (ticket.estado_ticket === 'Pendiente' || ticket.estado_ticket === 'Sin Confirmar') {
                                         <button (click)="marcarComoResuelto(ticket)" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 700;">Resolver</button>
                                     }
                                     <button (click)="descargarPDF(ticket)" style="background: white; border: 1px solid #273376; color: #273376; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 700;">PDF</button>

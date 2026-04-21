@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../environments/environment'; // B1-FIX
 
 @Component({
   selector: 'app-recuperar-contrasena',
@@ -13,6 +14,7 @@ import { CommonModule } from '@angular/common';
 export class RecuperarContrasena {
   datos = {
     email: '',
+    cedula: '', // BUG-C1 FIX
     nuevaPassword: '',
     confirmarPassword: ''
   };
@@ -22,8 +24,8 @@ export class RecuperarContrasena {
   constructor(private router: Router) {}
 
   async cambiarContrasena() {
-    if (!this.datos.email || !this.datos.nuevaPassword || !this.datos.confirmarPassword) {
-      alert('Por favor, completa todos los campos.');
+    if (!this.datos.email || !this.datos.cedula || !this.datos.nuevaPassword || !this.datos.confirmarPassword) {
+      alert('Por favor, completa todos los campos requeridos.');
       return;
     }
 
@@ -40,11 +42,12 @@ export class RecuperarContrasena {
     this.cargando = true;
 
     try {
-      const response = await fetch('http://localhost:3000/api/recuperar-contrasena', {
+      const response = await fetch(`${environment.apiUrl}/recuperar-contrasena`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: this.datos.email,
+          cedula: this.datos.cedula,
           nuevaPassword: this.datos.nuevaPassword
         })
       });
