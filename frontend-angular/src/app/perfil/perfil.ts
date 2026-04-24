@@ -30,6 +30,8 @@ export class Perfil implements OnInit {
       const usuarioGuardado = localStorage.getItem('usuarioLogueado');
       if (usuarioGuardado) {
         this.usuario = JSON.parse(usuarioGuardado);
+        // Aseguramos que el input de fecha se llene si la BD devolvió fecha_nacimiento
+        this.usuario.fecha_nac = this.usuario.fecha_nac || this.usuario.fecha_nacimiento;
         this.actualizarInicial();
       } else {
         this.router.navigate(['/login'], { replaceUrl: true });
@@ -52,7 +54,12 @@ export class Perfil implements OnInit {
 
   async onFileSelected(event: any) {
     const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
+    
+    if (!file) {
+      return; // El usuario cerró la ventana de selección sin elegir ningún archivo
+    }
+
+    if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.usuario.avatarUrl = e.target.result; // Convierte imagen a Base64 temporalmente
@@ -71,9 +78,11 @@ export class Perfil implements OnInit {
         });
         const data = await response.json();
         if (response.ok) {
-          const nuevaUrl = `${environment.serverUrl}/${data.avatarUrl.replace(/\\/g, '/')}`;
+          const timestamp = new Date().getTime();
+          const nuevaUrl = `${environment.serverUrl}/${data.avatarUrl.replace(/\\/g, '/')}?t=${timestamp}`;
           this.usuario.avatarUrl = nuevaUrl;
           this.usuario.avatar = data.avatarUrl; // guardar también la ruta original
+          // Limpiar el timestamp antes de guardar en localStorage si se prefiere, aunque tampoco afecta.
           localStorage.setItem('usuarioLogueado', JSON.stringify(this.usuario));
         } else {
           alert('Error al subir avatar: ' + (data.error || 'Verifica el tamaño o formato.'));
@@ -114,7 +123,8 @@ export class Perfil implements OnInit {
         // Mantenemos la estructura consistente
         const usrServer = data.usuario;
         if (usrServer.avatar) {
-          usrServer.avatarUrl = `${environment.serverUrl}/${usrServer.avatar.replace(/\\/g, '/')}`;
+          const timestamp = new Date().getTime();
+          usrServer.avatarUrl = `${environment.serverUrl}/${usrServer.avatar.replace(/\\/g, '/')}?t=${timestamp}`;
         }
         // Usar map de fecha
         usrServer.fecha_nac = usrServer.fecha_nacimiento || usrServer.fecha_nac;
@@ -124,6 +134,7 @@ export class Perfil implements OnInit {
         this.usuario = usuarioActualizado;
         this.actualizarInicial();
         alert('Cambios guardados con éxito.');
+        this.regresar();
       } else {
         alert('Error al guardar: ' + (data.error || 'Intenta de nuevo.'));
       }

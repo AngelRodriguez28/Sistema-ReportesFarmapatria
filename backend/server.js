@@ -72,12 +72,6 @@ const pool = new Pool({
 pool.connect(async (err, client, release) => {
     if (err) return console.error('Error al conectar con PostgreSQL:', err.stack);
     console.log('¡Conexión exitosa a la base de datos PostgreSQL!');
-    // A3-FIX: Asegurar que exista la columna avatar
-    try {
-        await client.query("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS avatar VARCHAR(255);");
-    } catch (e) {
-        console.log("Aviso: No se pudo verificar la columna avatar de forma automática.");
-    }
     release();
 });
 
@@ -215,9 +209,74 @@ app.get('/api/notificaciones/:usuarioId', verificarToken, async (req, res) => {
 // ==========================================
 app.get('/api/tickets/:usuarioId', verificarToken, async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM tickets WHERE usuario_id = $1 ORDER BY fecha_creacion DESC', [req.params.usuarioId]);
+        const query = `
+            SELECT t.*, tec.nombre as tecnico_nombre, tec.apellido as tecnico_apellido 
+            FROM tickets t 
+            LEFT JOIN usuarios tec ON t.tecnico_id = tec.id
+            WHERE t.usuario_id = $1 
+            ORDER BY t.fecha_creacion DESC
+        `;
+        const result = await pool.query(query, [req.params.usuarioId]);
         res.status(200).json(result.rows);
     } catch (error) { res.status(500).json({ error: 'Error al obtener los tickets.' }); }
+});
+// ==========================================
+// NUEVA RUTA: Confirmar Resolución por el Usuario
+// ==========================================
+app.put('/api/tickets/:id/confirmar', verificarToken, async (req, res) => {
+    try {
+        const ticketId = req.params.id;
+        
+        const queryUpdate = `UPDATE tickets SET estado_ticket = 'Resuelto' WHERE id = $1 RETURNING *`;
+        const result = await pool.query(queryUpdate, [ticketId]);
+        const ticketActualizado = result.rows[0];
+
+        if (ticketActualizado && ticketActualizado.tecnico_id) {
+            const msj = `El usuario confirmó la resolución del ticket ${ticketActualizado.numero_reporte}.`;
+            await pool.query('INSERT INTO notificaciones (usuario_id, mensaje, leida) VALUES ($1, $2, false)', [ticketActualizado.tecnico_id, msj]);
+        }
+        res.status(200).json({ message: 'Requerimiento confirmado exitosamente' });
+    } catch (error) {
+        console.error("Error al confirmar ticket:", error);
+        res.status(500).json({ error: 'Error al confirmar requerimiento del ticket.' });
+    }
+});
+// ==========================================
+// RUTA: Editar Ticket (Corregir Pendientes)
+// ==========================================
+app.put('/api/tickets/:id', verificarToken, upload.single('archivoAdjunto'), async (req, res) => {
+    try {
+        const ticketId = req.params.id;
+        const { contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion } = req.body;
+        const archivoRuta = req.file ? req.file.path : null;
+
+        let queryUpdate;
+        let queryParams;
+
+        if (archivoRuta) {
+            queryUpdate = `
+                UPDATE tickets 
+                SET numero_contacto = $1, tipificacion_falla = $2, unidad_afectada = $3, anydesk = $4, descripcion = $5, nivel_reporte = $6, unidad_reporta = $7, archivo_adjunto = $8
+                WHERE id = $9 AND estado_ticket = 'Pendiente' RETURNING *`;
+            queryParams = [contacto, tipificacionFalla, unidadAfectada, anydesk, descripcion, nivelReporte, unidadReporta, archivoRuta, ticketId];
+        } else {
+            queryUpdate = `
+                UPDATE tickets 
+                SET numero_contacto = $1, tipificacion_falla = $2, unidad_afectada = $3, anydesk = $4, descripcion = $5, nivel_reporte = $6, unidad_reporta = $7
+                WHERE id = $8 AND estado_ticket = 'Pendiente' RETURNING *`;
+            queryParams = [contacto, tipificacionFalla, unidadAfectada, anydesk, descripcion, nivelReporte, unidadReporta, ticketId];
+        }
+            
+        const result = await pool.query(queryUpdate, queryParams);
+        
+        if (result.rowCount === 0) {
+            return res.status(400).json({ error: 'El ticket no existe o ya no está Pendiente.' });
+        }
+        res.status(200).json({ message: 'Ticket actualizado exitosamente', ticket: result.rows[0] });
+    } catch (error) {
+        console.error("Error al actualizar ticket:", error);
+        res.status(500).json({ error: 'Error al actualizar ticket.' });
+    }
 });
 // ==========================================
 // RUTA ADMIN: Obtener TODOS los usuarios
@@ -268,11 +327,13 @@ app.put('/api/admin/usuarios/:id/estado', verificarToken, async (req, res) => {
 // ==========================================
 app.get('/api/admin/tickets', verificarToken, async (req, res) => {
     try {
-        // Hacemos un JOIN para unir la tabla tickets con la tabla usuarios
+        // Hacemos un JOIN para unir la tabla tickets con la tabla usuarios y tecnicos
         const query = `
-            SELECT t.*, u.nombre, u.apellido, u.gerencia as gerencia_usuario 
+            SELECT t.*, u.nombre, u.apellido, u.gerencia as gerencia_usuario, 
+                   tec.nombre as tecnico_nombre, tec.apellido as tecnico_apellido
             FROM tickets t 
             JOIN usuarios u ON t.usuario_id = u.id 
+            LEFT JOIN usuarios tec ON t.tecnico_id = tec.id
             ORDER BY t.fecha_creacion DESC
         `;
         const result = await pool.query(query);
@@ -283,22 +344,46 @@ app.get('/api/admin/tickets', verificarToken, async (req, res) => {
     }
 });
 // ==========================================
-// RUTA ADMIN: Cambiar estatus a Resuelto y Notificar al Usuario
+// RUTA ADMIN: Tomar Ticket (Asignar Técnico)
+// ==========================================
+app.put('/api/admin/tickets/:id/tomar', verificarToken, async (req, res) => {
+    try {
+        const ticketId = req.params.id;
+        const tecnicoId = req.usuarioId; // Obtenido del token
+
+        const queryUpdate = `UPDATE tickets SET estado_ticket = 'En Progreso', tecnico_id = $1 WHERE id = $2 RETURNING *`;
+        const result = await pool.query(queryUpdate, [tecnicoId, ticketId]);
+        
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Ticket no encontrado' });
+        const ticketActualizado = result.rows[0];
+
+        // Le creamos una notificación al usuario dueño del ticket
+        const msj = `Tu ticket ${ticketActualizado.numero_reporte} ha sido tomado por un técnico y se encuentra 'En Progreso'.`;
+        await pool.query('INSERT INTO notificaciones (usuario_id, mensaje, leida) VALUES ($1, $2, false)', [ticketActualizado.usuario_id, msj]);
+
+        res.status(200).json({ message: 'Ticket tomado exitosamente', ticket: ticketActualizado });
+    } catch (error) {
+        console.error("Error al tomar ticket:", error);
+        res.status(500).json({ error: 'Error interno al asignar ticket.' });
+    }
+});
+// ==========================================
+// RUTA ADMIN: Cambiar estatus a Sin Confirmar (Resolver Parcialmente) y Notificar al Usuario
 // ==========================================
 app.put('/api/admin/tickets/:id/resolver', verificarToken, async (req, res) => {
     try {
         const ticketId = req.params.id;
 
-        // 1. Cambiamos el estatus del ticket
-        const queryUpdate = `UPDATE tickets SET estado_ticket = 'Resuelto' WHERE id = $1 RETURNING *`;
+        // 1. Cambiamos el estatus del ticket a 'Sin Confirmar'
+        const queryUpdate = `UPDATE tickets SET estado_ticket = 'Sin Confirmar' WHERE id = $1 RETURNING *`;
         const result = await pool.query(queryUpdate, [ticketId]);
         const ticketActualizado = result.rows[0];
 
         // 2. Le creamos una notificación al usuario dueño del ticket
-        const msj = `¡Buenas noticias! Tu ticket ${ticketActualizado.numero_reporte} ha sido marcado como RESUELTO por el equipo de soporte.`;
+        const msj = `Tu ticket ${ticketActualizado.numero_reporte} ha sido resuelto. Por favor confirma la resolución en tu panel.`;
         await pool.query('INSERT INTO notificaciones (usuario_id, mensaje, leida) VALUES ($1, $2, false)', [ticketActualizado.usuario_id, msj]);
 
-        res.status(200).json({ message: 'Ticket resuelto exitosamente' });
+        res.status(200).json({ message: 'Ticket enviado a confirmación exitosamente' });
     } catch (error) {
         console.error("Error al resolver ticket:", error);
         res.status(500).json({ error: 'Error al cambiar estatus del ticket.' });

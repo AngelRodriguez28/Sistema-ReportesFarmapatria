@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http'; 
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common'; 
 import { jsPDF } from 'jspdf';
 import { timer, Subscription } from 'rxjs'; 
@@ -11,14 +12,14 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-panel-admin',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './panel-admin.html',
   styleUrl: './panel-admin.css'
 })
 export class PanelAdmin implements OnInit, OnDestroy { 
   
   adminActual = signal<any>({ id: 0, nombre: 'Cargando...', apellido: '', gerencia: '', rol_id: 0 });
-  pestanaActual = signal<'tickets' | 'usuarios' | 'estadisticas'>('tickets');
+  pestanaActual = signal<'home' | 'tickets' | 'usuarios' | 'estadisticas'>('home');
   isSidebarOpen = signal<boolean>(true);
   
   // Variable de Estado para la Ventana Modal
@@ -40,6 +41,13 @@ export class PanelAdmin implements OnInit, OnDestroy {
       ticket.estado_ticket?.toLowerCase().includes(busqueda)
     );
   });
+
+  // KPIs Calculados para el Home
+  totalTickets = computed(() => this.todosLosTickets().length);
+  totalPendientes = computed(() => this.todosLosTickets().filter(t => t.estado_ticket === 'Pendiente' || t.estado_ticket === 'En Progreso').length);
+  totalSinConfirmar = computed(() => this.todosLosTickets().filter(t => t.estado_ticket === 'Sin Confirmar').length);
+  totalResueltos = computed(() => this.todosLosTickets().filter(t => t.estado_ticket === 'Resuelto').length);
+  totalUsuarios = computed(() => this.todosLosUsuarios().length);
 
   private motorDeTiempo: Subscription | undefined;
   graficoEstatus: any;
@@ -92,7 +100,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
     this.terminoBusqueda.set(event.target.value);
   }
 
-  cambiarPestana(pestana: 'tickets' | 'usuarios' | 'estadisticas') {
+  cambiarPestana(pestana: 'home' | 'tickets' | 'usuarios' | 'estadisticas') {
     this.pestanaActual.set(pestana);
     if (pestana === 'estadisticas') {
       setTimeout(() => this.renderizarGraficosGlobales(), 100);
@@ -113,6 +121,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
     if (!canvasEstatus || !canvasFallas) return;
 
     const pendientes = this.todosLosTickets().filter(t => t.estado_ticket === 'Pendiente').length;
+    const enProgreso = this.todosLosTickets().filter(t => t.estado_ticket === 'En Progreso').length;
     const sinConfirmar = this.todosLosTickets().filter(t => t.estado_ticket === 'Sin Confirmar').length; // BUG-M2: Incluir Sin Confirmar
     const resueltos = this.todosLosTickets().filter(t => t.estado_ticket === 'Resuelto').length;
 
@@ -120,11 +129,11 @@ export class PanelAdmin implements OnInit, OnDestroy {
     this.graficoEstatus = new Chart(canvasEstatus, {
        type: 'bar',
        data: {
-           labels: ['Pendientes', 'Sin Confirmar', 'Resueltos'],
+           labels: ['Pendientes', 'En Progreso', 'Sin Confirmar', 'Resueltos'],
            datasets: [{
                label: 'Volumen de Tickets',
-               data: [pendientes, sinConfirmar, resueltos],
-               backgroundColor: ['#A70336', '#FFC907', '#28a745'] // Colores que combinan con tickets
+               data: [pendientes, enProgreso, sinConfirmar, resueltos],
+               backgroundColor: ['#A70336', '#17a2b8', '#FFC907', '#28a745'] // Colores que combinan con tickets
            }]
        },
        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
@@ -200,10 +209,29 @@ export class PanelAdmin implements OnInit, OnDestroy {
     }
   }
 
+  tomarTicket(ticket: any) {
+    if(confirm(`¿Estás seguro de tomar el ticket ${ticket.numero_reporte}? Pasará a estar "En Progreso".`)) {
+      this.http.put(`${environment.apiUrl}/admin/tickets/${ticket.id}/tomar`, {})
+        .subscribe({
+          next: () => this.cargarTodosLosTickets(),
+          error: (err) => {
+            console.error('Error al tomar ticket:', err);
+            alert('Error al intentar tomar el ticket. Es posible que el backend no esté actualizado o falte la columna en la base de datos. Por favor, reinicia el servidor de Node (server.js).');
+          }
+        });
+    }
+  }
+
   marcarComoResuelto(ticket: any) {
-    if(confirm(`¿Estás seguro de marcar el ticket ${ticket.numero_reporte} como RESUELTO?`)) {
+    if(confirm(`¿Estás seguro de marcar el ticket ${ticket.numero_reporte} como RESUELTO? (Se enviará a confirmación del usuario)`)) {
       this.http.put(`${environment.apiUrl}/admin/tickets/${ticket.id}/resolver`, {})
-        .subscribe(() => this.cargarTodosLosTickets());
+        .subscribe({
+          next: () => this.cargarTodosLosTickets(),
+          error: (err) => {
+            console.error('Error al resolver ticket:', err);
+            alert('Hubo un error en el servidor al intentar resolver el ticket.');
+          }
+        });
     }
   }
 
@@ -336,5 +364,9 @@ export class PanelAdmin implements OnInit, OnDestroy {
         console.warn('Aviso: No se pudo acceder al membrete oficial (cintillo.png). Documento generado modo soporte.');
         resolverEvidenciaYConstruir(false);
     };
+  }
+
+  corregirTicket(ticket: any) {
+    this.router.navigate(['/generar-reporte'], { state: { ticketAEditar: ticket } });
   }
 }

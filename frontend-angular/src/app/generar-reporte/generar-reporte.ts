@@ -19,12 +19,35 @@ export class GenerarReporte implements OnInit {
   
   constructor(private router: Router, private ticketService: TicketService) {}  // Inyectamos el Router y el TicketService
 
-  // Esta función lee quién inició sesión apenas abre la pantalla
+  estaEditando = false;
+  idTicketEditar: number | null = null;
+  rutaRetorno: string = '/panel-usuario';
+
   ngOnInit() {
     if (typeof window !== 'undefined' && localStorage) {
       const usuarioGuardado = localStorage.getItem('usuarioLogueado');
       if (usuarioGuardado) {
         this.usuarioActual = JSON.parse(usuarioGuardado);
+        
+        let state = history.state;
+        
+        if (state && state.ticketAEditar) {
+            this.estaEditando = true;
+            this.idTicketEditar = state.ticketAEditar.id;
+            
+            if (this.usuarioActual.rol_id === 1 || this.usuarioActual.rol_id === 2) {
+                 this.rutaRetorno = '/panel-admin';
+            }
+            
+            this.nuevoReporte.contacto = state.ticketAEditar.numero_contacto || '';
+            this.nuevoReporte.nivelReporte = state.ticketAEditar.nivel_reporte || '';
+            this.nuevoReporte.tipificacionFalla = state.ticketAEditar.tipificacion_falla || '';
+            this.nuevoReporte.unidadReporta = state.ticketAEditar.unidad_reporta || '';
+            this.nuevoReporte.unidadAfectada = state.ticketAEditar.unidad_afectada || '';
+            this.nuevoReporte.anydesk = state.ticketAEditar.anydesk || '';
+            this.nuevoReporte.descripcion = state.ticketAEditar.descripcion || '';
+        }
+
       } else {
         // Si no hay nadie logueado, lo mandamos al login
         this.router.navigate(['/login']);
@@ -278,14 +301,29 @@ export class GenerarReporte implements OnInit {
 
     try {
       const token = localStorage.getItem('authToken') || '';
-      const response = await fetch(`${environment.apiUrl}/tickets`, {
-        method: 'POST',
+      let url = `${environment.apiUrl}/tickets`;
+      let metodo = 'POST';
+      
+      if (this.estaEditando && this.idTicketEditar) {
+         url = `${environment.apiUrl}/tickets/${this.idTicketEditar}`;
+         metodo = 'PUT';
+      }
+
+      const response = await fetch(url, {
+        method: metodo,
         headers: { 'Authorization': `Bearer ${token}` }, // BUG-C3 FIX
         body: formData 
       });
 
       if (response.ok) {
         const resultado = await response.json();
+        
+        if (this.estaEditando) {
+             alert(`¡Éxito! Su reporte ha sido corregido exitosamente.`);
+             this.router.navigate([this.rutaRetorno]);
+             return;
+        }
+        
         alert(`¡Éxito! Su reporte ha sido generado bajo el código: ${resultado.ticket.numero_reporte}`);
         
         // Genera el PDF

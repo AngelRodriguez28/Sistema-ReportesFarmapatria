@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Georama:wght@300;400;500;700;800&display=swap');
+@import "tailwindcss";
+@theme {
+  --color-primary: #273376;
+  --color-secondary: #A70336;
+  --color-bg: #f4f6f9;
+  --color-text: #333333;
+  --font-sans: 'Georama', sans-serif;
+}
 
 :root {
   --color-primary: #273376;    /* Azul Institucional */

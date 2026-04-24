@@ -1,38 +1,44 @@
-<div class="auth-wrapper">
+<div class="min-h-screen flex flex-col md:flex-row bg-white font-sans">
     
     <!-- Panel izquierdo: Banner Corporativo -->
-    <div class="auth-banner">
-        <h1>Bienvenidos al Sistema de Gestión de Reportes Farmapatria</h1>
+    <div class="flex-1 bg-primary bg-gradient-to-br from-primary to-[#1a2352] flex flex-col justify-center items-center p-8 md:p-12 text-white text-center relative overflow-hidden min-h-[200px] md:min-h-screen">
+        <!-- Efecto decorativo sutil -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(167,3,54,0.4)_0%,transparent_50%)] pointer-events-none"></div>
+        <h1 class="text-3xl md:text-5xl font-extrabold z-10 drop-shadow-md tracking-tight leading-tight">Sistema de Gestión de Reportes Farmapatria</h1>
+        <p class="text-white/80 mt-4 z-10 font-medium text-sm md:text-base">Módulo Integrado de Soporte y Operaciones</p>
     </div>
 
     <!-- Right panel: Login Form -->
-    <div class="auth-side">
-        <div class="auth-card">
-            <div class="auth-content">
-                <div class="auth-header">
-                    <h2>Iniciar Sesión</h2>
-                    <p>Acceso a la plataforma</p>
+    <div class="flex-1 flex items-center justify-center p-6 md:p-12 bg-white">
+        <div class="w-full max-w-md p-8 md:p-10 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] md:shadow-none transition-all duration-300">
+            <div class="relative z-10">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-extrabold text-secondary tracking-tight">Iniciar Sesión</h2>
+                    <p class="text-gray-500 text-sm mt-2 font-medium">Acceso a la plataforma</p>
                 </div>
 
-                <form (ngSubmit)="iniciarSesion()">
-                    <div class="input-group">
-                        <input type="email" [(ngModel)]="credenciales.email" name="email" required placeholder="Usuario o Correo" class="ui-input">
+                <form (ngSubmit)="iniciarSesion()" class="space-y-5">
+                    <div>
+                        <input type="email" [(ngModel)]="credenciales.email" name="email" required placeholder="Usuario o Correo" 
+                        class="w-full px-5 py-3.5 border border-gray-200 bg-gray-50 rounded-full text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white placeholder-gray-400 font-medium">
                     </div>
 
-                    <div class="input-group">
-                        <input type="password" [(ngModel)]="credenciales.password" name="password" required placeholder="Contraseña" class="ui-input">
+                    <div>
+                        <input type="password" [(ngModel)]="credenciales.password" name="password" required placeholder="Contraseña" 
+                        class="w-full px-5 py-3.5 border border-gray-200 bg-gray-50 rounded-full text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white placeholder-gray-400 font-medium">
                     </div>
 
-                    <div class="remember-me" style="text-align: right;">
-                        <a routerLink="/recuperar-contrasena" style="background:none; border:none; color:inherit; font-size:14px; cursor:pointer; text-decoration:underline; padding:0;">¿Olvidó Contraseña?</a>
+                    <div class="text-right">
+                        <a routerLink="/recuperar-contrasena" class="text-sm font-semibold text-gray-500 hover:text-secondary hover:underline transition-colors">¿Olvidó su contraseña?</a>
                     </div>
 
-                    <button type="submit" class="ui-button btn-login">
+                    <button type="submit" 
+                    class="w-full px-6 py-3.5 rounded-full text-sm font-extrabold text-white bg-secondary shadow-[0_4px_15px_rgba(167,3,54,0.25)] transition-all duration-300 hover:bg-[#8a022d] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(167,3,54,0.35)]">
                         Iniciar sesión
                     </button>
 
-                    <div class="auth-footer">
-                        <p>¿No tienes una cuenta? <a routerLink="/registro">Regístrate</a></p>
+                    <div class="text-center mt-8 text-sm text-gray-500 font-medium">
+                        <p>¿No tienes una cuenta? <a routerLink="/registro" class="text-secondary font-extrabold hover:underline transition-colors">Regístrate</a></p>
                     </div>
                 </form>
             </div>

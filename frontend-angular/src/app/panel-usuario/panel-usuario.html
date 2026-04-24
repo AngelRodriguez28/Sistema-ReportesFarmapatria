@@ -1,211 +1,259 @@
-<div class="admin-layout" [class.sidebar-closed]="!isSidebarOpen()">
+<div class="flex h-screen bg-gray-50 overflow-hidden font-sans">
   
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-        <h2 style="margin: 0; font-size: 20px; font-weight: 800;">Panel Usuario</h2>
-        <small style="color: #FFC907; font-weight: 700;">Farmapatria</small>
+  <!-- Overlay para móviles cuando el sidebar está abierto -->
+  @if (isSidebarOpen()) {
+    <div class="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- Sidebar -->
+  <aside class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-primary text-white transition-transform duration-300 ease-in-out shadow-xl flex flex-col"
+         [class.-translate-x-full]="!isSidebarOpen()"
+         [class.translate-x-0]="isSidebarOpen()">
+    
+    <div class="p-6 border-b border-white/10 text-center">
+        <h2 class="text-xl font-extrabold m-0 tracking-tight">Panel Usuario</h2>
+        <small class="text-[#FFC907] font-bold tracking-wide">Farmapatria</small>
     </div>
     
-    <nav class="sidebar-nav">
-        <a (click)="irAlPerfil()" class="sidebar-link">
+    <nav class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-3">
+        <a (click)="irAlPerfil()" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium">
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/></svg> Mi Perfil
         </a>
 
-        <a (click)="cambiarPestana('estatus')" class="sidebar-link" [class.active]="pestanaActual() === 'estatus'">
+        <a (click)="cambiarPestana('estatus')" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium" [class.bg-secondary]="pestanaActual() === 'estatus'" [class.text-white]="pestanaActual() === 'estatus'" [class.font-bold]="pestanaActual() === 'estatus'">
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg> Mis Tickets
         </a>
 
-        <a (click)="cambiarPestana('historico')" class="sidebar-link" [class.active]="pestanaActual() === 'historico'">
+        <a (click)="cambiarPestana('historico')" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium" [class.bg-secondary]="pestanaActual() === 'historico'" [class.text-white]="pestanaActual() === 'historico'" [class.font-bold]="pestanaActual() === 'historico'">
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707zM8 1v1a6 6 0 1 0 6 6h1a7 7 0 1 1-7-7z"/><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/></svg> Histórico de Tickets
         </a>
 
-        <a routerLink="/generar-reporte" class="sidebar-link">
+        <a routerLink="/generar-reporte" class="px-4 py-3 rounded-xl flex items-center gap-3 text-[#FFC907] hover:bg-white/10 hover:text-[#FFC907] transition-all cursor-pointer mt-4 border border-[#FFC907]/30 font-bold bg-[#FFC907]/10">
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg> Abrir Nuevo Ticket
         </a>
     </nav>
   </aside>
 
-  <div class="main-content">
-    <header class="panel-header">
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <button class="hamburger" (click)="toggleSidebar()">☰</button>
-        <div style="display: flex; flex-direction: column;">
-          <h2 style="margin: 0; font-size: 20px; font-weight: 800;">Dashboard</h2>
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col min-w-0 bg-gray-50 overflow-hidden">
+    <!-- Header -->
+    <header class="bg-primary px-4 md:px-8 py-3 md:py-4 flex justify-between items-center text-white shadow-md z-30">
+      <div class="flex items-center gap-4">
+        <button class="text-white hover:text-gray-200 focus:outline-none transition-colors" (click)="toggleSidebar()">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
+        </button>
+        <div class="flex flex-col">
+          <h2 class="m-0 text-lg md:text-xl font-extrabold tracking-tight hidden sm:block">Dashboard</h2>
         </div>
       </div>
       
-      <div style="display: flex; align-items: center; gap: 20px;">
+      <div class="flex items-center gap-4 md:gap-6">
         
-        <div style="position: relative; cursor: pointer; color: white; display: flex; align-items: center;" (click)="toggleCampanita()">
+        <!-- Notificaciones -->
+        <div class="relative cursor-pointer text-white flex items-center hover:bg-white/10 p-2 rounded-full transition-colors" (click)="toggleCampanita()">
           <svg width="22" height="22" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/></svg>
           @if (noLeidas() > 0) {
-            <span style="position: absolute; top: -5px; right: -5px; background: #FFC907; color: #273376; font-size: 10px; padding: 2px 6px; border-radius: 50%; font-weight: 800;">{{ noLeidas() }}</span>
+            <span class="absolute -top-1 -right-1 bg-[#FFC907] text-primary text-[10px] px-1.5 py-0.5 rounded-full font-extrabold shadow-sm border border-white">{{ noLeidas() }}</span>
           }
           @if (mostrarMenuNotificaciones()) {
-            <div style="position: absolute; right: 0; top: 35px; background: white; border: 1px solid #ccc; width: 250px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 10px; z-index: 100; color: #333;">
-              <h4 style="margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #273376;">Notificaciones</h4>
-              @if (notificaciones().length === 0) {
-                <p style="margin: 0; font-size: 12px; color: #666;">No tienes notificaciones.</p>
-              } @else {
-                @for (notif of notificaciones(); track notif.id) {
-                  <div style="margin: 5px 0; border-bottom: 1px solid #f9f9f9; padding-bottom: 5px;">
-                    <p style="margin: 0; font-size: 12px; color: #333;" [style.fontWeight]="notif.leida ? '400' : '700'">{{ notif.mensaje }}</p>
-                  </div>
-                }
-              }
+            <div class="absolute right-0 top-12 bg-white border border-gray-200 w-64 md:w-80 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-4 z-50 text-gray-800 cursor-default" (click)="$event.stopPropagation()">
+              <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-2">
+                <h4 class="m-0 text-primary font-extrabold text-sm">Notificaciones</h4>
+              </div>
+              <div class="max-h-[300px] overflow-y-auto">
+                  @if (notificaciones().length === 0) {
+                    <p class="m-0 text-xs text-gray-500 py-4 text-center">No tienes notificaciones recientes.</p>
+                  } @else {
+                    @for (notif of notificaciones(); track notif.id) {
+                      <div class="py-2.5 border-b border-gray-50 last:border-0 hover:bg-gray-50 px-2 rounded-lg transition-colors cursor-pointer">
+                        <p class="m-0 text-xs text-gray-700" [class.font-extrabold]="!notif.leida" [class.font-medium]="notif.leida">{{ notif.mensaje }}</p>
+                      </div>
+                    }
+                  }
+              </div>
             </div>
           }
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: background 0.2s;" (click)="irAlPerfil()" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
-          <div style="width: 38px; height: 38px; background-color: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); overflow: hidden;">
+        <div class="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-white/10 transition-colors" (click)="irAlPerfil()">
+          <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm overflow-hidden border-2 border-white/30 shadow-inner">
             @if (usuarioActual().avatarUrl) {
-              <img [src]="usuarioActual().avatarUrl" style="width: 100%; height: 100%; object-fit: cover;">
+              <img [src]="usuarioActual().avatarUrl" class="w-full h-full object-cover">
             } @else {
-              <span style="font-weight: 800; color: white;">{{ inicial() }}</span>
+              <span class="font-extrabold text-white text-lg">{{ inicial() }}</span>
             }
           </div>
-          <div style="display: flex; flex-direction: column; line-height: 1.2;">
-            <span style="font-size: 12px; font-weight: 500; opacity: 0.8;">{{ cargoLaboral() }}</span>
-            <strong style="font-size: 14px; font-weight: 800;">{{ usuarioActual().nombre }} {{ usuarioActual().apellido }}</strong>
+          <div class="flex flex-col leading-tight hidden md:flex">
+            <span class="text-xs font-medium text-white/80">{{ cargoLaboral() }}</span>
+            <strong class="text-sm font-extrabold">{{ usuarioActual().nombre }} {{ usuarioActual().apellido }}</strong>
           </div>
         </div>
 
-        <button (click)="cerrarSesion()" class="ui-button" style="background: white; color: var(--color-secondary); padding: 8px 20px; width: auto; font-size: 14px; border-radius: 8px; font-weight: 800; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">Cerrar Sesión</button>
+        <button (click)="cerrarSesion()" class="bg-white text-secondary px-4 md:px-5 py-2 md:py-2.5 text-sm rounded-full font-extrabold shadow-md hover:bg-gray-100 hover:shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap">
+            Cerrar Sesión
+        </button>
       </div>
     </header>
 
-    <div class="panel-wrapper">
-      <div class="panel-container responsive-flex">
+    <!-- Contenido Dinámico -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8">
+      <div class="max-w-7xl mx-auto flex flex-col xl:flex-row gap-6 items-start">
   
-  <div class="responsive-col" style="display: flex; flex-direction: column; gap: 20px;">
-    
-    @if (pestanaActual() === 'historico') {
-      <div class="panel-card">
-      
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--color-primary); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-        <h3 style="margin: 0; color: var(--color-primary); font-weight: 800; font-size: 20px;">Historial de Reportes</h3>
-        
-        <div style="position: relative; flex: 1; min-width: 200px; max-width: 320px;">
-          <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #a0a5ad; font-size: 14px;">
-            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.324a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
-          </span>
-          <input type="text" placeholder="Buscar ticket..." (input)="actualizarBusqueda($event)" class="ui-input" style="padding-left: 45px;">
-        </div>
-      </div>
-      
-      <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
-        
-        @if (historialFiltrado().length === 0) {
-          <div style="background: #f8f9fa; padding: 15px; text-align: center; border-radius: 4px; color: #666;">
-            No se encontraron tickets en el historial.
-          </div>
-        } @else {
-          <div style="border-left: 2px solid #e9ecef; margin-left: 10px; padding-left: 20px; position: relative;">
+        <!-- Columna Izquierda: Contenido Principal -->
+        <div class="flex-1 w-full space-y-6">
             
-            @for (ticket of historialFiltrado(); track ticket.id) {
-              <div style="margin-bottom: 25px; position: relative;">
-                
-                <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"
-                     [style.background]="ticket.estado_ticket === 'Resuelto' ? '#28a745' : '#FFC907'"
-                     [style.boxShadow]="ticket.estado_ticket === 'Resuelto' ? '0 0 0 2px #28a745' : '0 0 0 2px #FFC907'">
-                </div>
-
-                <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 15px; transition: 0.2s;" onmouseover="this.style.boxShadow='0 4px 8px rgba(0,0,0,0.05)'" onmouseout="this.style.boxShadow='none'">
-                  
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div>
-                      <strong style="color: #273376; font-size: 14px; font-weight: 700;">{{ ticket.numero_reporte }}</strong>
-                      <div style="font-size: 12px; color: #888; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg> {{ ticket.fecha_creacion | date:'dd/MM/yyyy hh:mm a' }}
-                      </div>
-                    </div>
+            @if (pestanaActual() === 'historico') {
+            <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6 md:p-8">
+            
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-4 mb-6 gap-4">
+                    <h3 class="text-primary font-extrabold text-xl m-0">Historial de Reportes</h3>
                     
-                    <span [style.background]="ticket.estado_ticket === 'Resuelto' ? '#d4edda' : '#fff3cd'"
-                          [style.color]="ticket.estado_ticket === 'Resuelto' ? '#155724' : '#856404'"
-                          style="padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">
-                      {{ ticket.estado_ticket }}
+                    <div class="relative w-full md:w-72">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.324a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
                     </span>
-                  </div>
-
-                  <div style="font-size: 13px; color: #444; margin-bottom: 10px;">
-                    <div><strong>Afectada:</strong> {{ ticket.unidad_afectada }}</div>
-                    <div style="color: #A70336;"><strong>Problema:</strong> {{ ticket.tipificacion_falla }}</div>
-                  </div>
-
-                  @if (ticket.descripcion) {
-                    <div style="background: white; border: 1px dashed #ccc; padding: 8px; border-radius: 4px; font-size: 12px; color: #666; margin-bottom: 10px; max-height: 50px; overflow-y: auto;">
-                      {{ ticket.descripcion }}
+                    <input type="text" placeholder="Buscar ticket..." (input)="actualizarBusqueda($event)" class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-medium">
                     </div>
-                  }
-
-                  <div style="text-align: right;">
-                    <button (click)="descargarPDF(ticket)" style="display: flex; align-items: center; gap: 6px; background: white; border: 1px solid #273376; color: #273376; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 700; transition: 0.2s; font-family: 'Georama', sans-serif;" onmouseover="this.style.backgroundColor='#273376'; this.style.color='white'" onmouseout="this.style.backgroundColor='white'; this.style.color='#273376'">
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg> Descargar Soporte
-                    </button>
-                  </div>
-
                 </div>
-              </div>
+            
+                <div class="max-h-[500px] overflow-y-auto pr-2 space-y-5">
+                    @if (historialFiltrado().length === 0) {
+                    <div class="bg-gray-50 p-8 text-center rounded-xl border border-dashed border-gray-300 text-gray-500 font-medium">
+                        No se encontraron tickets en el historial.
+                    </div>
+                    } @else {
+                        <div class="border-l-2 border-gray-200 ml-3 pl-5 relative space-y-6">
+                            @for (ticket of historialFiltrado(); track ticket.id) {
+                            <div class="relative">
+                                
+                                <div class="absolute -left-[27px] top-4 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm"
+                                    [class.bg-green-500]="ticket.estado_ticket === 'Resuelto'"
+                                    [class.bg-yellow-400]="ticket.estado_ticket !== 'Resuelto'">
+                                </div>
+
+                                <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow group">
+                                
+                                <div class="flex justify-between items-start mb-3 gap-2 flex-wrap">
+                                    <div>
+                                    <strong class="text-primary text-base">{{ ticket.numero_reporte }}</strong>
+                                    <div class="text-[11px] text-gray-500 mt-1 flex items-center gap-1 font-medium">
+                                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg> {{ ticket.fecha_creacion | date:'dd/MM/yyyy hh:mm a' }}
+                                    </div>
+                                    </div>
+                                    
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap"
+                                        [class.bg-green-100]="ticket.estado_ticket === 'Resuelto'" [class.text-green-700]="ticket.estado_ticket === 'Resuelto'"
+                                        [class.bg-yellow-100]="ticket.estado_ticket !== 'Resuelto'" [class.text-yellow-700]="ticket.estado_ticket !== 'Resuelto'">
+                                    {{ ticket.estado_ticket }}
+                                    </span>
+                                </div>
+
+                                <div class="text-[13px] text-gray-700 space-y-1 mb-4">
+                                    <div><strong class="font-bold text-gray-900">Afectada:</strong> {{ ticket.unidad_afectada }}</div>
+                                    <div class="text-secondary"><strong class="font-bold text-gray-900">Problema:</strong> {{ ticket.tipificacion_falla }}</div>
+                                </div>
+
+                                @if (ticket.descripcion) {
+                                    <div class="bg-white border border-gray-200 border-dashed p-3 rounded-lg text-xs text-gray-600 mb-4 max-h-[80px] overflow-y-auto italic font-medium">
+                                    {{ ticket.descripcion }}
+                                    </div>
+                                }
+
+                                <div class="flex justify-end gap-2 mt-2">
+                                    @if (ticket.estado_ticket === 'Pendiente') {
+                                    <button (click)="corregirTicket(ticket)" class="flex items-center gap-1.5 bg-white border border-secondary text-secondary px-3 py-1.5 rounded-lg text-xs font-extrabold hover:bg-secondary hover:text-white transition-colors">
+                                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/></svg> Corregir
+                                    </button>
+                                    }
+                                    <button (click)="descargarPDF(ticket)" class="flex items-center gap-1.5 bg-white border border-primary text-primary px-3 py-1.5 rounded-lg text-xs font-extrabold hover:bg-primary hover:text-white transition-colors">
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg> Soporte
+                                    </button>
+                                </div>
+
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
             }
-          </div>
-        }
-      </div>
-      </div>
-    }
 
-    @if (pestanaActual() === 'estatus') {
-      <div class="panel-card">
-        <h3 style="margin-top: 0; color: #273376; border-bottom: 2px solid #273376; padding-bottom: 5px; font-weight: 700;">Buzón de Estatus</h3>
-        
-        <h4 style="color: #A70336; margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 14v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2h-7zm3 6.35c.427.202.831.458 1.144.757-.313-.299-.717-.555-1.144-.757zM4.837 14h6.326a4.5 4.5 0 0 0-.327-1.5H5.164c.106.52.22 1.026.327 1.5z"/></svg> Tickets Pendientes ({{ ticketsPendientes().length }})
-        </h4>
-        <div style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
-          @for (ticket of ticketsPendientes(); track ticket.id) {
-            <div style="background: #f8d7da; border-left: 4px solid #A70336; padding: 10px; margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
-              <div><strong style="color: #273376;">{{ ticket.numero_reporte }}</strong> - {{ ticket.tipificacion_falla }}</div>
-              <button (click)="descargarPDF(ticket)" style="display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #273376;" title="Descargar Soporte">
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg>
-              </button>
+            @if (pestanaActual() === 'estatus') {
+            <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6">
+                <h3 class="text-primary font-extrabold text-xl border-b border-gray-100 pb-4 mb-6">Buzón de Estatus</h3>
+                
+                <!-- Tickets Pendientes -->
+                <h4 class="text-secondary font-extrabold mb-4 flex items-center gap-2">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 14v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2h-7zm3 6.35c.427.202.831.458 1.144.757-.313-.299-.717-.555-1.144-.757zM4.837 14h6.326a4.5 4.5 0 0 0-.327-1.5H5.164c.106.52.22 1.026.327 1.5z"/></svg> Tickets Pendientes ({{ ticketsPendientes().length }})
+                </h4>
+                <div class="max-h-[300px] overflow-y-auto mb-8 space-y-3 pr-2">
+                @for (ticket of ticketsPendientes(); track ticket.id) {
+                    <div class="p-4 rounded-xl text-sm flex justify-between items-center border-l-4 shadow-sm"
+                        [class.bg-blue-50]="ticket.estado_ticket === 'En Progreso'" [class.border-blue-500]="ticket.estado_ticket === 'En Progreso'"
+                        [class.bg-red-50]="ticket.estado_ticket === 'Pendiente'" [class.border-secondary]="ticket.estado_ticket === 'Pendiente'">
+                    <div>
+                        <strong class="text-primary">{{ ticket.numero_reporte }}</strong> - <span class="text-gray-700 font-medium">{{ ticket.tipificacion_falla }}</span>
+                        @if (ticket.estado_ticket === 'En Progreso') {
+                        <div class="mt-1.5 text-[11px] text-blue-800 bg-blue-100 px-2 py-0.5 rounded inline-block font-bold">
+                            Atendido por: {{ ticket.tecnico_nombre }} {{ ticket.tecnico_apellido }}
+                        </div>
+                        }
+                    </div>
+                    <div class="flex items-center gap-2">
+                        @if (ticket.estado_ticket === 'Pendiente') {
+                        <button (click)="corregirTicket(ticket)" class="text-secondary bg-white p-2 rounded-lg shadow-sm hover:bg-secondary hover:text-white transition-colors" title="Corregir Ticket">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/></svg>
+                        </button>
+                        }
+                        <button (click)="descargarPDF(ticket)" class="text-primary bg-white p-2 rounded-lg shadow-sm hover:bg-primary hover:text-white transition-colors" title="Descargar Soporte">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg>
+                        </button>
+                    </div>
+                    </div>
+                }
+                @if (ticketsPendientes().length === 0) { <p class="text-xs text-gray-500 bg-gray-50 p-4 rounded-xl text-center border border-dashed">No hay tickets pendientes.</p> }
+                </div>
+
+                <!-- Tickets Sin Confirmar -->
+                <h4 class="text-yellow-600 font-extrabold mb-4 flex items-center gap-2">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg> Sin Confirmar ({{ ticketsSinConfirmar().length }})
+                </h4>
+                <div class="max-h-[300px] overflow-y-auto mb-4 space-y-3 pr-2">
+                @for (ticket of ticketsSinConfirmar(); track ticket.id) {
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-xl text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-sm">
+                    <div class="font-medium text-gray-700"><strong class="text-primary">{{ ticket.numero_reporte }}</strong> - {{ ticket.tipificacion_falla }}</div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button (click)="confirmarRequerimiento(ticket)" class="bg-green-500 hover:bg-green-600 text-white border-none px-4 py-2 rounded-lg cursor-pointer text-xs font-extrabold transition-colors shadow-sm flex-1 sm:flex-none">Confirmar Cierre</button>
+                        <button (click)="descargarPDF(ticket)" class="text-primary bg-white p-2 rounded-lg shadow-sm hover:bg-primary hover:text-white transition-colors border border-gray-200" title="Descargar Soporte">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg>
+                        </button>
+                    </div>
+                    </div>
+                }
+                @if (ticketsSinConfirmar().length === 0) { <p class="text-xs text-gray-500 bg-gray-50 p-4 rounded-xl text-center border border-dashed">No hay tickets pendientes por confirmar.</p> }
+                </div>
             </div>
-          }
-          @if (ticketsPendientes().length === 0) { <p style="font-size: 12px; color: #666;">No hay tickets pendientes.</p> }
+            }
         </div>
-
-        <h4 style="color: #856404; margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg> Sin Confirmar ({{ ticketsSinConfirmar().length }})
-        </h4>
-        <div style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
-          @for (ticket of ticketsSinConfirmar(); track ticket.id) {
-            <div style="background: #fff3cd; border-left: 4px solid #FFC907; padding: 10px; margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
-              <div><strong style="color: #273376;">{{ ticket.numero_reporte }}</strong> - {{ ticket.tipificacion_falla }}</div>
-              <button (click)="descargarPDF(ticket)" style="display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #273376;" title="Descargar Soporte">
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg>
-              </button>
+  
+        <!-- Columna Derecha: Gráficos -->
+        <div class="w-full xl:w-[400px]">
+            @if (pestanaActual() === 'estatus') {
+            <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6 sticky top-6">
+                <h3 class="text-primary font-extrabold text-lg border-b border-gray-100 pb-3 mb-5">Mis Fallas Frecuentes</h3>
+                <div class="h-[300px] relative">
+                @if (misTickets().length === 0) {
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium text-center px-4 bg-gray-50 rounded-xl border border-dashed">
+                    No hay datos suficientes para generar el gráfico.
+                    </div>
+                }
+                <canvas id="miGraficoFallas"></canvas>
+                </div>
             </div>
-          }
-          @if (ticketsSinConfirmar().length === 0) { <p style="font-size: 12px; color: #666;">No hay tickets sin confirmar.</p> }
-        </div>
-
-      </div>
-    }
-  </div>
-
-  <div class="responsive-col">
-    
-    @if (pestanaActual() === 'estatus') {
-      <div class="panel-card">
-        <h3 style="margin-top: 0; color: #273376; border-bottom: 2px solid #273376; padding-bottom: 5px; font-weight: 700;">Mis Fallas Frecuentes</h3>
-        <div style="height: 250px; position: relative;">
-          @if (misTickets().length === 0) {
-            <p style="text-align: center; color: #666; font-size: 13px; margin-top: 50px;">No hay datos suficientes para graficar.</p>
-          }
-          <canvas id="miGraficoFallas"></canvas>
+            }
         </div>
       </div>
-    }
-  </div>
-    </div>
+    </main>
   </div>
 </div>

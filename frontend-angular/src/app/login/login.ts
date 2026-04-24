@@ -51,6 +51,10 @@ export class LoginLoginComponent implements OnInit { // 2. Implementamos OnInit 
       const data = await response.json();
 
       if (response.ok) {
+        if (data.usuario.avatar) {
+          const timestamp = new Date().getTime();
+          data.usuario.avatarUrl = `${environment.serverUrl}/${data.usuario.avatar.replace(/\\/g, '/')}?t=${timestamp}`;
+        }
         localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
         localStorage.setItem('authToken', data.token); // BUG-C3 FIX: Guardar el JWT
         alert('¡Bienvenido a Farmapatria, ' + data.usuario.nombre + '!');

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http'; 
 import { TicketService } from '../services/ticket';
 import { CommonModule } from '@angular/common'; 
@@ -13,7 +14,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-panel-usuario',
   standalone: true,
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, FormsModule],
   templateUrl: './panel-usuario.html',
   styleUrl: './panel-usuario.css'
 })
@@ -117,7 +118,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
     this.http.get<any[]>(`${environment.apiUrl}/tickets/${this.usuarioActual().id}`)
       .subscribe(todos => {
         this.misTickets.set(todos); 
-        this.ticketsPendientes.set(todos.filter(t => t.estado_ticket === 'Pendiente'));
+        this.ticketsPendientes.set(todos.filter(t => t.estado_ticket === 'Pendiente' || t.estado_ticket === 'En Progreso'));
         this.ticketsSinConfirmar.set(todos.filter(t => t.estado_ticket === 'Sin Confirmar'));
         this.ticketsResueltos.set(todos.filter(t => t.estado_ticket === 'Resuelto'));
         
@@ -187,6 +188,9 @@ export class PanelUsuario implements OnInit, OnDestroy {
 
   cambiarPestana(pestana: 'estatus' | 'historico') {
     this.pestanaActual.set(pestana);
+    if (pestana === 'estatus') {
+      setTimeout(() => this.renderizarGrafico(), 100);
+    }
   }
 
   irAlPerfil() {
@@ -319,5 +323,18 @@ export class PanelUsuario implements OnInit, OnDestroy {
       console.warn('Aviso: No se encontró cintillo.png. Generando en modo soporte.');
       resolverEvidenciaYConstruir(false);
     };
+  }
+
+  corregirTicket(ticket: any) {
+    this.router.navigate(['/generar-reporte'], { state: { ticketAEditar: ticket } });
+  }
+
+  confirmarRequerimiento(ticket: any) {
+    if(confirm(`¿Estás seguro de confirmar la resolución del ticket ${ticket.numero_reporte}? Esto dará por cerrado el caso.`)) {
+      this.http.put(`${environment.apiUrl}/tickets/${ticket.id}/confirmar`, {})
+        .subscribe(() => {
+          this.cargarTickets();
+        });
+    }
   }
 }

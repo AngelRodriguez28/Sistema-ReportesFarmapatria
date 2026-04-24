@@ -1,83 +1,118 @@
-<div class="panel-container" style="max-width: 900px;">
+<div class="min-h-screen bg-gray-50 font-sans py-8 px-4 sm:px-6 lg:px-8 flex justify-center">
     
-    <div class="panel-card" style="padding: 0; overflow: hidden;">
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden transition-all duration-300">
         
-        <div class="panel-header" style="flex-wrap: wrap; gap: 10px;">
-            <div>
-                <h2 style="margin: 0; font-size: 22px; font-weight: 800;">Nueva Incidencia Técnica</h2>
-                <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Plataforma de Gestión - Farmapatria</p>
+        <div class="bg-primary px-6 md:px-10 py-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 relative overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(167,3,54,0.4)_0%,transparent_50%)] pointer-events-none"></div>
+            <div class="relative z-10">
+                <h2 class="m-0 text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                    {{ estaEditando ? 'Corregir Incidencia Técnica' : 'Nueva Incidencia Técnica' }}
+                </h2>
+                <p class="m-0 mt-1 text-sm text-white/80 font-medium">Plataforma de Gestión - Farmapatria</p>
             </div>
-            <button routerLink="/panel-usuario" class="ui-button btn-outline" style="color: white; border-color: white; padding: 8px 15px; width: auto; font-size: 13px;">Volver al Panel</button>
+            <button routerLink="/panel-usuario" class="relative z-10 bg-white/10 hover:bg-white/20 border border-white/30 text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm backdrop-blur-sm flex items-center gap-2">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg>
+                Volver al Panel
+            </button>
         </div>
 
-        <form (ngSubmit)="enviarReporte()" style="padding: 30px;">
+        <form (ngSubmit)="enviarReporte()" class="p-6 md:p-10 space-y-6">
             
-            <div class="responsive-flex" style="margin-bottom: 20px;">
-                <div class="responsive-col">
-                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Número de Contacto *</label>
-                    <input type="text" [(ngModel)]="nuevoReporte.contacto" name="contacto" required placeholder="Ej: 0412-0000000" class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-extrabold text-primary mb-2">Número de Contacto <span class="text-secondary">*</span></label>
+                    <input type="text" [(ngModel)]="nuevoReporte.contacto" name="contacto" required placeholder="Ej: 0412-0000000" 
+                    class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium">
                 </div>
-                <div class="responsive-col">
-                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Nivel de Reporte *</label>
-                    <select [(ngModel)]="nuevoReporte.nivelReporte" name="nivelReporte" required class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
-                        <option value="" disabled selected>Seleccione el nivel...</option>
-                        @for (nivel of nivelesReporte; track nivel) {
-                            <option [value]="nivel">{{ nivel }}</option>
-                        }
-                    </select>
-                </div>
-            </div>
-
-            <div class="responsive-flex" style="margin-bottom: 20px;">
-                <div class="responsive-col">
-                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Unidad que Reporta *</label>
-                    <select [(ngModel)]="nuevoReporte.unidadReporta" name="unidadReporta" required class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
-                        <option value="" disabled selected>Seleccione la unidad emisora...</option>
-                        @for (unidad of unidadesQueReportan; track unidad) {
-                            <option [value]="unidad">{{ unidad }}</option>
-                        }
-                    </select>
-                </div>
-                <div class="responsive-col">
-                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Unidad Afectada *</label>
-                    <select [(ngModel)]="nuevoReporte.unidadAfectada" name="unidadAfectada" required class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
-                        <option value="" disabled selected>Seleccione la farmacia o unidad afectada...</option>
-                        @for (unidad of unidadesAfectadas; track unidad) {
-                            <option [value]="unidad">{{ unidad }}</option>
-                        }
-                    </select>
+                <div>
+                    <label class="block text-sm font-extrabold text-primary mb-2">Nivel de Reporte <span class="text-secondary">*</span></label>
+                    <div class="relative">
+                        <select [(ngModel)]="nuevoReporte.nivelReporte" name="nivelReporte" required 
+                        class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium appearance-none cursor-pointer">
+                            <option value="" disabled selected>Seleccione el nivel...</option>
+                            @for (nivel of nivelesReporte; track nivel) {
+                                <option [value]="nivel">{{ nivel }}</option>
+                            }
+                        </select>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="responsive-flex" style="margin-bottom: 20px;">
-                <div class="responsive-col" style="flex: 2;">
-                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Tipificación de la Falla *</label>
-                    <select [(ngModel)]="nuevoReporte.tipificacionFalla" name="tipificacionFalla" required class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
-                        <option value="" disabled selected>Seleccione el tipo de incidencia...</option>
-                        @for (falla of tipificaciones; track falla) {
-                            <option [value]="falla">{{ falla }}</option>
-                        }
-                    </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-extrabold text-primary mb-2">Unidad que Reporta <span class="text-secondary">*</span></label>
+                    <div class="relative">
+                        <select [(ngModel)]="nuevoReporte.unidadReporta" name="unidadReporta" required 
+                        class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium appearance-none cursor-pointer">
+                            <option value="" disabled selected>Seleccione la unidad emisora...</option>
+                            @for (unidad of unidadesQueReportan; track unidad) {
+                                <option [value]="unidad">{{ unidad }}</option>
+                            }
+                        </select>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+                    </div>
                 </div>
-                <div class="responsive-col">
-                    <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">N° Anydesk (Opcional)</label>
-                    <input type="text" [(ngModel)]="nuevoReporte.anydesk" name="anydesk" placeholder="Ej: 123 456 789" class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da;">
+                <div>
+                    <label class="block text-sm font-extrabold text-primary mb-2">Unidad Afectada <span class="text-secondary">*</span></label>
+                    <div class="relative">
+                        <select [(ngModel)]="nuevoReporte.unidadAfectada" name="unidadAfectada" required 
+                        class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium appearance-none cursor-pointer">
+                            <option value="" disabled selected>Seleccione la farmacia o unidad afectada...</option>
+                            @for (unidad of unidadesAfectadas; track unidad) {
+                                <option [value]="unidad">{{ unidad }}</option>
+                            }
+                        </select>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+                    </div>
                 </div>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Descripción Detallada del Evento *</label>
-                <textarea [(ngModel)]="nuevoReporte.descripcion" name="descripcion" rows="4" required placeholder="Describa el problema presentado con el mayor detalle posible..." class="ui-input" style="border-radius: 6px; background-color: white; border: 1px solid #ced4da; resize: vertical; height: auto;"></textarea>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-extrabold text-primary mb-2">Tipificación de la Falla <span class="text-secondary">*</span></label>
+                    <div class="relative">
+                        <select [(ngModel)]="nuevoReporte.tipificacionFalla" name="tipificacionFalla" required 
+                        class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium appearance-none cursor-pointer">
+                            <option value="" disabled selected>Seleccione el tipo de incidencia...</option>
+                            @for (falla of tipificaciones; track falla) {
+                                <option [value]="falla">{{ falla }}</option>
+                            }
+                        </select>
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-extrabold text-primary mb-2">N° Anydesk <span class="text-gray-400 font-medium text-xs">(Opcional)</span></label>
+                    <input type="text" [(ngModel)]="nuevoReporte.anydesk" name="anydesk" placeholder="Ej: 123 456 789" 
+                    class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium font-mono">
+                </div>
             </div>
 
-            <div style="margin-bottom: 25px; padding: 15px; border: 1px dashed #ccc; border-radius: 6px; background: #f9f9f9;">
-                <label style="display: block; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; font-weight: 700;">Evidencia / Archivo Adjunto (Opcional)</label>
-                <input type="file" (change)="capturarArchivo($event)" style="font-size: 13px; color: #666; width: 100%;">
+            <div>
+                <label class="block text-sm font-extrabold text-primary mb-2">Descripción Detallada del Evento <span class="text-secondary">*</span></label>
+                <textarea [(ngModel)]="nuevoReporte.descripcion" name="descripcion" rows="4" required placeholder="Describa el problema presentado con el mayor detalle posible..." 
+                class="w-full px-5 py-4 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium resize-y"></textarea>
             </div>
 
-            <button type="submit" class="ui-button" style="background-color: var(--color-primary); color: white; border-radius: 6px;">
-                Generar Ticket de Soporte
-            </button>
+            <div class="p-6 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors group cursor-pointer relative flex flex-col items-center justify-center text-center">
+                <input type="file" (change)="capturarArchivo($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                <div class="text-gray-400 group-hover:text-primary transition-colors mb-2">
+                    <svg width="32" height="32" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
+                </div>
+                <label class="block text-sm font-extrabold text-gray-700 mb-1">Evidencia / Archivo Adjunto <span class="text-gray-400 font-medium text-xs">(Opcional)</span></label>
+                <p class="text-xs text-gray-500 font-medium m-0">Haz clic o arrastra un archivo de imagen para adjuntarlo (Max 5MB)</p>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 flex justify-end">
+                <button type="submit" 
+                class="w-full md:w-auto px-8 py-3.5 rounded-full text-sm font-extrabold text-white shadow-[0_4px_15px_rgba(39,51,118,0.25)] transition-all duration-300 hover:-translate-y-0.5"
+                [class.bg-green-500]="estaEditando" [class.hover:bg-green-600]="estaEditando" [class.shadow-[0_4px_15px_rgba(40,167,69,0.25)]]="estaEditando"
+                [class.bg-primary]="!estaEditando" [class.hover:bg-[#1a2352]]="!estaEditando">
+                    {{ estaEditando ? 'Guardar Corrección' : 'Generar Ticket de Soporte' }}
+                </button>
+            </div>
 
         </form>
     </div>
