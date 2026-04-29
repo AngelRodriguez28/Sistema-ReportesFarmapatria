@@ -242,6 +242,28 @@ app.put('/api/tickets/:id/confirmar', verificarToken, async (req, res) => {
     }
 });
 // ==========================================
+// NUEVA RUTA: Reportar Error Persistente por el Usuario
+// ==========================================
+app.put('/api/tickets/:id/error-persistente', verificarToken, async (req, res) => {
+    try {
+        const ticketId = req.params.id;
+        
+        const queryUpdate = `UPDATE tickets SET estado_ticket = 'En Progreso' WHERE id = $1 RETURNING *`;
+        const result = await pool.query(queryUpdate, [ticketId]);
+        const ticketActualizado = result.rows[0];
+
+        if (ticketActualizado && ticketActualizado.tecnico_id) {
+            const msj = `El usuario ha reportado un Error Persistente en el ticket ${ticketActualizado.numero_reporte}. El ticket ha regresado a 'En Progreso'.`;
+            await pool.query('INSERT INTO notificaciones (usuario_id, mensaje, leida) VALUES ($1, $2, false)', [ticketActualizado.tecnico_id, msj]);
+        }
+        res.status(200).json({ message: 'Error persistente reportado exitosamente' });
+    } catch (error) {
+        console.error("Error al reportar error persistente:", error);
+        res.status(500).json({ error: 'Error al reportar el error persistente del ticket.' });
+    }
+});
+
+// ==========================================
 // RUTA: Editar Ticket (Corregir Pendientes)
 // ==========================================
 app.put('/api/tickets/:id', verificarToken, upload.single('archivoAdjunto'), async (req, res) => {

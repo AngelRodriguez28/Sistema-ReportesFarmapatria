@@ -43,10 +43,34 @@ export class PanelAdmin implements OnInit, OnDestroy {
   });
 
   // KPIs Calculados para el Home
-  totalTickets = computed(() => this.todosLosTickets().length);
-  totalPendientes = computed(() => this.todosLosTickets().filter(t => t.estado_ticket === 'Pendiente' || t.estado_ticket === 'En Progreso').length);
+  totalTickets = computed(() => {
+    const rolId = this.adminActual().rol_id;
+    if ([3, 4, 5].includes(rolId)) {
+      return this.todosLosTickets().filter(t => t.tecnico_id === this.adminActual().id).length;
+    }
+    return this.todosLosTickets().length;
+  });
+
+  totalPendientes = computed(() => {
+    const rolId = this.adminActual().rol_id;
+    if ([3, 4, 5].includes(rolId)) {
+      return this.todosLosTickets().filter(t => t.tecnico_id === this.adminActual().id && t.estado_ticket === 'En Progreso').length;
+    }
+    return this.todosLosTickets().filter(t => t.estado_ticket === 'Pendiente' || t.estado_ticket === 'En Progreso').length;
+  });
+
+  ticketsGlobalesNuevos = computed(() => this.todosLosTickets().filter(t => t.estado_ticket === 'Pendiente').length);
+
   totalSinConfirmar = computed(() => this.todosLosTickets().filter(t => t.estado_ticket === 'Sin Confirmar').length);
-  totalResueltos = computed(() => this.todosLosTickets().filter(t => t.estado_ticket === 'Resuelto').length);
+
+  totalResueltos = computed(() => {
+    const rolId = this.adminActual().rol_id;
+    if ([3, 4, 5].includes(rolId)) {
+      return this.todosLosTickets().filter(t => t.tecnico_id === this.adminActual().id && (t.estado_ticket === 'Resuelto' || t.estado_ticket === 'Sin Confirmar')).length;
+    }
+    return this.todosLosTickets().filter(t => t.estado_ticket === 'Resuelto').length;
+  });
+
   totalUsuarios = computed(() => this.todosLosUsuarios().length);
 
   private motorDeTiempo: Subscription | undefined;
@@ -161,13 +185,20 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
   cargarTodosLosTickets() {
     this.http.get<any[]>(`${environment.apiUrl}/admin/tickets`).subscribe(tickets => {
+        const rolId = this.adminActual().rol_id;
+        const adminId = this.adminActual().id;
         
         // ORDENAMIENTO: Del más reciente al más antiguo
-        const ticketsOrdenados = tickets.sort((a, b) => {
+        let ticketsOrdenados = tickets.sort((a, b) => {
             const fechaA = new Date(a.fecha_creacion).getTime();
             const fechaB = new Date(b.fecha_creacion).getTime();
             return fechaB - fechaA; 
         });
+
+        // FILTRO POR ROL: Soporte solo ve 'Pendientes' globales y sus propios tickets tomados/resueltos
+        if ([3, 4, 5].includes(rolId)) {
+            ticketsOrdenados = ticketsOrdenados.filter(t => t.estado_ticket === 'Pendiente' || t.tecnico_id === adminId);
+        }
 
         this.todosLosTickets.set(ticketsOrdenados);
         
@@ -197,15 +228,18 @@ export class PanelAdmin implements OnInit, OnDestroy {
     }
   }
 
-  cambiarEstadoUsuario(usuario: any) {
-    const nuevoEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
-    const accion = nuevoEstado === 'Inactivo' ? 'BLOQUEAR' : 'DESBLOQUEAR';
+  cambiarEstadoUsuario(usuario: any, event: any) {
+    const nuevoEstado = event.target.value;
+    const accion = nuevoEstado === 'Inactivo' ? 'INACTIVAR y BLOQUEAR el acceso de' : 'ACTIVAR y PERMITIR el acceso de';
 
-    if(confirm(`¿Estás seguro de ${accion} a ${usuario.nombre} ${usuario.apellido}?`)) {
+    if(confirm(`¿Estás seguro de ${accion} ${usuario.nombre} ${usuario.apellido}?`)) {
       this.http.put(`${environment.apiUrl}/admin/usuarios/${usuario.id}/estado`, { estado: nuevoEstado })
         .subscribe(() => {
           this.cargarTodosLosUsuarios();
         });
+    } else {
+      // Revertir el cambio visual en el select si cancela
+      event.target.value = usuario.estado === 'Bloqueado' ? 'Inactivo' : usuario.estado;
     }
   }
 

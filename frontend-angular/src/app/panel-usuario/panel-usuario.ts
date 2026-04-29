@@ -337,4 +337,13 @@ export class PanelUsuario implements OnInit, OnDestroy {
         });
     }
   }
+
+  reportarErrorPersistente(ticket: any) {
+    if(confirm(`¿Estás seguro de reportar un Error Persistente en el ticket ${ticket.numero_reporte}? Esto lo devolverá al estado "En Progreso" para que el técnico lo revise nuevamente.`)) {
+      this.http.put(`${environment.apiUrl}/tickets/${ticket.id}/error-persistente`, {})
+        .subscribe(() => {
+          this.cargarTickets();
+        });
+    }
+  }
 }
