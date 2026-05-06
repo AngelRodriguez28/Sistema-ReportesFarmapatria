@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http'; 
+
 import { TicketService } from '../services/ticket';
 import { CommonModule } from '@angular/common'; 
 import { jsPDF } from 'jspdf'; 
@@ -69,7 +69,6 @@ export class PanelUsuario implements OnInit, OnDestroy {
   graficoUsuario: any; // <-- Variable para guardar el gráfico
 
   constructor(
-    private http: HttpClient, 
     private router: Router,
     private ticketService: TicketService
   ) {}
@@ -110,12 +109,12 @@ export class PanelUsuario implements OnInit, OnDestroy {
   }
 
   cargarNotificaciones() {
-    this.http.get<any[]>(`${environment.apiUrl}/notificaciones/${this.usuarioActual().id}`)
+    this.ticketService.obtenerNotificaciones(this.usuarioActual().id)
       .subscribe(data => this.notificaciones.set(data));
   }
 
   cargarTickets() {
-    this.http.get<any[]>(`${environment.apiUrl}/tickets/${this.usuarioActual().id}`)
+    this.ticketService.obtenerTicketsPorUsuario(this.usuarioActual().id)
       .subscribe(todos => {
         this.misTickets.set(todos); 
         this.ticketsPendientes.set(todos.filter(t => t.estado_ticket === 'Pendiente' || t.estado_ticket === 'En Progreso'));
@@ -168,7 +167,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
   toggleCampanita() {
     this.mostrarMenuNotificaciones.set(!this.mostrarMenuNotificaciones());
     if (this.mostrarMenuNotificaciones() && this.noLeidas() > 0) {
-      this.http.put(`${environment.apiUrl}/notificaciones/marcar-leidas/${this.usuarioActual().id}`, {})
+      this.ticketService.marcarNotificacionesLeidas(this.usuarioActual().id)
         .subscribe(() => {
            this.notificaciones.update(notifs => notifs.map(n => ({ ...n, leida: true })));
         });
@@ -331,7 +330,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
 
   confirmarRequerimiento(ticket: any) {
     if(confirm(`¿Estás seguro de confirmar la resolución del ticket ${ticket.numero_reporte}? Esto dará por cerrado el caso.`)) {
-      this.http.put(`${environment.apiUrl}/tickets/${ticket.id}/confirmar`, {})
+      this.ticketService.confirmarResolucion(ticket.id)
         .subscribe(() => {
           this.cargarTickets();
         });
@@ -340,7 +339,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
 
   reportarErrorPersistente(ticket: any) {
     if(confirm(`¿Estás seguro de reportar un Error Persistente en el ticket ${ticket.numero_reporte}? Esto lo devolverá al estado "En Progreso" para que el técnico lo revise nuevamente.`)) {
-      this.http.put(`${environment.apiUrl}/tickets/${ticket.id}/error-persistente`, {})
+      this.ticketService.reportarErrorPersistente(ticket.id)
         .subscribe(() => {
           this.cargarTickets();
         });

@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../environments/environment'; // B1-FIX
+import { environment } from '../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-recuperar-contrasena',
@@ -21,9 +22,9 @@ export class RecuperarContrasena {
 
   cargando = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
-  async cambiarContrasena() {
+  cambiarContrasena() {
     if (!this.datos.email || !this.datos.cedula || !this.datos.nuevaPassword || !this.datos.confirmarPassword) {
       alert('Por favor, completa todos los campos requeridos.');
       return;
@@ -41,30 +42,22 @@ export class RecuperarContrasena {
 
     this.cargando = true;
 
-    try {
-      const response = await fetch(`${environment.apiUrl}/recuperar-contrasena`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: this.datos.email,
-          cedula: this.datos.cedula,
-          nuevaPassword: this.datos.nuevaPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+    this.authService.recuperarContrasena({
+      email: this.datos.email,
+      cedula: this.datos.cedula,
+      nuevaPassword: this.datos.nuevaPassword
+    }).subscribe({
+      next: () => {
         alert('Contraseña actualizada exitosamente. Por favor, inicia sesión con tu nueva contraseña.');
         this.router.navigate(['/login']);
-      } else {
-        alert(data.error || 'Error al actualizar la contraseña.');
+        this.cargando = false;
+      },
+      error: (err) => {
+        console.error('Error al conectar con el servidor:', err);
+        const msj = err.error && err.error.error ? err.error.error : 'Error al actualizar la contraseña.';
+        alert(msj);
+        this.cargando = false;
       }
-    } catch (error) {
-      console.error('Error al conectar con el servidor:', error);
-      alert('Error de conexión. ¿Está encendido el Backend en el puerto 3000?');
-    } finally {
-      this.cargando = false;
-    }
+    });
   }
 }

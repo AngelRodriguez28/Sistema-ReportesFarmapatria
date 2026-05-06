@@ -86,7 +86,15 @@
                 <div>
                     <label class="block text-sm font-extrabold text-primary mb-2">N° Anydesk <span class="text-gray-400 font-medium text-xs">(Opcional)</span></label>
                     <input type="text" [(ngModel)]="nuevoReporte.anydesk" name="anydesk" placeholder="Ej: 123 456 789" 
-                    class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium font-mono">
+                    class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium font-mono mb-3">
+                    
+                    <div class="relative overflow-hidden inline-block w-full">
+                        <button type="button" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-600 hover:text-primary hover:border-primary/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 group">
+                            <svg class="text-gray-400 group-hover:text-primary transition-colors" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            Adjuntar Captura de Anydesk
+                        </button>
+                        <input type="file" (change)="capturarImagenAnydesk($event)" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    </div>
                 </div>
             </div>
 

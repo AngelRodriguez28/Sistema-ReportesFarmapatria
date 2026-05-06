@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../environments/environment'; // B1-FIX
+import { environment } from '../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-perfil',
@@ -23,7 +24,7 @@ export class Perfil implements OnInit {
 
   inicial = 'F';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
     if (typeof window !== 'undefined' && localStorage) {
@@ -66,67 +67,47 @@ export class Perfil implements OnInit {
       };
       reader.readAsDataURL(file);
 
-      // A3-FIX: Subir imagen directamente al backend
       const formData = new FormData();
       formData.append('avatar', file);
-      try {
-        const token = localStorage.getItem('authToken') || '';
-        const response = await fetch(`${environment.apiUrl}/usuarios/${this.usuario.id}/avatar`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }, // BUG-C3 FIX
-          body: formData
-        });
-        const data = await response.json();
-        if (response.ok) {
+
+      this.authService.subirAvatar(this.usuario.id, formData).subscribe({
+        next: (data) => {
           const timestamp = new Date().getTime();
           const nuevaUrl = `${environment.serverUrl}/${data.avatarUrl.replace(/\\/g, '/')}?t=${timestamp}`;
           this.usuario.avatarUrl = nuevaUrl;
-          this.usuario.avatar = data.avatarUrl; // guardar también la ruta original
-          // Limpiar el timestamp antes de guardar en localStorage si se prefiere, aunque tampoco afecta.
+          this.usuario.avatar = data.avatarUrl; 
           localStorage.setItem('usuarioLogueado', JSON.stringify(this.usuario));
-        } else {
-          alert('Error al subir avatar: ' + (data.error || 'Verifica el tamaño o formato.'));
+        },
+        error: (err) => {
+          console.error('Error subiendo avatar:', err);
+          const msj = err.error && err.error.error ? err.error.error : 'Verifica el tamaño o formato.';
+          alert('Error al subir avatar: ' + msj);
         }
-      } catch (error) {
-        console.error('Error subiendo avatar:', error);
-      }
+      });
     } else {
       alert('Por favor, selecciona un formato de imagen válido (JPG, PNG, GIF).');
     }
   }
 
-  // B9-FIX + A4-FIX: guardarCambios ahora persiste fecha de nacimiento
-  async guardarCambios() {
+  guardarCambios() {
     if (!this.usuario.nombre || !this.usuario.apellido) {
       alert('Nombre y Apellido son obligatorios.');
       return;
     }
-    try {
-      // Renombramos la variable para mapear con backend
-      const fecha_nac = this.usuario.fecha_nac || this.usuario.fecha_nacimiento;
-      const token = localStorage.getItem('authToken') || '';
-      const response = await fetch(`${environment.apiUrl}/usuarios/${this.usuario.id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // BUG-C3 FIX
-        },
-        body: JSON.stringify({ 
-          nombre: this.usuario.nombre, 
-          apellido: this.usuario.apellido,
-          fecha_nac: fecha_nac // A4-FIX
-        })
-      });
-      const data = await response.json();
-      if (response.ok) {
-        // Actualizar localStorage con datos frescos del servidor
-        // Mantenemos la estructura consistente
+    
+    const fecha_nac = this.usuario.fecha_nac || this.usuario.fecha_nacimiento;
+    
+    this.authService.actualizarPerfil(this.usuario.id, {
+      nombre: this.usuario.nombre, 
+      apellido: this.usuario.apellido,
+      fecha_nac: fecha_nac
+    }).subscribe({
+      next: (data) => {
         const usrServer = data.usuario;
         if (usrServer.avatar) {
           const timestamp = new Date().getTime();
           usrServer.avatarUrl = `${environment.serverUrl}/${usrServer.avatar.replace(/\\/g, '/')}?t=${timestamp}`;
         }
-        // Usar map de fecha
         usrServer.fecha_nac = usrServer.fecha_nacimiento || usrServer.fecha_nac;
         
         const usuarioActualizado = { ...this.usuario, ...usrServer };
@@ -135,13 +116,13 @@ export class Perfil implements OnInit {
         this.actualizarInicial();
         alert('Cambios guardados con éxito.');
         this.regresar();
-      } else {
-        alert('Error al guardar: ' + (data.error || 'Intenta de nuevo.'));
+      },
+      error: (err) => {
+        console.error('Error al guardar perfil:', err);
+        const msj = err.error && err.error.error ? err.error.error : 'Intenta de nuevo.';
+        alert('Error al guardar: ' + msj);
       }
-    } catch (error) {
-      console.error('Error de conexión al guardar perfil:', error);
-      alert('Error de conexión. Verifica que el Backend esté corriendo.');
-    }
+    });
   }
 
   regresar() {

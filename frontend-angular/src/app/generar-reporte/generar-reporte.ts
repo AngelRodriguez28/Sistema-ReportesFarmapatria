@@ -64,7 +64,8 @@ export class GenerarReporte implements OnInit {
     unidadAfectada: '',
     contacto: '',
     descripcion: '',
-    archivoAdjunto: null as File | null
+    archivoAdjunto: null as File | null,
+    imagenAnydesk: null as File | null
   };
 
   nivelesReporte = [
@@ -178,6 +179,13 @@ export class GenerarReporte implements OnInit {
     }
   }
 
+  capturarImagenAnydesk(event: any) {
+    const archivo = event.target.files[0];
+    if (archivo) {
+      this.nuevoReporte.imagenAnydesk = archivo;
+    }
+  }
+
   generarPDF(numeroReporte: string) {
     const doc = new jsPDF('p', 'mm', 'a4'); 
 
@@ -231,7 +239,9 @@ export class GenerarReporte implements OnInit {
       drawField('Unidad que Reporta:', this.nuevoReporte.unidadReporta);
       drawField('Unidad Afectada:', this.nuevoReporte.unidadAfectada);
       drawField('Tipificación:', this.nuevoReporte.tipificacionFalla);
-      drawField('N° Anydesk:', this.nuevoReporte.anydesk || 'N/A');
+      const anydeskText = this.nuevoReporte.anydesk || 'N/A';
+      const anydeskImagenText = this.nuevoReporte.imagenAnydesk ? ' (Imagen adjunta)' : '';
+      drawField('N° Anydesk:', anydeskText + anydeskImagenText);
 
       y += 5;
       doc.setFont("helvetica", "bold");
@@ -298,48 +308,38 @@ export class GenerarReporte implements OnInit {
     if (this.nuevoReporte.archivoAdjunto) {
       formData.append('archivoAdjunto', this.nuevoReporte.archivoAdjunto);
     }
+    if (this.nuevoReporte.imagenAnydesk) {
+      formData.append('imagenAnydesk', this.nuevoReporte.imagenAnydesk);
+    }
 
     try {
-      const token = localStorage.getItem('authToken') || '';
-      let url = `${environment.apiUrl}/tickets`;
-      let metodo = 'POST';
-      
       if (this.estaEditando && this.idTicketEditar) {
-         url = `${environment.apiUrl}/tickets/${this.idTicketEditar}`;
-         metodo = 'PUT';
-      }
-
-      const response = await fetch(url, {
-        method: metodo,
-        headers: { 'Authorization': `Bearer ${token}` }, // BUG-C3 FIX
-        body: formData 
-      });
-
-      if (response.ok) {
-        const resultado = await response.json();
-        
-        if (this.estaEditando) {
-             alert(`¡Éxito! Su reporte ha sido corregido exitosamente.`);
-             this.router.navigate([this.rutaRetorno]);
-             return;
-        }
-        
-        alert(`¡Éxito! Su reporte ha sido generado bajo el código: ${resultado.ticket.numero_reporte}`);
-        
-        // Genera el PDF
-        this.generarPDF(resultado.ticket.numero_reporte);
-
-        // <-- Lanza la notificación para que el panel se actualice
-        this.ticketService.notificarNuevoTicket(); 
-
-        // Hace la redirección al panel principal automáticamente
-        this.router.navigate(['/panel-usuario']);
-
+        this.ticketService.editarTicket(this.idTicketEditar, formData).subscribe({
+          next: (resultado) => {
+            alert(`¡Éxito! Su reporte ha sido corregido exitosamente.`);
+            this.router.navigate([this.rutaRetorno]);
+          },
+          error: (err) => {
+            console.error("Error al editar:", err);
+            alert("Ocurrió un error al intentar comunicar con el servidor.");
+          }
+        });
       } else {
-        alert("Ocurrió un error al intentar comunicar con el servidor de base de datos.");
+        this.ticketService.crearTicket(formData).subscribe({
+          next: (resultado) => {
+            alert(`¡Éxito! Su reporte ha sido generado bajo el código: ${resultado.ticket.numero_reporte}`);
+            this.generarPDF(resultado.ticket.numero_reporte);
+            this.ticketService.notificarNuevoTicket(); 
+            this.router.navigate(['/panel-usuario']);
+          },
+          error: (err) => {
+            console.error("Error al crear:", err);
+            alert("Ocurrió un error al intentar comunicar con el servidor de base de datos.");
+          }
+        });
       }
     } catch (error) {
-      console.error("Error de conexión:", error);
+      console.error("Error inesperado:", error);
       alert("No se pudo conectar con el servidor.");
     }
   }

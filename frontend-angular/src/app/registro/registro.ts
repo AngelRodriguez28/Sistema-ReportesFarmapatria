@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms'; 
 import { Router, RouterLink } from '@angular/router'; 
 import { CommonModule } from '@angular/common';
-import { environment } from '../../environments/environment'; // B1-FIX
+import { environment } from '../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-registro',
@@ -27,7 +28,7 @@ export class Registro {
     confirmarPassword: '' // Campo temporal solo para validar
   };
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   // Fecha máxima permitida: hoy (no se permiten fechas futuras)
   get fechaMaxima(): string {
@@ -35,8 +36,7 @@ export class Registro {
     return hoy.toISOString().split('T')[0]; // Formato YYYY-MM-DD
   }
 
-  async registrarse() {
-    // Validaciones de seguridad en el Frontend
+  registrarse() {
     if (this.nuevoUsuario.password !== this.nuevoUsuario.confirmarPassword) {
       alert('Las contraseñas no coinciden. Por favor, verifica.');
       return;
@@ -47,27 +47,18 @@ export class Registro {
       return;
     }
 
-    try {
-      // Enviamos los datos a tu Backend en Node.js
-      // B6-FIX: Excluir confirmarPassword del body (es solo validación frontend)
-      const { confirmarPassword, ...datosParaEnviar } = this.nuevoUsuario;
-      const response = await fetch(`${environment.apiUrl}/registro`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datosParaEnviar)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+    const { confirmarPassword, ...datosParaEnviar } = this.nuevoUsuario;
+    
+    this.authService.registro(datosParaEnviar).subscribe({
+      next: () => {
         alert('¡Registro exitoso! Ya puedes iniciar sesión en la plataforma.');
-        this.router.navigate(['/login']); // Lo mandamos de vuelta al Login
-      } else {
-        alert('Error al registrar: ' + (data.error || 'Verifica tus datos.'));
+        this.router.navigate(['/login']); 
+      },
+      error: (err) => {
+        console.error('Error al registrar:', err);
+        const msj = err.error && err.error.error ? err.error.error : 'Verifica tus datos o conexión al servidor.';
+        alert('Error al registrar: ' + msj);
       }
-    } catch (error) {
-      console.error('Error de conexión:', error);
-      alert('Error al conectar con el servidor. Verifica que el Backend esté corriendo.');
-    }
+    });
   }
 }

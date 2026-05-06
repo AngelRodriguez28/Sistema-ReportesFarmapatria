@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; 
+import { AdminService } from '../services/admin.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common'; 
 import { jsPDF } from 'jspdf';
@@ -77,7 +77,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   graficoEstatus: any;
   graficoFallas: any;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private adminService: AdminService, private router: Router) {}
 
   ngOnInit() {
     if (typeof window !== 'undefined' && localStorage) {
@@ -184,14 +184,14 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   cargarTodosLosTickets() {
-    this.http.get<any[]>(`${environment.apiUrl}/admin/tickets`).subscribe(tickets => {
+    this.adminService.obtenerTicketsGlobales().subscribe(tickets => {
         const rolId = this.adminActual().rol_id;
         const adminId = this.adminActual().id;
         
         // ORDENAMIENTO: Del más reciente al más antiguo
         let ticketsOrdenados = tickets.sort((a, b) => {
-            const fechaA = new Date(a.fecha_creacion).getTime();
-            const fechaB = new Date(b.fecha_creacion).getTime();
+            const fechaA = new Date(a.fecha_creacion || 0).getTime();
+            const fechaB = new Date(b.fecha_creacion || 0).getTime();
             return fechaB - fechaA; 
         });
 
@@ -209,7 +209,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   cargarTodosLosUsuarios() {
-    this.http.get<any[]>(`${environment.apiUrl}/admin/usuarios`).subscribe(usuarios => this.todosLosUsuarios.set(usuarios));
+    this.adminService.obtenerUsuarios().subscribe(usuarios => this.todosLosUsuarios.set(usuarios));
   }
 
   cambiarRolUsuario(usuario: any, event: any) {
@@ -218,7 +218,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
     if(confirm(`¿Estás seguro de cambiar el rol de ${usuario.nombre} a ${nombreRol}?`)) {
       // B5-FIX: Convertir a número (event.target.value siempre es string en HTML)
-      this.http.put(`${environment.apiUrl}/admin/usuarios/${usuario.id}/rol`, { rol_id: Number(nuevoRolId) })
+      this.adminService.cambiarRolUsuario(usuario.id, Number(nuevoRolId))
         .subscribe(() => {
           alert('Rol actualizado exitosamente');
           this.cargarTodosLosUsuarios();
@@ -233,7 +233,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
     const accion = nuevoEstado === 'Inactivo' ? 'INACTIVAR y BLOQUEAR el acceso de' : 'ACTIVAR y PERMITIR el acceso de';
 
     if(confirm(`¿Estás seguro de ${accion} ${usuario.nombre} ${usuario.apellido}?`)) {
-      this.http.put(`${environment.apiUrl}/admin/usuarios/${usuario.id}/estado`, { estado: nuevoEstado })
+      this.adminService.cambiarEstadoUsuario(usuario.id, nuevoEstado)
         .subscribe(() => {
           this.cargarTodosLosUsuarios();
         });
@@ -245,7 +245,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
   tomarTicket(ticket: any) {
     if(confirm(`¿Estás seguro de tomar el ticket ${ticket.numero_reporte}? Pasará a estar "En Progreso".`)) {
-      this.http.put(`${environment.apiUrl}/admin/tickets/${ticket.id}/tomar`, {})
+      this.adminService.tomarTicket(ticket.id)
         .subscribe({
           next: () => this.cargarTodosLosTickets(),
           error: (err) => {
@@ -258,7 +258,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
   marcarComoResuelto(ticket: any) {
     if(confirm(`¿Estás seguro de marcar el ticket ${ticket.numero_reporte} como RESUELTO? (Se enviará a confirmación del usuario)`)) {
-      this.http.put(`${environment.apiUrl}/admin/tickets/${ticket.id}/resolver`, {})
+      this.adminService.resolverTicket(ticket.id)
         .subscribe({
           next: () => this.cargarTodosLosTickets(),
           error: (err) => {
