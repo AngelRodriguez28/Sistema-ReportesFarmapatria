@@ -1,42 +1,63 @@
-<div class="auth-wrapper">
+<div class="min-h-screen flex flex-col md:flex-row bg-white font-sans">
     
     <!-- Panel izquierdo: Banner Corporativo -->
-    <div class="auth-banner">
-        <h1>Bienvenidos al Sistema de Gestión de Reportes Farmapatria</h1>
-    </div>
-
-    <!-- Right panel: Login Form -->
-    <div class="auth-side">
-        <div class="auth-card">
-            <div class="auth-content">
-                <div class="auth-header">
-                    <h2>Iniciar Sesión</h2>
-                    <p>Acceso a la plataforma</p>
-                </div>
-
-                <form (ngSubmit)="iniciarSesion()">
-                    <div class="input-group">
-                        <input type="email" [(ngModel)]="credenciales.email" name="email" required placeholder="Usuario o Correo" class="ui-input">
-                    </div>
-
-                    <div class="input-group">
-                        <input type="password" [(ngModel)]="credenciales.password" name="password" required placeholder="Contraseña" class="ui-input">
-                    </div>
-
-                    <div class="remember-me" style="text-align: right;">
-                        <a routerLink="/recuperar-contrasena" style="background:none; border:none; color:inherit; font-size:14px; cursor:pointer; text-decoration:underline; padding:0;">¿Olvidó Contraseña?</a>
-                    </div>
-
-                    <button type="submit" class="ui-button btn-login">
-                        Iniciar sesión
-                    </button>
-
-                    <div class="auth-footer">
-                        <p>¿No tienes una cuenta? <a routerLink="/registro">Regístrate</a></p>
-                    </div>
-                </form>
+    <div class="flex-1 bg-primary bg-gradient-to-br from-[#273376] via-[#1a2352] to-[#0f1433] flex flex-col justify-center items-center p-8 md:p-12 text-white text-center relative overflow-hidden min-h-[250px] md:min-h-screen">
+        <!-- Efectos decorativos modernos (Blobs) -->
+        <div class="absolute top-0 left-0 w-72 h-72 bg-secondary rounded-full mix-blend-multiply filter blur-3xl opacity-30 pointer-events-none"></div>
+        <div class="absolute top-0 right-0 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none"></div>
+        
+        <div class="z-10 flex flex-col items-center">
+            <div class="w-20 h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/20 shadow-xl">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8.5 8.5 7 7"></path></svg>
             </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold drop-shadow-xl tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100">
+                Farmapatria
+            </h1>
+            <p class="text-white/90 mt-4 font-medium text-base md:text-lg tracking-wide max-w-md">Sistema Integrado de Gestión y Soporte Operativo</p>
         </div>
     </div>
 
+    <!-- Right panel: Login Form -->
+    <div class="flex-1 flex items-center justify-center p-6 md:p-12 bg-gray-50/50 backdrop-blur-xl relative">
+        <div class="w-full max-w-md p-8 md:p-10 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100 relative z-10 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Iniciar Sesión</h2>
+                <p class="text-gray-500 text-sm mt-3 font-medium">Accede a tu panel de control</p>
+            </div>
+
+            <form (ngSubmit)="iniciarSesion()" class="space-y-6">
+                <div class="space-y-5">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <input type="email" [(ngModel)]="credenciales.email" name="email" required placeholder="Usuario o Correo" 
+                        class="w-full pl-11 pr-5 py-3.5 border border-gray-200 bg-gray-50/50 rounded-2xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white placeholder-gray-400 font-medium">
+                    </div>
+
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        </div>
+                        <input type="password" [(ngModel)]="credenciales.password" name="password" required placeholder="Contraseña" 
+                        class="w-full pl-11 pr-5 py-3.5 border border-gray-200 bg-gray-50/50 rounded-2xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white placeholder-gray-400 font-medium">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end">
+                    <a routerLink="/recuperar-contrasena" class="text-sm font-semibold text-primary hover:text-secondary hover:underline transition-colors">¿Olvidó su contraseña?</a>
+                </div>
+
+                <button type="submit" 
+                class="w-full px-6 py-4 rounded-2xl text-sm font-bold text-white bg-secondary shadow-[0_8px_20px_rgba(167,3,54,0.25)] transition-all duration-300 hover:bg-[#8a022d] hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(167,3,54,0.35)] active:translate-y-0">
+                    Ingresar a la plataforma
+                </button>
+
+                <div class="text-center mt-8 pt-6 border-t border-gray-100 text-sm text-gray-500 font-medium">
+                    <p>¿No tienes una cuenta? <a routerLink="/registro" class="text-secondary font-bold hover:underline transition-colors">Regístrate aquí</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
