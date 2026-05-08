@@ -73,6 +73,45 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
   totalUsuarios = computed(() => this.todosLosUsuarios().length);
 
+  // Rendimiento de Técnicos (Vista Súper Admin)
+  estadisticasTecnicos = computed(() => {
+    // Filtrar solo usuarios con rol de soporte (3, 4, 5)
+    const tecnicos = this.todosLosUsuarios().filter(u => [3, 4, 5].includes(u.rol_id));
+    const tickets = this.todosLosTickets();
+
+    return tecnicos.map(tecnico => {
+      const ticketsDelTecnico = tickets.filter(t => t.tecnico_id === tecnico.id);
+      const asignados = ticketsDelTecnico.length;
+      const resueltos = ticketsDelTecnico.filter(t => t.estado_ticket === 'Resuelto' || t.estado_ticket === 'Sin Confirmar').length;
+      const enProgreso = ticketsDelTecnico.filter(t => t.estado_ticket === 'En Progreso').length;
+      const eficiencia = asignados === 0 ? 0 : Math.round((resueltos / asignados) * 100);
+
+      // Determinar color de rol para UI
+      let colorRol = 'bg-gray-100 text-gray-700';
+      if (tecnico.rol_id === 3) colorRol = 'bg-blue-100 text-blue-700 border-blue-200'; // Soporte GTIC
+      if (tecnico.rol_id === 4) colorRol = 'bg-purple-100 text-purple-700 border-purple-200'; // Soporte Redes
+      if (tecnico.rol_id === 5) colorRol = 'bg-orange-100 text-orange-700 border-orange-200'; // Soporte Aplicaciones
+
+      return {
+        ...tecnico,
+        estadisticas: { asignados, resueltos, enProgreso, eficiencia },
+        colorRol
+      };
+    });
+  });
+
+  // Mi Eficiencia (Vista Técnico)
+  miEficiencia = computed(() => {
+    const rolId = this.adminActual().rol_id;
+    if (![3, 4, 5].includes(rolId)) return 0;
+
+    const asignados = this.totalTickets();
+    const resueltos = this.totalResueltos();
+    
+    if (asignados === 0) return 0;
+    return Math.round((resueltos / asignados) * 100);
+  });
+
   private motorDeTiempo: Subscription | undefined;
   graficoEstatus: any;
   graficoFallas: any;

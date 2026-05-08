@@ -120,10 +120,92 @@
             </div>
           </div>
           
-          <div class="mt-8 bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6 md:p-8">
+          <!-- SECCIÓN DE EFICIENCIA (Solo Técnicos) -->
+          @if ([3,4,5].includes(adminActual().rol_id)) {
+            <div class="mt-6 bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 transition-all">
+              <div class="flex justify-between items-end mb-2">
+                <h3 class="text-primary font-extrabold text-lg m-0">Mi Eficiencia de Resolución</h3>
+                <span class="text-2xl font-extrabold text-secondary">{{ miEficiencia() }}%</span>
+              </div>
+              <p class="text-sm text-gray-500 mb-4">Porcentaje de tickets resueltos respecto al total de asignados.</p>
+              
+              <!-- Barra de Progreso Tailwind -->
+              <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden shadow-inner">
+                <div class="h-4 rounded-full transition-all duration-1000 ease-out"
+                     [ngClass]="{'bg-red-500': miEficiencia() < 30, 'bg-yellow-400': miEficiencia() >= 30 && miEficiencia() < 70, 'bg-green-500': miEficiencia() >= 70}"
+                     [style.width.%]="miEficiencia()">
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- MENSAJE DE BIENVENIDA -->
+          <div class="mt-6 bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6 md:p-8">
             <h3 class="text-primary font-extrabold text-2xl mb-4">Módulo Administrativo Farmapatria</h3>
             <p class="text-gray-600 text-base leading-relaxed max-w-3xl">Bienvenido al Centro de Control. Desde aquí puedes gestionar los reportes técnicos, auditar el estado de los tickets y administrar los niveles de acceso de los usuarios del sistema.</p>
           </div>
+
+          <!-- SECCIÓN DE RENDIMIENTO DE TÉCNICOS (Solo Súper Admin) -->
+          @if (adminActual().rol_id === 1) {
+            <div class="mt-8">
+              <h3 class="text-primary font-extrabold text-xl mb-4 flex items-center gap-2">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/><path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+                Rendimiento del Equipo Técnico
+              </h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                @for (tecnico of estadisticasTecnicos(); track tecnico.id) {
+                  <div class="bg-white rounded-2xl p-5 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 hover:-translate-y-1 transition-transform duration-200">
+                    <div class="flex items-center gap-4 mb-4 pb-4 border-b border-gray-50">
+                      <div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl shadow-inner">
+                        {{ tecnico.nombre.substring(0,1).toUpperCase() }}
+                      </div>
+                      <div>
+                        <h4 class="font-extrabold text-gray-900 text-base leading-tight">{{ tecnico.nombre }} {{ tecnico.apellido }}</h4>
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mt-1 inline-block border" [ngClass]="tecnico.colorRol">
+                          {{ tecnico.rol_id === 3 ? 'Soporte GTIC' : (tecnico.rol_id === 4 ? 'Redes' : 'Aplicaciones') }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 text-center mb-4">
+                      <div class="bg-gray-50 rounded-lg py-2 border border-gray-100">
+                        <span class="block text-gray-500 text-[10px] font-extrabold uppercase">Asignados</span>
+                        <strong class="text-lg text-gray-800">{{ tecnico.estadisticas.asignados }}</strong>
+                      </div>
+                      <div class="bg-blue-50/50 rounded-lg py-2 border border-blue-100">
+                        <span class="block text-blue-500 text-[10px] font-extrabold uppercase">Progreso</span>
+                        <strong class="text-lg text-blue-700">{{ tecnico.estadisticas.enProgreso }}</strong>
+                      </div>
+                      <div class="bg-green-50/50 rounded-lg py-2 border border-green-100">
+                        <span class="block text-green-600 text-[10px] font-extrabold uppercase">Resueltos</span>
+                        <strong class="text-lg text-green-700">{{ tecnico.estadisticas.resueltos }}</strong>
+                      </div>
+                    </div>
+
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                      <span class="text-gray-500">Eficiencia</span>
+                      <span [ngClass]="{'text-red-500': tecnico.estadisticas.eficiencia < 30, 'text-yellow-600': tecnico.estadisticas.eficiencia >= 30 && tecnico.estadisticas.eficiencia < 70, 'text-green-600': tecnico.estadisticas.eficiencia >= 70}">
+                        {{ tecnico.estadisticas.eficiencia }}%
+                      </span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                      <div class="h-2 rounded-full transition-all duration-1000"
+                           [ngClass]="{'bg-red-500': tecnico.estadisticas.eficiencia < 30, 'bg-yellow-400': tecnico.estadisticas.eficiencia >= 30 && tecnico.estadisticas.eficiencia < 70, 'bg-green-500': tecnico.estadisticas.eficiencia >= 70}"
+                           [style.width.%]="tecnico.estadisticas.eficiencia">
+                      </div>
+                    </div>
+                  </div>
+                }
+                
+                @if (estadisticasTecnicos().length === 0) {
+                  <div class="col-span-full py-8 text-center text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-sm font-medium">
+                    No hay técnicos con rol de soporte asignados en el sistema.
+                  </div>
+                }
+              </div>
+            </div>
+          }
         }
 
         <!-- ======================= GESTIÓN DE TICKETS ======================= -->
