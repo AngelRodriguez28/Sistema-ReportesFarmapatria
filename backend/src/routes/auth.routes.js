@@ -3,13 +3,19 @@ const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const { verificarToken } = require('../middlewares/auth.middleware');
 const upload = require('../middlewares/upload.middleware');
+const { 
+    registrarUsuarioValidation, 
+    loginValidation, 
+    recuperarContrasenaValidation, 
+    actualizarPerfilValidation 
+} = require('../middlewares/validations/auth.validation');
 
-router.post('/registro', authController.registrarUsuario);
-router.post('/login', authController.login);
-router.put('/recuperar-contrasena', authController.recuperarContrasena);
+router.post('/registro', registrarUsuarioValidation, authController.registrarUsuario);
+router.post('/login', loginValidation, authController.login);
+router.put('/recuperar-contrasena', recuperarContrasenaValidation, authController.recuperarContrasena);
 
 // Perfil de Usuario
-router.put('/usuarios/:id', verificarToken, authController.actualizarPerfil);
+router.put('/usuarios/:id', verificarToken, actualizarPerfilValidation, authController.actualizarPerfil);
 router.post('/usuarios/:id/avatar', verificarToken, upload.single('avatar'), authController.subirAvatar);
 
 module.exports = router;

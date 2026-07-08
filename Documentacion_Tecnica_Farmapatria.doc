@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 2cm; }
+        h1, h2, h3 { color: #273376; }
+        h1 { border-bottom: 2px solid #273376; padding-bottom: 10px; }
+        h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 30px; }
+        code { background-color: #f4f4f4; padding: 2px 5px; border-radius: 4px; font-family: monospace; }
+        pre { background-color: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <h1>Documentación Técnica y Manual de Procesos: Sistema de Reportes Farmapatria</h1>
+<h2>1. Introducción y Propósito</h2>
+<p>El <strong>Sistema de Reportes Farmapatria</strong> es una plataforma web integral diseñada para la gestión, seguimiento y resolución de incidentes o requerimientos técnicos (tickets) dentro de la red de farmacias y gerencias de Farmapatria. </p>
+<p>El propósito de esta documentación es detallar la arquitectura del sistema, su configuración, la estructura de la base de datos y la lógica de negocio subyacente. Este documento sirve como la base técnica fundamental para el <strong>Manual de Procesos y Procedimientos</strong> de la organización, permitiendo a los desarrolladores, administradores y personal técnico entender cómo interactúan los componentes del sistema.</p>
+<hr>
+<h2>2. Arquitectura Tecnológica (Stack)</h2>
+<p>El sistema está construido bajo una arquitectura Cliente-Servidor separada, utilizando tecnologías modernas de desarrollo web:</p>
+<h3>2.1. Frontend (Cliente)</h3>
+<ul>
+<li><strong>Framework:</strong> Angular 21 (TypeScript).</li>
+<li><strong>Arquitectura Estructural:</strong> Código desacoplado utilizando una Capa de Servicios (<code>AuthService</code>, <code>TicketService</code>, <code>AdminService</code>) para la comunicación HTTP, con Modelos de Dominio estrictos (<code>Interfaces</code>) para garantizar tipado seguro.</li>
+<li><strong>Estilizado:</strong> Tailwind CSS v4 (Enfoque utilitario y diseño responsivo).</li>
+<li><strong>Gráficos y Visualización:</strong> Chart.js (Para KPIs y reportes estadísticos en el dashboard de administrador).</li>
+<li><strong>Generación de Documentos:</strong> jsPDF (Para exportación de reportes).</li>
+<li><strong>Manejo de Rutas:</strong> Angular Router con Guards de protección (AuthGuard, RoleGuard).</li>
+<li><strong>Renderizado:</strong> Soporte para Server-Side Rendering (SSR) incluido en la configuración.</li>
+</ul>
+<h3>2.2. Backend (Servidor)</h3>
+<ul>
+<li><strong>Entorno de Ejecución:</strong> Node.js.</li>
+<li><strong>Framework:</strong> Express.js v5.</li>
+<li><strong>Arquitectura Estructural:</strong> Patrón MVC (Modelo-Vista-Controlador). El código está modularizado en <code>routes/</code> (enrutamiento), <code>controllers/</code> (lógica de negocio) y <code>middlewares/</code> (seguridad), eliminando el anti-patrón de backend monolítico.</li>
+<li><strong>Seguridad y Autenticación:</strong> <ul>
+<li><code>jsonwebtoken</code> (JWT) para control de sesiones.</li>
+<li><code>bcryptjs</code> para el hash y encriptación de contraseñas.</li>
+</ul>
+</li>
+<li><strong>Manejo de Archivos:</strong> <code>multer</code> para la subida de adjuntos (Imágenes y PDFs, hasta 5MB).</li>
+<li><strong>Conexión a Base de Datos:</strong> <code>pg</code> (PostgreSQL Client).</li>
+<li><strong>Configuración:</strong> <code>dotenv</code> para gestión segura de variables de entorno.</li>
+</ul>
+<h3>2.3. Base de Datos</h3>
+<ul>
+<li><strong>Motor:</strong> PostgreSQL.</li>
+<li><strong>Estructura Relacional:</strong> Tablas interconectadas mediante claves foráneas (Usuarios, Tickets, Notificaciones).</li>
+</ul>
+<hr>
+<h2>3. Modelo de Base de Datos y Entidades</h2>
+<p>El sistema depende de tres entidades principales:</p>
+<h3>3.1. Tabla: <code>usuarios</code></h3>
+<p>Gestiona la identidad y el acceso al sistema.</p>
+<ul>
+<li><strong>Campos Principales:</strong><ul>
+<li><code>id</code> (PK, Serial)</li>
+<li><code>cedula</code>, <code>email</code> (Únicos)</li>
+<li><code>nombre</code>, <code>apellido</code>, <code>fecha_nacimiento</code></li>
+<li><code>password</code> (Hash BCrypt)</li>
+<li><code>gerencia</code>, <code>farmacia</code> (Ubicación del usuario)</li>
+<li><code>rol_id</code> (Identificador de permisos: Ej. 2 para Usuario Estándar/Jefe de Farmacia, 6 para Gerentes Estadales, etc.)</li>
+<li><code>estado</code> (Activo, Inactivo, Bloqueado)</li>
+<li><code>avatar</code> (Ruta al archivo de imagen de perfil)</li>
+</ul>
+</li>
+</ul>
+<h3>3.2. Tabla: <code>tickets</code></h3>
+<p>Almacena los requerimientos e incidentes reportados.</p>
+<ul>
+<li><strong>Campos Principales:</strong><ul>
+<li><code>id</code> (PK, Serial)</li>
+<li><code>numero_reporte</code> (Formato correlativo: <code>REP-XXXX</code>)</li>
+<li><code>usuario_id</code> (FK -&gt; <code>usuarios.id</code>)</li>
+<li><code>tecnico_id</code> (FK -&gt; <code>usuarios.id</code> - Técnico asignado)</li>
+<li><code>estado_ticket</code> (Pendiente, En Progreso, Sin Confirmar, Resuelto)</li>
+<li><code>nivel_reporte</code>, <code>tipificacion_falla</code> (Categorización)</li>
+<li><code>unidad_reporta</code>, <code>unidad_afectada</code></li>
+<li><code>anydesk</code> (Código de acceso remoto)</li>
+<li><code>descripcion</code></li>
+<li><code>archivo_adjunto</code> (Ruta al archivo subido)</li>
+<li><code>fecha_creacion</code></li>
+</ul>
+</li>
+</ul>
+<h3>3.3. Tabla: <code>notificaciones</code></h3>
+<p>Sistema de alertas integradas en la plataforma.</p>
+<ul>
+<li><strong>Campos Principales:</strong><ul>
+<li><code>id</code> (PK, Serial)</li>
+<li><code>usuario_id</code> (FK -&gt; <code>usuarios.id</code> - Destinatario de la alerta)</li>
+<li><code>mensaje</code> (Texto descriptivo del evento)</li>
+<li><code>leida</code> (Boolean)</li>
+<li><code>fecha_creacion</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>4. Módulos y Flujos de Procesos</h2>
+<p>A continuación se detalla la lógica de negocio de los módulos principales que componen el sistema.</p>
+<h3>4.1. Módulo de Autenticación y Acceso</h3>
+<ol>
+<li><strong>Registro (<code>/registro</code>):</strong> <ul>
+<li>El usuario proporciona sus datos personales, laborales y credenciales.</li>
+<li>El sistema encripta la contraseña y autodesigna el <code>rol_id</code> basado en la selección de gerencia (ej. si contiene &quot;ESTADAL&quot;, asigna rol 6).</li>
+<li>El estado inicial es &quot;Activo&quot;.</li>
+</ul>
+</li>
+<li><strong>Login (<code>/login</code>):</strong><ul>
+<li>Verificación de credenciales (<code>email</code> y <code>password</code>).</li>
+<li>El sistema bloquea el acceso si el usuario tiene estado <code>Inactivo</code> o <code>Bloqueado</code>.</li>
+<li>Retorna un token JWT con una validez de 8 horas.</li>
+</ul>
+</li>
+<li><strong>Recuperación de Contraseña (<code>/recuperar-contrasena</code>):</strong><ul>
+<li>Requiere validación doble cruzada: <code>email</code> y <code>cedula</code>.</li>
+<li>Permite el establecimiento de una nueva contraseña encriptada en la base de datos sin necesidad de intervención del administrador.</li>
+</ul>
+</li>
+</ol>
+<h3>4.2. Módulo de Gestión de Tickets (Ciclo de Vida)</h3>
+<p>El núcleo del proceso de atención técnica sigue un flujo de estados estricto:</p>
+<ol>
+<li><strong>Creación (Estado: <code>Pendiente</code>):</strong><ul>
+<li>El usuario completa el formulario en <code>/generar-reporte</code>.</li>
+<li>Puede adjuntar evidencia (PNG, JPG, PDF).</li>
+<li>Se genera un identificador único (Ej. <code>REP-0042</code>).</li>
+</ul>
+</li>
+<li><strong>Atención (Estado: <code>En Progreso</code>):</strong><ul>
+<li>Un usuario con privilegios (Administrador/Técnico) visualiza el ticket en su dashboard.</li>
+<li>Hace clic en &quot;Tomar Ticket&quot;. El sistema registra el <code>tecnico_id</code> y cambia el estado.</li>
+<li>Se notifica automáticamente al creador original.</li>
+</ul>
+</li>
+<li><strong>Resolución Técnica (Estado: <code>Sin Confirmar</code>):</strong><ul>
+<li>El técnico marca el ticket como solucionado desde su panel.</li>
+<li>El estado cambia a <code>Sin Confirmar</code>. Se requiere que el usuario original valide que el problema realmente se solucionó.</li>
+</ul>
+</li>
+<li><strong>Confirmación de Usuario (Estado: <code>Resuelto</code> o Retorno a <code>En Progreso</code>):</strong><ul>
+<li>El usuario recibe una notificación.</li>
+<li><strong>Si el problema se solucionó:</strong> El usuario hace clic en confirmar. El estado cambia a <code>Resuelto</code> (Cierre definitivo).</li>
+<li><strong>Si el problema persiste:</strong> El usuario reporta &quot;Error Persistente&quot;. El ticket regresa a estado <code>En Progreso</code> y se notifica al técnico asignado para que retome el caso.</li>
+</ul>
+</li>
+</ol>
+<h3>4.3. Módulo de Administración de Usuarios</h3>
+<p>Accesible únicamente para perfiles administrativos (Soporte Técnico/Super Admin).</p>
+<ul>
+<li><strong>Listado Global:</strong> Visualización de todos los usuarios registrados en el sistema.</li>
+<li><strong>Gestión de Accesos:</strong> Modificación dinámica del <code>estado</code> (para inhabilitar el ingreso al sistema) y del <code>rol_id</code> (para elevar o restringir privilegios).</li>
+</ul>
+<h3>4.4. Módulo de Perfil de Usuario</h3>
+<ul>
+<li><strong>Actualización de Datos:</strong> Los usuarios pueden corregir su nombre, apellido y fecha de nacimiento.</li>
+<li><strong>Gestión de Avatar:</strong> Sistema de carga de imagen de perfil mediante <code>multer</code>, almacenada en la carpeta <code>/uploads</code> del servidor backend.</li>
+</ul>
+<hr>
+<h2>5. Descripción de la API (Backend RESTful)</h2>
+<p>Todas las rutas privadas requieren que se envíe el token JWT en el encabezado: <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+<h3>Rutas Públicas (Sin Token)</h3>
+<ul>
+<li><code>POST /api/login</code>: Iniciar sesión y obtener JWT.</li>
+<li><code>POST /api/registro</code>: Registrar nuevo usuario.</li>
+<li><code>PUT /api/recuperar-contrasena</code>: Restablecer clave con validación de CI.</li>
+</ul>
+<h3>Rutas Privadas de Usuario (Requieren Token)</h3>
+<ul>
+<li><code>POST /api/tickets</code>: Crear un nuevo ticket (Soporta <code>multipart/form-data</code>).</li>
+<li><code>PUT /api/tickets/:id</code>: Editar un ticket (Solo si está en estado <code>Pendiente</code>).</li>
+<li><code>GET /api/tickets/:usuarioId</code>: Obtener el historial de tickets del usuario logueado.</li>
+<li><code>PUT /api/tickets/:id/confirmar</code>: Confirmar la resolución de un ticket.</li>
+<li><code>PUT /api/tickets/:id/error-persistente</code>: Rechazar resolución y devolver a progreso.</li>
+<li><code>GET /api/notificaciones/:usuarioId</code>: Obtener últimas 10 notificaciones.</li>
+<li><code>PUT /api/notificaciones/marcar-leidas/:usuarioId</code>: Marcar notificaciones como leídas.</li>
+<li><code>PUT /api/usuarios/:id</code>: Actualizar perfil básico.</li>
+<li><code>POST /api/usuarios/:id/avatar</code>: Subir/Actualizar foto de perfil.</li>
+</ul>
+<h3>Rutas Privadas de Administración (Requieren Token y Privilegios)</h3>
+<ul>
+<li><code>GET /api/admin/usuarios</code>: Obtener lista completa de usuarios.</li>
+<li><code>PUT /api/admin/usuarios/:id/rol</code>: Cambiar el rol de un usuario.</li>
+<li><code>PUT /api/admin/usuarios/:id/estado</code>: Cambiar estado (Bloquear/Activar).</li>
+<li><code>GET /api/admin/tickets</code>: Obtener todos los tickets a nivel global.</li>
+<li><code>PUT /api/admin/tickets/:id/tomar</code>: Asignarse un ticket como técnico.</li>
+<li><code>PUT /api/admin/tickets/:id/resolver</code>: Marcar un ticket como resuelto por parte del técnico.</li>
+</ul>
+<hr>
+<h2>6. Procedimientos de Seguridad y Estabilidad Implementados</h2>
+<ol>
+<li><strong>Protección de Contraseñas:</strong> Ninguna contraseña se almacena en texto plano. Se utiliza <code>bcryptjs</code> con un salt rounds de 10.</li>
+<li><strong>Protección de Rutas (Guards en Angular):</strong> El frontend evita que usuarios no autenticados accedan al panel mediante <code>AuthGuard</code>. Adicionalmente, <code>RoleGuard</code> restringe el acceso a <code>/panel-admin</code> basándose en el rol del JWT.</li>
+<li><strong>Seguridad de API (Interceptor y Middlewares):</strong> Todas las peticiones HTTP desde Angular inyectan automáticamente el token JWT mediante un Interceptor global (<code>authInterceptor</code>). En el backend, las rutas sensibles ejecutan los middlewares <code>verificarToken</code> y <code>esSuperAdmin</code> para validar firmas y privilegios elevados.</li>
+<li><strong>Validación de Archivos:</strong> La carga de imágenes y documentos se filtra estrictamente en el backend utilizando <code>multer</code>, limitando por tipo MIME (JPG, PNG, GIF, PDF) y tamaño máximo de 5MB, mitigando riesgos de subida de scripts maliciosos.</li>
+<li><strong>Aislamiento de Variables de Entorno:</strong> Credenciales de base de datos y llaves secretas se mantienen en el archivo <code>.env</code>, el cual no se sube al control de versiones.</li>
+<li><strong>Resiliencia y Anti-Crash (Fail-Safe):</strong> Se incorporó un interceptor global de errores (<code>errorHandler.middleware.js</code>) en el backend. Este mecanismo atrapa excepciones no controladas a nivel de servidor, previniendo caídas totales (&quot;crashes&quot;) y asegurando que el cliente reciba respuestas HTTP estandarizadas en lugar de filtrar información de la base de datos.</li>
+</ol>
+<hr>
+<h2>7. Directrices para el Mantenimiento</h2>
+<ul>
+<li><strong>Levantamiento Local:</strong><ul>
+<li>Backend: <code>npm start</code> o <code>node server.js</code> (Puerto 3000).</li>
+<li>Frontend: <code>ng serve</code> (Puerto estándar 4200).</li>
+</ul>
+</li>
+<li><strong>Base de Datos:</strong> Asegurarse de que el servicio de PostgreSQL esté en ejecución y que los parámetros del <code>.env</code> coincidan con el entorno local o de producción.</li>
+<li><strong>Almacenamiento de Archivos:</strong> La carpeta <code>backend/uploads/</code> debe tener permisos de escritura. En un entorno serverless (como Netlify/Vercel) para producción, esta estrategia de <code>multer</code> local deberá migrarse a un servicio Cloud Storage (como AWS S3 o Supabase Storage) ya que el sistema de archivos es efímero.</li>
+</ul>
+
+</body>
+</html>

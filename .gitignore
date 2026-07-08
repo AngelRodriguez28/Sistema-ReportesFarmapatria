@@ -1,3 +1,8 @@
-*.tsbuildinfo
-#Carpeta de subidas del backend
-backend/uploads/
+ *.tsbuildinfo
+ #Carpeta de subidas del backend
+ backend/uploads/
+
+# Evitar subir dependencias de Node.js y caché
+node_modules/
+.angular/
+dist/

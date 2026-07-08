@@ -17,70 +17,126 @@
             </button>
         </div>
 
-        <form (ngSubmit)="enviarReporte()" class="p-6 md:p-10 space-y-6">
+        <form (ngSubmit)="enviarReporte()" class="p-6 md:p-10 space-y-6 relative">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @if(dropdownsAbiertos.nivelReporte || dropdownsAbiertos.unidadReporta || dropdownsAbiertos.unidadAfectada || dropdownsAbiertos.tipificacionFalla) {
+                <div class="fixed inset-0 z-30" (click)="cerrarDropdowns()"></div>
+            }
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-40">
                 <div>
                     <label class="block text-sm font-extrabold text-primary mb-2">Número de Contacto <span class="text-secondary">*</span></label>
                     <input type="text" [(ngModel)]="nuevoReporte.contacto" name="contacto" required placeholder="Ej: 0412-0000000" 
                     class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium">
                 </div>
-                <div>
+                <div class="relative z-50">
                     <label class="block text-sm font-extrabold text-primary mb-2">Nivel de Reporte <span class="text-secondary">*</span></label>
                     <div class="relative">
-                        <select [(ngModel)]="nuevoReporte.nivelReporte" name="nivelReporte" required 
-                        class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium appearance-none cursor-pointer">
-                            <option value="" disabled selected>Seleccione el nivel...</option>
-                            @for (nivel of nivelesReporte; track nivel) {
-                                <option [value]="nivel">{{ nivel }}</option>
-                            }
-                        </select>
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+                        <div (click)="toggleDropdown('nivelReporte')" 
+                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer flex justify-between items-center"
+                             [class.border-primary]="dropdownsAbiertos.nivelReporte" [class.bg-white]="dropdownsAbiertos.nivelReporte" [class.ring-4]="dropdownsAbiertos.nivelReporte" [class.ring-primary]="dropdownsAbiertos.nivelReporte">
+                            <span [class.text-gray-400]="!nuevoReporte.nivelReporte">{{ nuevoReporte.nivelReporte || 'Seleccione el nivel...' }}</span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="dropdownsAbiertos.nivelReporte" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        
+                        @if(dropdownsAbiertos.nivelReporte) {
+                            <div class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                @for (nivel of nivelesReporte; track nivel) {
+                                    <div (click)="seleccionarOpcion('nivelReporte', nivel)" 
+                                         class="px-5 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors"
+                                         [class.bg-primary]="nuevoReporte.nivelReporte === nivel"
+                                         [class.bg-opacity-10]="nuevoReporte.nivelReporte === nivel"
+                                         [class.text-primary]="nuevoReporte.nivelReporte === nivel"
+                                         [class.font-bold]="nuevoReporte.nivelReporte === nivel">
+                                        {{ nivel }}
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-30">
+                <div class="relative">
                     <label class="block text-sm font-extrabold text-primary mb-2">Unidad que Reporta <span class="text-secondary">*</span></label>
                     <div class="relative">
-                        <select [(ngModel)]="nuevoReporte.unidadReporta" name="unidadReporta" required 
-                        class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium appearance-none cursor-pointer">
-                            <option value="" disabled selected>Seleccione la unidad emisora...</option>
-                            @for (unidad of unidadesQueReportan; track unidad) {
-                                <option [value]="unidad">{{ unidad }}</option>
-                            }
-                        </select>
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+                        <div (click)="toggleDropdown('unidadReporta')" 
+                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer flex justify-between items-center"
+                             [class.border-primary]="dropdownsAbiertos.unidadReporta" [class.bg-white]="dropdownsAbiertos.unidadReporta" [class.ring-4]="dropdownsAbiertos.unidadReporta" [class.ring-primary]="dropdownsAbiertos.unidadReporta">
+                            <span [class.text-gray-400]="!nuevoReporte.unidadReporta" class="truncate pr-4">{{ nuevoReporte.unidadReporta || 'Seleccione la unidad emisora...' }}</span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform shrink-0" [class.rotate-180]="dropdownsAbiertos.unidadReporta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        
+                        @if(dropdownsAbiertos.unidadReporta) {
+                            <div class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                @for (unidad of unidadesQueReportan; track unidad) {
+                                    <div (click)="seleccionarOpcion('unidadReporta', unidad)" 
+                                         class="px-5 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors truncate"
+                                         [class.bg-primary]="nuevoReporte.unidadReporta === unidad"
+                                         [class.bg-opacity-10]="nuevoReporte.unidadReporta === unidad"
+                                         [class.text-primary]="nuevoReporte.unidadReporta === unidad"
+                                         [class.font-bold]="nuevoReporte.unidadReporta === unidad">
+                                        {{ unidad }}
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
-                <div>
+                <div class="relative">
                     <label class="block text-sm font-extrabold text-primary mb-2">Unidad Afectada <span class="text-secondary">*</span></label>
                     <div class="relative">
-                        <select [(ngModel)]="nuevoReporte.unidadAfectada" name="unidadAfectada" required 
-                        class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium appearance-none cursor-pointer">
-                            <option value="" disabled selected>Seleccione la farmacia o unidad afectada...</option>
-                            @for (unidad of unidadesAfectadas; track unidad) {
-                                <option [value]="unidad">{{ unidad }}</option>
-                            }
-                        </select>
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+                        <div (click)="toggleDropdown('unidadAfectada')" 
+                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer flex justify-between items-center"
+                             [class.border-primary]="dropdownsAbiertos.unidadAfectada" [class.bg-white]="dropdownsAbiertos.unidadAfectada" [class.ring-4]="dropdownsAbiertos.unidadAfectada" [class.ring-primary]="dropdownsAbiertos.unidadAfectada">
+                            <span [class.text-gray-400]="!nuevoReporte.unidadAfectada" class="truncate pr-4">{{ nuevoReporte.unidadAfectada || 'Seleccione la farmacia o unidad afectada...' }}</span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform shrink-0" [class.rotate-180]="dropdownsAbiertos.unidadAfectada" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        
+                        @if(dropdownsAbiertos.unidadAfectada) {
+                            <div class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                @for (unidad of unidadesAfectadas; track unidad) {
+                                    <div (click)="seleccionarOpcion('unidadAfectada', unidad)" 
+                                         class="px-5 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors truncate"
+                                         [class.bg-primary]="nuevoReporte.unidadAfectada === unidad"
+                                         [class.bg-opacity-10]="nuevoReporte.unidadAfectada === unidad"
+                                         [class.text-primary]="nuevoReporte.unidadAfectada === unidad"
+                                         [class.font-bold]="nuevoReporte.unidadAfectada === unidad">
+                                        {{ unidad }}
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-2">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20">
+                <div class="md:col-span-2 relative">
                     <label class="block text-sm font-extrabold text-primary mb-2">Tipificación de la Falla <span class="text-secondary">*</span></label>
                     <div class="relative">
-                        <select [(ngModel)]="nuevoReporte.tipificacionFalla" name="tipificacionFalla" required 
-                        class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium appearance-none cursor-pointer">
-                            <option value="" disabled selected>Seleccione el tipo de incidencia...</option>
-                            @for (falla of tipificaciones; track falla) {
-                                <option [value]="falla">{{ falla }}</option>
-                            }
-                        </select>
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▼</span>
+                        <div (click)="toggleDropdown('tipificacionFalla')" 
+                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer flex justify-between items-center"
+                             [class.border-primary]="dropdownsAbiertos.tipificacionFalla" [class.bg-white]="dropdownsAbiertos.tipificacionFalla" [class.ring-4]="dropdownsAbiertos.tipificacionFalla" [class.ring-primary]="dropdownsAbiertos.tipificacionFalla">
+                            <span [class.text-gray-400]="!nuevoReporte.tipificacionFalla" class="truncate pr-4">{{ nuevoReporte.tipificacionFalla || 'Seleccione el tipo de incidencia...' }}</span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform shrink-0" [class.rotate-180]="dropdownsAbiertos.tipificacionFalla" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        
+                        @if(dropdownsAbiertos.tipificacionFalla) {
+                            <div class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                @for (falla of tipificaciones; track falla) {
+                                    <div (click)="seleccionarOpcion('tipificacionFalla', falla)" 
+                                         class="px-5 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors truncate"
+                                         [class.bg-primary]="nuevoReporte.tipificacionFalla === falla"
+                                         [class.bg-opacity-10]="nuevoReporte.tipificacionFalla === falla"
+                                         [class.text-primary]="nuevoReporte.tipificacionFalla === falla"
+                                         [class.font-bold]="nuevoReporte.tipificacionFalla === falla">
+                                        {{ falla }}
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
                 <div>

@@ -270,13 +270,13 @@
                     </button>
                     
                     @if (ticket.estado_ticket === 'Pendiente') {
-                        @if (adminActual().rol_id == 1 || adminActual().rol_id == 3 || adminActual().rol_id == 4 || adminActual().rol_id == 5) {
+                        @if (adminActual().rol_id == 3 || adminActual().rol_id == 4 || adminActual().rol_id == 5) {
                             <button class="flex-1 bg-primary hover:bg-[#1a2352] text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition-all" (click)="tomarTicket(ticket)">Tomar</button>
                         }
                     }
 
                     @if (ticket.estado_ticket === 'En Progreso') {
-                        @if (ticket.tecnico_id == adminActual().id || adminActual().rol_id == 1) {
+                        @if (ticket.tecnico_id == adminActual().id) {
                             <button class="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition-all" (click)="marcarComoResuelto(ticket)">Resolver</button>
                         } @else {
                             <button class="flex-1 bg-gray-200 text-gray-400 cursor-not-allowed px-3 py-2 rounded-lg text-xs font-bold" disabled>Resolver</button>

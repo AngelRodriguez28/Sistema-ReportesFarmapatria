@@ -27,6 +27,13 @@ app.use('/api', authRoutes);          // /api/registro, /api/login, /api/usuario
 app.use('/api', ticketsRoutes);       // /api/tickets/..., /api/notificaciones/...
 app.use('/api/admin', adminRoutes);   // /api/admin/usuarios/..., /api/admin/tickets/...
 
+// Servir Frontend Angular Estáticamente
+const frontendPath = path.join(__dirname, '../frontend-angular/dist/frontend-angular/browser');
+app.use(express.static(frontendPath));
+app.get(/(.*)/, (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.csr.html'));
+});
+
 // Interceptor Global de Errores (Debe ir siempre después de las rutas)
 app.use(errorHandler);
 

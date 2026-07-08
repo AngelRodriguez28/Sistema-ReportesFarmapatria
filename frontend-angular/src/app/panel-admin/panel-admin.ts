@@ -283,6 +283,10 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   tomarTicket(ticket: any) {
+    if (this.adminActual().rol_id === 1) {
+      alert('Acción no permitida: Los Súper Administradores no pueden tomar casos.');
+      return;
+    }
     if(confirm(`¿Estás seguro de tomar el ticket ${ticket.numero_reporte}? Pasará a estar "En Progreso".`)) {
       this.adminService.tomarTicket(ticket.id)
         .subscribe({
@@ -296,6 +300,10 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   marcarComoResuelto(ticket: any) {
+    if (this.adminActual().rol_id === 1) {
+      alert('Acción no permitida: Los Súper Administradores no pueden resolver casos.');
+      return;
+    }
     if(confirm(`¿Estás seguro de marcar el ticket ${ticket.numero_reporte} como RESUELTO? (Se enviará a confirmación del usuario)`)) {
       this.adminService.resolverTicket(ticket.id)
         .subscribe({

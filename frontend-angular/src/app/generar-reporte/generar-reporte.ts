@@ -68,6 +68,34 @@ export class GenerarReporte implements OnInit {
     imagenAnydesk: null as File | null
   };
 
+  dropdownsAbiertos = {
+    nivelReporte: false,
+    unidadReporta: false,
+    unidadAfectada: false,
+    tipificacionFalla: false
+  };
+
+  toggleDropdown(dropdown: 'nivelReporte' | 'unidadReporta' | 'unidadAfectada' | 'tipificacionFalla') {
+    Object.keys(this.dropdownsAbiertos).forEach(key => {
+      if (key !== dropdown) this.dropdownsAbiertos[key as keyof typeof this.dropdownsAbiertos] = false;
+    });
+    this.dropdownsAbiertos[dropdown] = !this.dropdownsAbiertos[dropdown];
+  }
+
+  seleccionarOpcion(dropdown: 'nivelReporte' | 'unidadReporta' | 'unidadAfectada' | 'tipificacionFalla', valor: string) {
+    this.nuevoReporte[dropdown] = valor;
+    this.dropdownsAbiertos[dropdown] = false;
+  }
+
+  cerrarDropdowns() {
+    this.dropdownsAbiertos = {
+      nivelReporte: false,
+      unidadReporta: false,
+      unidadAfectada: false,
+      tipificacionFalla: false
+    };
+  }
+
   nivelesReporte = [
     'Soporte Técnico',
     'Redes',
