@@ -1,0 +1,9 @@
+@media (max-width: 640px) {
+  .notifications-dropdown {
+    position: fixed !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+    top: 70px !important;
+  }
+}

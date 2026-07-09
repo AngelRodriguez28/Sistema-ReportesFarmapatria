@@ -25,7 +25,8 @@ export class PanelUsuario implements OnInit, OnDestroy {
   noLeidas = computed(() => this.notificaciones().filter(n => !n.leida).length); 
   mostrarMenuNotificaciones = signal<boolean>(false); 
 
-  isSidebarOpen = signal<boolean>(true);
+  isSidebarOpen = signal<boolean>(false);
+  habilitarTransicion = false;
   inicial = computed(() => {
     const nombre = this.usuarioActual().nombre;
     return nombre ? nombre.substring(0,1).toUpperCase() : 'U';
@@ -34,11 +35,12 @@ export class PanelUsuario implements OnInit, OnDestroy {
   // --- NUEVO: ROL LABORAL DINÁMICO ---
   cargoLaboral = computed(() => {
     const usr = this.usuarioActual();
+    if (usr.rol_nombre) return usr.rol_nombre;
     if (usr.farmacia && usr.farmacia.toUpperCase().includes('FP')) {
       return `Jefe de Farmacia`;
     }
     if (usr.gerencia && usr.gerencia.includes('ESTADAL')) {
-      return 'Gerente Estadal';
+      return 'Gerente 1';
     }
     return 'Analista / Especialista';
   });
@@ -75,6 +77,13 @@ export class PanelUsuario implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (typeof window !== 'undefined' && localStorage) {
+      if (window.innerWidth >= 768) {
+        this.isSidebarOpen.set(true);
+      }
+      setTimeout(() => {
+        this.habilitarTransicion = true;
+      }, 150);
+
       const usuarioGuardado = localStorage.getItem('usuarioLogueado');
       if (usuarioGuardado) {
         this.usuarioActual.set(JSON.parse(usuarioGuardado));

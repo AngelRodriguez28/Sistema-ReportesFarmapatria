@@ -61,3 +61,20 @@
         </div>
     </div>
 </div>
+
+@if (mostrarBienvenida()) {
+  <div class="sphere-overlay">
+    <div class="sphere-card">
+      <div class="sphere-loader-container">
+        <div class="sphere-glow"></div>
+        <div class="orbit-ring orbit-ring-1"></div>
+        <div class="orbit-ring orbit-ring-2"></div>
+        <div class="orbit-ring orbit-ring-3"></div>
+        <div class="sphere-core"></div>
+      </div>
+      <h3 class="sphere-welcome-title">¡Bienvenido, {{ nombreUsuario() }}!</h3>
+      <p class="sphere-welcome-subtitle">Iniciando sesión de forma segura...</p>
+    </div>
+  </div>
+}
+

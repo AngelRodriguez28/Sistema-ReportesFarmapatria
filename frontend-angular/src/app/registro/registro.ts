@@ -20,7 +20,7 @@ export class Registro {
     apellido: '',
     cedula: '',
     fecha_nac: '',
-    estado: 'Activo', // Por defecto todos nacen activos
+    estado: 'Inactivo', // Por defecto todos nacen inactivos hasta aprobación
     gerencia: '',
     farmacia: '',
     email: '',
@@ -51,7 +51,7 @@ export class Registro {
     
     this.authService.registro(datosParaEnviar).subscribe({
       next: () => {
-        alert('¡Registro exitoso! Ya puedes iniciar sesión en la plataforma.');
+        alert('¡Registro exitoso! Tu cuenta ha sido registrada y está pendiente de aprobación por el Súper Administrador. Recibirás acceso una vez sea validada.');
         this.router.navigate(['/login']); 
       },
       error: (err) => {

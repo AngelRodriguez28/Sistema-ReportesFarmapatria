@@ -1,1 +1,167 @@
 /* Styles moved to global styles.css to be shared with Registro */
+
+/* Estilos para el nuevo modal de bienvenida minimalista y moderno */
+.sphere-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: overlayFadeIn 0.3s ease-out forwards;
+}
+
+.sphere-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 40px 30px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+              0 0 40px rgba(39, 51, 118, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: scale(0.9) translateY(15px);
+  animation: cardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Rueda/Esfera de carga moderna */
+.sphere-loader-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sphere-glow {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-secondary) 0%, rgba(39, 51, 118, 0.6) 100%);
+  filter: blur(8px);
+  opacity: 0.7;
+  animation: spherePulse 2s infinite ease-in-out;
+}
+
+.sphere-core {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffffff 0%, rgba(255, 255, 255, 0.2) 20%, var(--color-primary) 60%, var(--color-secondary) 100%);
+  box-shadow: inset -5px -5px 15px rgba(0,0,0,0.4),
+              inset 5px 5px 15px rgba(255,255,255,0.25),
+              0 0 25px rgba(39, 51, 118, 0.6);
+  z-index: 2;
+  animation: sphereFloat 3s infinite ease-in-out;
+}
+
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+.orbit-ring-1 {
+  width: 90px;
+  height: 90px;
+  border-top-color: var(--color-secondary);
+  border-right-color: rgba(167, 3, 84, 0.3);
+  animation: orbitSpin 1.4s infinite cubic-bezier(0.53, 0.21, 0.29, 0.87);
+  z-index: 3;
+}
+
+.orbit-ring-2 {
+  width: 110px;
+  height: 110px;
+  border-bottom-color: var(--color-primary);
+  border-left-color: rgba(39, 51, 118, 0.3);
+  animation: orbitSpin 2.2s infinite linear reverse;
+  z-index: 1;
+}
+
+.orbit-ring-3 {
+  width: 130px;
+  height: 130px;
+  border-top-color: rgba(255, 255, 255, 0.4);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  transform: rotateX(70deg) rotateY(20deg);
+  animation: orbitSpin3D 4s infinite linear;
+  z-index: 0;
+}
+
+/* Animaciones */
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cardEntrance {
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes spherePulse {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+    filter: blur(8px);
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+    filter: blur(12px);
+  }
+}
+
+@keyframes sphereFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.02);
+  }
+}
+
+@keyframes orbitSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes orbitSpin3D {
+  0% { transform: rotateX(70deg) rotateY(20deg) rotateZ(0deg); }
+  100% { transform: rotateX(70deg) rotateY(20deg) rotateZ(360deg); }
+}
+
+.sphere-welcome-title {
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-family: var(--font-family);
+}
+
+.sphere-welcome-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  font-family: var(--font-family);
+}

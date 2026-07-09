@@ -6,7 +6,10 @@
   }
 
   <!-- Sidebar -->
-  <aside class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-primary text-white transition-all duration-300 ease-in-out shadow-xl flex flex-col"
+  <aside class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-primary text-white shadow-xl flex flex-col"
+         [class.transition-all]="habilitarTransicion"
+         [class.duration-300]="habilitarTransicion"
+         [class.ease-in-out]="habilitarTransicion"
          [class.-translate-x-full]="!isSidebarOpen()"
          [class.md:-ml-64]="!isSidebarOpen()"
          [class.translate-x-0]="isSidebarOpen()">
@@ -57,7 +60,7 @@
             <span class="absolute -top-1 -right-1 bg-[#FFC907] text-primary text-[10px] px-1.5 py-0.5 rounded-full font-extrabold shadow-sm border border-white">{{ noLeidas() }}</span>
           }
           @if (mostrarMenuNotificaciones()) {
-            <div class="absolute right-0 top-12 bg-white border border-gray-200 w-64 md:w-80 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-4 z-50 text-gray-800 cursor-default" (click)="$event.stopPropagation()">
+            <div class="notifications-dropdown absolute right-0 top-12 bg-white border border-gray-200 w-64 md:w-80 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-4 z-50 text-gray-800 cursor-default" (click)="$event.stopPropagation()">
               <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-2">
                 <h4 class="m-0 text-primary font-extrabold text-sm">Notificaciones</h4>
               </div>

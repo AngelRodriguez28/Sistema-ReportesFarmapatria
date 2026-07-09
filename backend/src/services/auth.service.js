@@ -6,7 +6,7 @@ const registrarUsuarioService = async (datosUsuario) => {
     const { nombre, apellido, cedula, fecha_nac, estado, gerencia, farmacia, email, password } = datosUsuario;
     
     const hashedPassword = await bcrypt.hash(password, 10);
-    const estadoFinal = estado || ESTADOS_USUARIO.ACTIVO;
+    const estadoFinal = ESTADOS_USUARIO.INACTIVO; // Forzado a Inactivo por seguridad en registro público
 
     let rolAsignado = ROLES.JEFE_FARMACIA_ESTANDAR;
     if (gerencia && gerencia.includes('ESTADAL')) {
@@ -20,14 +20,24 @@ const registrarUsuarioService = async (datosUsuario) => {
 };
 
 const loginService = async (email, password) => {
-    const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+    const query = `
+        SELECT u.*, r.nombre as rol_nombre, r.categoria as rol_categoria
+        FROM usuarios u
+        LEFT JOIN roles r ON u.rol_id = r.id
+        WHERE u.email = $1
+    `;
+    const result = await pool.query(query, [email]);
     if (result.rows.length === 0) {
         throw { status: 401, message: 'Correo no registrado.' };
     }
     const usuario = result.rows[0];
 
-    if (usuario.estado === ESTADOS_USUARIO.INACTIVO || usuario.estado === ESTADOS_USUARIO.BLOQUEADO) {
-        throw { status: 403, message: 'Tu cuenta está bloqueada o inactiva. Contacta al administrador del sistema.' };
+    if (usuario.estado === ESTADOS_USUARIO.INACTIVO) {
+        throw { status: 403, message: 'Tu cuenta está inactiva y requiere aprobación por el Súper Administrador.' };
+    }
+
+    if (usuario.estado === ESTADOS_USUARIO.BLOQUEADO) {
+        throw { status: 403, message: 'Tu cuenta está bloqueada. Contacta al administrador del sistema.' };
     }
 
     const passwordValida = await bcrypt.compare(password, usuario.password);

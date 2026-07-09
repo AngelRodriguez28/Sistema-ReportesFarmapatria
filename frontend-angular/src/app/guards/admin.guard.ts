@@ -4,18 +4,25 @@ import { CanActivateFn, Router } from '@angular/router';
 export const adminGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
-  if (typeof window !== 'undefined' && localStorage) {
+  // Si se está ejecutando en el servidor (SSR), se aprueba la ruta para evitar
+  // redirecciones falsas. La validación real ocurrirá en el cliente al hidratar la página.
+  if (typeof window === 'undefined') {
+    return true;
+  }
+
+  if (localStorage) {
     const usuarioGuardado = localStorage.getItem('usuarioLogueado');
     
     if (usuarioGuardado) {
       const usuario = JSON.parse(usuarioGuardado);
       
-      // Validamos estrictamente por el ID del Rol
-      // 1 = Root Administrador, 3 = GTIC, 4 = Redes, 5 = Aplicaciones
-      if (usuario.rol_id === 1 || usuario.rol_id === 3 || usuario.rol_id === 4 || usuario.rol_id === 5) {
-        return true; // ¡Acceso concedido al panel de administración!
+      // Validamos por la categoría del rol en lugar de IDs fijos
+      // Control del Sistema, Soporte y Monitoreo (Gerente de Tecnología) acceden al panel
+      const categoriasPermitidas = ['Control del Sistema', 'Soporte', 'Monitoreo'];
+      if (categoriasPermitidas.includes(usuario.rol_categoria)) {
+        return true; // ¡Acceso concedido!
       } else {
-        // Es un Usuario o Cargo Estándar (rol_id = 2). Lo mandamos a su panel.
+        // Rol estándar (Jefe de Farmacia, etc.). Lo redirige a su panel.
         router.navigate(['/panel-usuario']);
         return false; // ¡Acceso denegado!
       }

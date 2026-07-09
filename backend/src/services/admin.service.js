@@ -2,7 +2,13 @@ const pool = require('../config/db');
 const { ROLES, ESTADOS_TICKET } = require('../config/constants');
 
 const obtenerUsuariosService = async () => {
-    const query = `SELECT id, nombre, apellido, email, cedula, gerencia, estado, rol_id FROM usuarios ORDER BY id ASC`;
+    const query = `
+        SELECT u.id, u.nombre, u.apellido, u.email, u.cedula, u.gerencia, u.estado, u.rol_id,
+               r.nombre as rol_nombre, r.categoria as rol_categoria
+        FROM usuarios u
+        LEFT JOIN roles r ON u.rol_id = r.id
+        ORDER BY u.id ASC
+    `;
     const result = await pool.query(query);
     return result.rows;
 };
@@ -32,9 +38,9 @@ const obtenerTicketsGlobalesService = async () => {
     return result.rows;
 };
 
-const tomarTicketService = async (ticketId, tecnicoId, usuarioRol) => {
-    if (Number(usuarioRol) === ROLES.SUPER_ADMINISTRADOR) {
-        throw { status: 403, message: 'Acceso Denegado. Los Súper Administradores no pueden tomar casos.' };
+const tomarTicketService = async (ticketId, tecnicoId, usuarioCategoria) => {
+    if (usuarioCategoria !== 'Soporte') {
+        throw { status: 403, message: 'Acceso Denegado. Solo el personal de soporte técnico puede tomar casos.' };
     }
 
     const queryUpdate = `UPDATE tickets SET estado_ticket = '${ESTADOS_TICKET.EN_PROGRESO}', tecnico_id = $1 WHERE id = $2 RETURNING *`;
@@ -49,9 +55,9 @@ const tomarTicketService = async (ticketId, tecnicoId, usuarioRol) => {
     return ticketActualizado;
 };
 
-const resolverTicketService = async (ticketId, usuarioRol) => {
-    if (Number(usuarioRol) === ROLES.SUPER_ADMINISTRADOR) {
-        throw { status: 403, message: 'Acceso Denegado. Los Súper Administradores no pueden resolver casos.' };
+const resolverTicketService = async (ticketId, usuarioCategoria) => {
+    if (usuarioCategoria !== 'Soporte') {
+        throw { status: 403, message: 'Acceso Denegado. Solo el personal de soporte técnico puede resolver casos.' };
     }
 
     const queryUpdate = `UPDATE tickets SET estado_ticket = '${ESTADOS_TICKET.SIN_CONFIRMAR}' WHERE id = $1 RETURNING *`;

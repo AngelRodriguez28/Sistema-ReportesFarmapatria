@@ -17,7 +17,7 @@ const login = async (req, res, next) => {
     try {
         const usuario = await authService.loginService(email, password);
         
-        const token = jwt.sign({ id: usuario.id, rol_id: usuario.rol_id }, SECRET_KEY, { expiresIn: '8h' });
+        const token = jwt.sign({ id: usuario.id, rol_id: usuario.rol_id, rol_categoria: usuario.rol_categoria }, SECRET_KEY, { expiresIn: '8h' });
 
         const { password: _, ...usuarioSinPassword } = usuario;
         res.status(200).json({ message: 'Login exitoso', usuario: usuarioSinPassword, token });

@@ -126,8 +126,9 @@ export class Perfil implements OnInit {
   }
 
   regresar() {
-    // Si el rol es admin o superadmin o de soporte GTIC
-    if ([1, 3, 4, 5].includes(this.usuario.rol_id as number)) {
+    // Si la categoría permite acceder al panel administrativo
+    const categoriasAdmin = ['Control del Sistema', 'Soporte', 'Monitoreo'];
+    if (categoriasAdmin.includes(this.usuario.rol_categoria)) {
       this.router.navigate(['/panel-admin']); 
     } else {
       this.router.navigate(['/panel-usuario']);

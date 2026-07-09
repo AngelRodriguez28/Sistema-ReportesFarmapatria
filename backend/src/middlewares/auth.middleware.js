@@ -13,6 +13,7 @@ const verificarToken = (req, res, next) => {
         if (err) return res.status(401).json({ error: 'Token inválido o expirado.' });
         req.usuarioId = decoded.id;
         req.usuarioRol = decoded.rol_id;
+        req.usuarioCategoria = decoded.rol_categoria;
         next();
     });
 };
