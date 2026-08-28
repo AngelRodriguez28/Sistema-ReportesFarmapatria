@@ -6,7 +6,7 @@ echo.
 
 echo 1. Encendiendo el Servidor Backend (Node.js)...
 cd /d "%~dp0\backend"
-start "Servidor Backend" cmd /k "node server.js"
+start "Servidor Backend" cmd /k "npx nodemon server.js"
 
 echo 2. Encendiendo la conexion a Internet (Cloudflare)...
 cd /d "%~dp0"

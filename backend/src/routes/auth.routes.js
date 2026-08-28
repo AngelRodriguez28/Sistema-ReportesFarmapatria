@@ -12,6 +12,8 @@ const {
 
 router.post('/registro', registrarUsuarioValidation, authController.registrarUsuario);
 router.post('/login', loginValidation, authController.login);
+router.get('/login/mfa/setup', verificarToken, authController.setupMFA);
+router.post('/login/mfa/verify', authController.verifyMFA);
 router.put('/recuperar-contrasena', recuperarContrasenaValidation, authController.recuperarContrasena);
 
 // Perfil de Usuario

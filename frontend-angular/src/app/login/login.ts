@@ -11,14 +11,22 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class LoginLoginComponent implements OnInit { // 2. Implementamos OnInit en la clase
+export class LoginLoginComponent implements OnInit {
   credenciales = {
     email: '',
     password: ''
   };
 
+  // Estados UI
   mostrarBienvenida = signal(false);
   nombreUsuario = signal('');
+  
+  // Estados MFA
+  requiereMFA = signal(false);
+  esPrimeraVezMFA = signal(false);
+  qrCodeUrl = signal('');
+  codigoMFA = '';
+  tokenTemporal = '';
 
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -50,27 +58,26 @@ export class LoginLoginComponent implements OnInit { // 2. Implementamos OnInit 
     this.authService.login(this.credenciales).subscribe({
       next: (data) => {
         console.log("iniciarSesion: respuesta del backend recibida con éxito");
-        if (data.usuario.avatar) {
-          const timestamp = new Date().getTime();
-          data.usuario.avatarUrl = `${environment.serverUrl}/${data.usuario.avatar.replace(/\\/g, '/')}?t=${timestamp}`;
-        }
-        localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
-        localStorage.setItem('authToken', data.token); // BUG-C3 FIX: Guardar el JWT
         
-        this.nombreUsuario.set(data.usuario.nombre);
-        this.mostrarBienvenida.set(true);
-        console.log("iniciarSesion: mostrarBienvenida establecido en true, programando redirección en 3000ms...");
+        // Si el backend pide MFA
+        if (data.mfaRequired) {
+          this.requiereMFA.set(true);
+          this.esPrimeraVezMFA.set(data.mfaSetup);
+          this.tokenTemporal = data.tokenTemp;
 
-        const rolUsuario = Number(data.usuario.rol_id);
-
-        setTimeout(() => {
-          console.log("iniciarSesion: setTimeout finalizado, ejecutando navigate...");
-          if ([1, 3, 4, 5].includes(rolUsuario)) {
-            this.router.navigate(['/panel-admin'], { replaceUrl: true }); 
-          } else {
-            this.router.navigate(['/panel-usuario'], { replaceUrl: true }); 
+          // Si es la primera vez, cargar el QR Code
+          if (data.mfaSetup) {
+            this.authService.setupMFA(this.tokenTemporal).subscribe({
+              next: (mfaData) => {
+                this.qrCodeUrl.set(mfaData.qr_code);
+              },
+              error: (err) => alert("Error generando código QR para MFA.")
+            });
           }
-        }, 3000);
+          return; // Detener flujo normal, esperar ingreso de código
+        }
+
+        this.procesarLoginExitoso(data);
       },
       error: (err) => {
         console.error("Error al conectar con el servidor:", err);
@@ -78,5 +85,40 @@ export class LoginLoginComponent implements OnInit { // 2. Implementamos OnInit 
         alert("Error al iniciar sesión: " + msj);
       }
     });
+  }
+
+  verificarMFA() {
+    if (!this.codigoMFA) return alert("Por favor ingresa el código MFA.");
+    
+    this.authService.verifyMFA(this.tokenTemporal, this.codigoMFA).subscribe({
+      next: (data) => {
+        this.requiereMFA.set(false); // Ocultar modal
+        this.procesarLoginExitoso(data);
+      },
+      error: (err) => {
+        alert(err.error?.error || "Código MFA incorrecto.");
+      }
+    });
+  }
+
+  private procesarLoginExitoso(data: any) {
+    if (data.usuario.avatar) {
+      const timestamp = new Date().getTime();
+      data.usuario.avatarUrl = `${environment.serverUrl}/${data.usuario.avatar.replace(/\\/g, '/')}?t=${timestamp}`;
+    }
+    localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
+    localStorage.setItem('authToken', data.token);
+    
+    this.nombreUsuario.set(data.usuario.nombre);
+    this.mostrarBienvenida.set(true);
+
+    const rolUsuario = Number(data.usuario.rol_id);
+    setTimeout(() => {
+      if ([1, 3, 4, 5].includes(rolUsuario)) {
+        this.router.navigate(['/panel-admin'], { replaceUrl: true }); 
+      } else {
+        this.router.navigate(['/panel-usuario'], { replaceUrl: true }); 
+      }
+    }, 3000);
   }
 }

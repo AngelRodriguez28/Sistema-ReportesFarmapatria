@@ -105,9 +105,10 @@ export class PanelAdmin implements OnInit, OnDestroy {
       const enProgreso = ticketsDelTecnico.filter(t => t.estado_ticket === 'En Progreso').length;
       const eficiencia = asignados === 0 ? 0 : Math.round((resueltos / asignados) * 100);
 
-      // Determinar color de rol para UI (Soporte GTIC es ID 3, Soporte Aplicaciones es ID 5)
+      // Determinar color de rol para UI (Soporte Tecnico es ID 3, Aplicaciones es ID 5)
       let colorRol = 'bg-blue-100 text-blue-700 border-blue-200';
       if (tecnico.rol_id === 5) colorRol = 'bg-purple-100 text-purple-700 border-purple-200';
+      if (tecnico.rol_id === 7) colorRol = 'bg-teal-100 text-teal-700 border-teal-200';
 
       return {
         ...tecnico,

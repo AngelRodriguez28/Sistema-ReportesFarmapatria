@@ -14,6 +14,7 @@ const verificarToken = (req, res, next) => {
         req.usuarioId = decoded.id;
         req.usuarioRol = decoded.rol_id;
         req.usuarioCategoria = decoded.rol_categoria;
+        req.mfaVerificado = decoded.mfa_verified || false;
         next();
     });
 };
@@ -21,6 +22,9 @@ const verificarToken = (req, res, next) => {
 const esSuperAdmin = (req, res, next) => {
     if (Number(req.usuarioRol) !== 1) {
         return res.status(403).json({ error: 'Acceso Denegado. Solo el Súper Administrador (ROOT) puede realizar esta acción.' });
+    }
+    if (!req.mfaVerificado) {
+        return res.status(403).json({ error: 'Acceso Denegado. Autenticación Multifactor (MFA) requerida para perfil ROOT.' });
     }
     next();
 };

@@ -80,48 +80,76 @@
         
         <!-- ======================= HOME ======================= -->
         @if (pestanaActual() === 'home') {
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <!-- KPIs Dinámicos -->
-            <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
-                <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl">
-                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Asignados' : 'Total Tickets' }}</h4>
-                    <span class="text-2xl font-extrabold text-gray-800">{{ totalTickets() }}</span>
-                </div>
+          @if (adminActual().rol_categoria === 'Control del Sistema') {
+            <!-- Vista para Super Administrador -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <!-- Total Usuarios -->
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl">
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/><path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+                  </div>
+                  <div>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">Total Usuarios</h4>
+                      <span class="text-2xl font-extrabold text-gray-800">{{ totalUsuarios() }}</span>
+                  </div>
+              </div>
+              
+              <!-- Pendientes (Usuarios Inactivos / Sin Aceptar) -->
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center text-2xl">
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
+                  </div>
+                  <div>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">Pendientes</h4>
+                      <span class="text-2xl font-extrabold text-gray-800">{{ usuariosPendientesCount() }}</span>
+                  </div>
+              </div>
             </div>
-            
-            <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
-                <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center text-2xl">
-                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Pendientes' : 'Pendientes' }}</h4>
-                    <span class="text-2xl font-extrabold text-gray-800">{{ totalPendientes() }}</span>
-                </div>
-            </div>
+          } @else {
+            <!-- Vista para otros roles (Soporte, Monitoreo, etc.) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              <!-- KPIs Dinámicos -->
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl">
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                  </div>
+                  <div>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Asignados' : 'Total Tickets' }}</h4>
+                      <span class="text-2xl font-extrabold text-gray-800">{{ totalTickets() }}</span>
+                  </div>
+              </div>
+              
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center text-2xl">
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
+                  </div>
+                  <div>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Pendientes' : 'Pendientes' }}</h4>
+                      <span class="text-2xl font-extrabold text-gray-800">{{ totalPendientes() }}</span>
+                  </div>
+              </div>
 
-            <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
-                <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl">
-                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Nuevos Disponibles' : 'En Progreso' }}</h4>
-                    <span class="text-2xl font-extrabold text-gray-800">{{ adminActual().rol_categoria === 'Soporte' ? ticketsGlobalesNuevos() : todosLosTickets().filter(t => t.estado_ticket === 'En Progreso').length }}</span>
-                </div>
-            </div>
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl">
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
+                  </div>
+                  <div>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Nuevos Disponibles' : 'En Progreso' }}</h4>
+                      <span class="text-2xl font-extrabold text-gray-800">{{ adminActual().rol_categoria === 'Soporte' ? ticketsGlobalesNuevos() : todosLosTickets().filter(t => t.estado_ticket === 'En Progreso').length }}</span>
+                  </div>
+              </div>
 
-            <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
-                <div class="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center text-2xl">
-                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Resueltos' : 'Resueltos' }}</h4>
-                    <span class="text-2xl font-extrabold text-gray-800">{{ totalResueltos() }}</span>
-                </div>
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div class="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center text-2xl">
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg>
+                  </div>
+                  <div>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Resueltos' : 'Resueltos' }}</h4>
+                      <span class="text-2xl font-extrabold text-gray-800">{{ totalResueltos() }}</span>
+                  </div>
+              </div>
             </div>
-          </div>
+          }
           
           <!-- SECCIÓN DE EFICIENCIA (Solo Técnicos) -->
           @if (adminActual().rol_categoria === 'Soporte') {
@@ -367,6 +395,7 @@
                             <option value="4" [selected]="user.rol_id == 4">Gerente General De Tecnologia</option>
                             <option value="5" [selected]="user.rol_id == 5">Aplicaciones</option>
                             <option value="6" [selected]="user.rol_id == 6">Gerente 1</option>
+                            <option value="7" [selected]="user.rol_id == 7">Redes</option>
                         </select>
                       </td>
                       <td class="px-6 py-4 text-center">

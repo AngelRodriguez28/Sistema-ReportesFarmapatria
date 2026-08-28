@@ -16,6 +16,16 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/login`, credenciales);
   }
 
+  setupMFA(token: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/login/mfa/setup`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+
+  verifyMFA(token: string, mfaCode: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login/mfa/verify`, { token, mfaCode });
+  }
+
   registro(datos: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/registro`, datos);
   }

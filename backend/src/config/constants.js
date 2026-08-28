@@ -1,10 +1,11 @@
 const ROLES = {
-    SUPER_ADMINISTRADOR: 1,      // Administrador
+    SUPER_ADMINISTRADOR: 1,      // Super Administrador
     JEFE_FARMACIA_ESTANDAR: 2,   // Jefe de Farmacia
-    SOPORTE: 3,                  // Soporte (GTIC)
-    GERENTE_TECNOLOGIA: 4,       // Gerente General De Tecnologia (Monitoreo)
-    SOPORTE_APLICACIONES: 5,     // Soporte Aplicaciones
+    SOPORTE: 3,                  // Soporte Tecnico
+    GERENTE_TECNOLOGIA: 4,       // Gerente General De Tecnologia
+    SOPORTE_APLICACIONES: 5,     // Aplicaciones
     GERENTE_ESTADAL: 6,          // Gerente 1
+    REDES: 7,                    // Redes
 };
 
 const CATEGORIAS_ROL = {

@@ -1,0 +1,1 @@
+require('dotenv').config(); const { Pool } = require('pg'); const pool = new Pool({ user: process.env.DB_USER, host: 'localhost', database: process.env.DB_NAME || 'farmapatria_db', password: process.env.DB_PASSWORD, port: 5432 }); pool.query('SELECT id, nombre, apellido, email, rol_id, estado FROM usuarios').then(res => { console.table(res.rows); pool.end(); });
