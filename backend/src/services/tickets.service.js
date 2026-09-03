@@ -5,26 +5,32 @@ const generarTicketService = async (datosTicket, archivoRuta, imagenAnydeskRuta)
     const { usuario_id, contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion } = datosTicket;
     const estado_ticket = ESTADOS_TICKET.PENDIENTE;
 
-    // Use a sequence or a single transaction to get the ID and format it.
-    // Assuming 'tickets' has a SERIAL 'id' primary key.
-    const queryInsert = `
-      INSERT INTO tickets (usuario_id, numero_contacto, nivel_reporte, tipificacion_falla, unidad_reporta, unidad_afectada, anydesk, descripcion, archivo_adjunto, estado_ticket, imagen_anydesk)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;
-    `;
-    const resultInsert = await pool.query(queryInsert, [usuario_id, contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion, archivoRuta, estado_ticket, imagenAnydeskRuta]);
-    
-    const newTicketId = resultInsert.rows[0].id;
-    const numero_reporte = 'REP-' + String(newTicketId).padStart(4, '0');
+    // Obtener el siguiente valor de la secuencia para asegurar sincronización atómica
+    const seqRes = await pool.query("SELECT nextval('tickets_id_seq') AS next_id");
+    let nextId = parseInt(seqRes.rows[0].next_id, 10);
 
-    const resultUpdate = await pool.query(
-        `UPDATE tickets SET numero_reporte = $1 WHERE id = $2 RETURNING *`,
-        [numero_reporte, newTicketId]
-    );
+    // Si la secuencia estuviese desfasada respecto a IDs existentes, resincronizar
+    const checkExist = await pool.query('SELECT id FROM tickets WHERE id = $1', [nextId]);
+    if (checkExist.rowCount > 0) {
+        const maxRes = await pool.query('SELECT COALESCE(MAX(id), 0) AS max_id FROM tickets');
+        nextId = parseInt(maxRes.rows[0].max_id, 10) + 1;
+        await pool.query("SELECT setval('tickets_id_seq', $1, true)", [nextId]);
+    }
+
+    const numero_reporte = 'REP-' + String(nextId).padStart(4, '0');
+
+    const queryInsert = `
+      INSERT INTO tickets (id, numero_reporte, usuario_id, numero_contacto, nivel_reporte, tipificacion_falla, unidad_reporta, unidad_afectada, anydesk, descripcion, archivo_adjunto, estado_ticket, imagen_anydesk)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;
+    `;
+    const resultInsert = await pool.query(queryInsert, [
+        nextId, numero_reporte, usuario_id, contacto, nivelReporte, tipificacionFalla, unidadReporta, unidadAfectada, anydesk, descripcion, archivoRuta, estado_ticket, imagenAnydeskRuta
+    ]);
 
     const msjNotificacion = `Generaste el ticket ${numero_reporte} exitosamente.`;
     await pool.query('INSERT INTO notificaciones (usuario_id, mensaje, leida) VALUES ($1, $2, false)', [usuario_id, msjNotificacion]);
 
-    return resultUpdate.rows[0];
+    return resultInsert.rows[0];
 };
 
 const editarTicketService = async (ticketId, datosTicket, archivoRuta, imagenAnydeskRuta) => {

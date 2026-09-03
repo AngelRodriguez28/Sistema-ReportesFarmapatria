@@ -11,7 +11,7 @@
                 </h2>
                 <p class="m-0 mt-1 text-sm text-white/80 font-medium">Plataforma de Gestión - Farmapatria</p>
             </div>
-            <button routerLink="/panel-usuario" class="relative z-10 bg-white/10 hover:bg-white/20 border border-white/30 text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm backdrop-blur-sm flex items-center gap-2">
+            <button [routerLink]="rutaRetorno" class="relative z-10 bg-white/10 hover:bg-white/20 border border-white/30 text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm backdrop-blur-sm flex items-center gap-2">
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg>
                 Volver al Panel
             </button>
@@ -19,9 +19,7 @@
 
         <form (ngSubmit)="enviarReporte()" class="p-6 md:p-10 space-y-6 relative">
             
-            @if(dropdownsAbiertos.nivelReporte || dropdownsAbiertos.unidadReporta || dropdownsAbiertos.unidadAfectada || dropdownsAbiertos.tipificacionFalla) {
-                <div class="fixed inset-0 z-30" (click)="cerrarDropdowns()"></div>
-            }
+            
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-40">
                 <div>
@@ -32,27 +30,14 @@
                 <div class="relative z-50">
                     <label class="block text-sm font-extrabold text-primary mb-2">Nivel de Reporte <span class="text-secondary">*</span></label>
                     <div class="relative">
-                        <div (click)="toggleDropdown('nivelReporte')" 
-                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer flex justify-between items-center"
-                             [class.border-primary]="dropdownsAbiertos.nivelReporte" [class.bg-white]="dropdownsAbiertos.nivelReporte" [class.ring-4]="dropdownsAbiertos.nivelReporte" [class.ring-primary]="dropdownsAbiertos.nivelReporte">
-                            <span [class.text-gray-400]="!nuevoReporte.nivelReporte">{{ nuevoReporte.nivelReporte || 'Seleccione el nivel...' }}</span>
-                            <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="dropdownsAbiertos.nivelReporte" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                        
-                        @if(dropdownsAbiertos.nivelReporte) {
-                            <div class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                                @for (nivel of nivelesReporte; track nivel) {
-                                    <div (click)="seleccionarOpcion('nivelReporte', nivel)" 
-                                         class="px-5 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors"
-                                         [class.bg-primary]="nuevoReporte.nivelReporte === nivel"
-                                         [class.bg-opacity-10]="nuevoReporte.nivelReporte === nivel"
-                                         [class.text-primary]="nuevoReporte.nivelReporte === nivel"
-                                         [class.font-bold]="nuevoReporte.nivelReporte === nivel">
-                                        {{ nivel }}
-                                    </div>
-                                }
-                            </div>
-                        }
+                        <select [(ngModel)]="nuevoReporte.nivelReporte" name="nivelReporte" required
+                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer appearance-none pr-10">
+                            <option value="" disabled selected>Seleccione el nivel...</option>
+                            @for (nivel of nivelesReporte; track nivel) {
+                                <option [value]="nivel">{{ nivel }}</option>
+                            }
+                        </select>
+                        <svg class="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
             </div>
@@ -61,53 +46,27 @@
                 <div class="relative">
                     <label class="block text-sm font-extrabold text-primary mb-2">Unidad que Reporta <span class="text-secondary">*</span></label>
                     <div class="relative">
-                        <div (click)="toggleDropdown('unidadReporta')" 
-                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer flex justify-between items-center"
-                             [class.border-primary]="dropdownsAbiertos.unidadReporta" [class.bg-white]="dropdownsAbiertos.unidadReporta" [class.ring-4]="dropdownsAbiertos.unidadReporta" [class.ring-primary]="dropdownsAbiertos.unidadReporta">
-                            <span [class.text-gray-400]="!nuevoReporte.unidadReporta" class="truncate pr-4">{{ nuevoReporte.unidadReporta || 'Seleccione la unidad emisora...' }}</span>
-                            <svg class="w-4 h-4 text-gray-400 transition-transform shrink-0" [class.rotate-180]="dropdownsAbiertos.unidadReporta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                        
-                        @if(dropdownsAbiertos.unidadReporta) {
-                            <div class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                                @for (unidad of unidadesQueReportan; track unidad) {
-                                    <div (click)="seleccionarOpcion('unidadReporta', unidad)" 
-                                         class="px-5 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors truncate"
-                                         [class.bg-primary]="nuevoReporte.unidadReporta === unidad"
-                                         [class.bg-opacity-10]="nuevoReporte.unidadReporta === unidad"
-                                         [class.text-primary]="nuevoReporte.unidadReporta === unidad"
-                                         [class.font-bold]="nuevoReporte.unidadReporta === unidad">
-                                        {{ unidad }}
-                                    </div>
-                                }
-                            </div>
-                        }
+                        <select [(ngModel)]="nuevoReporte.unidadReporta" name="unidadReporta" required
+                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer appearance-none pr-10">
+                            <option value="" disabled selected>Seleccione la unidad emisora...</option>
+                            @for (unidad of unidadesQueReportan; track unidad) {
+                                <option [value]="unidad">{{ unidad }}</option>
+                            }
+                        </select>
+                        <svg class="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
                 <div class="relative">
                     <label class="block text-sm font-extrabold text-primary mb-2">Unidad Afectada <span class="text-secondary">*</span></label>
                     <div class="relative">
-                        <div (click)="toggleDropdown('unidadAfectada')" 
-                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer flex justify-between items-center"
-                             [class.border-primary]="dropdownsAbiertos.unidadAfectada" [class.bg-white]="dropdownsAbiertos.unidadAfectada" [class.ring-4]="dropdownsAbiertos.unidadAfectada" [class.ring-primary]="dropdownsAbiertos.unidadAfectada">
-                            <span [class.text-gray-400]="!nuevoReporte.unidadAfectada" class="truncate pr-4">{{ nuevoReporte.unidadAfectada || 'Seleccione la farmacia o unidad afectada...' }}</span>
-                            <svg class="w-4 h-4 text-gray-400 transition-transform shrink-0" [class.rotate-180]="dropdownsAbiertos.unidadAfectada" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                        
-                        @if(dropdownsAbiertos.unidadAfectada) {
-                            <div class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                                @for (unidad of unidadesAfectadas; track unidad) {
-                                    <div (click)="seleccionarOpcion('unidadAfectada', unidad)" 
-                                         class="px-5 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors truncate"
-                                         [class.bg-primary]="nuevoReporte.unidadAfectada === unidad"
-                                         [class.bg-opacity-10]="nuevoReporte.unidadAfectada === unidad"
-                                         [class.text-primary]="nuevoReporte.unidadAfectada === unidad"
-                                         [class.font-bold]="nuevoReporte.unidadAfectada === unidad">
-                                        {{ unidad }}
-                                    </div>
-                                }
-                            </div>
-                        }
+                        <select [(ngModel)]="nuevoReporte.unidadAfectada" name="unidadAfectada" required
+                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer appearance-none pr-10">
+                            <option value="" disabled selected>Seleccione la farmacia o unidad afectada...</option>
+                            @for (unidad of unidadesAfectadas; track unidad) {
+                                <option [value]="unidad">{{ unidad }}</option>
+                            }
+                        </select>
+                        <svg class="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
             </div>
@@ -116,27 +75,14 @@
                 <div class="md:col-span-2 relative">
                     <label class="block text-sm font-extrabold text-primary mb-2">Tipificación de la Falla <span class="text-secondary">*</span></label>
                     <div class="relative">
-                        <div (click)="toggleDropdown('tipificacionFalla')" 
-                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer flex justify-between items-center"
-                             [class.border-primary]="dropdownsAbiertos.tipificacionFalla" [class.bg-white]="dropdownsAbiertos.tipificacionFalla" [class.ring-4]="dropdownsAbiertos.tipificacionFalla" [class.ring-primary]="dropdownsAbiertos.tipificacionFalla">
-                            <span [class.text-gray-400]="!nuevoReporte.tipificacionFalla" class="truncate pr-4">{{ nuevoReporte.tipificacionFalla || 'Seleccione el tipo de incidencia...' }}</span>
-                            <svg class="w-4 h-4 text-gray-400 transition-transform shrink-0" [class.rotate-180]="dropdownsAbiertos.tipificacionFalla" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                        
-                        @if(dropdownsAbiertos.tipificacionFalla) {
-                            <div class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                                @for (falla of tipificaciones; track falla) {
-                                    <div (click)="seleccionarOpcion('tipificacionFalla', falla)" 
-                                         class="px-5 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary cursor-pointer transition-colors truncate"
-                                         [class.bg-primary]="nuevoReporte.tipificacionFalla === falla"
-                                         [class.bg-opacity-10]="nuevoReporte.tipificacionFalla === falla"
-                                         [class.text-primary]="nuevoReporte.tipificacionFalla === falla"
-                                         [class.font-bold]="nuevoReporte.tipificacionFalla === falla">
-                                        {{ falla }}
-                                    </div>
-                                }
-                            </div>
-                        }
+                        <select [(ngModel)]="nuevoReporte.tipificacionFalla" name="tipificacionFalla" required
+                             class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium cursor-pointer appearance-none pr-10">
+                            <option value="" disabled selected>Seleccione el tipo de incidencia...</option>
+                            @for (falla of tipificaciones; track falla) {
+                                <option [value]="falla">{{ falla }}</option>
+                            }
+                        </select>
+                        <svg class="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
                 <div>
@@ -145,9 +91,9 @@
                     class="w-full px-5 py-3 border border-gray-200 bg-gray-50 rounded-xl text-sm text-gray-800 outline-none transition-all duration-300 focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white font-medium font-mono mb-3">
                     
                     <div class="relative overflow-hidden inline-block w-full">
-                        <button type="button" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-600 hover:text-primary hover:border-primary/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 group">
-                            <svg class="text-gray-400 group-hover:text-primary transition-colors" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
-                            Adjuntar Captura de Anydesk
+                        <button type="button" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-600 hover:text-primary hover:border-primary/50 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 group truncate">
+                            <svg class="text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            <span class="truncate">{{ nuevoReporte.imagenAnydesk ? nuevoReporte.imagenAnydesk.name : 'Adjuntar Captura de Anydesk' }}</span>
                         </button>
                         <input type="file" (change)="capturarImagenAnydesk($event)" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                     </div>
@@ -162,11 +108,19 @@
 
             <div class="p-6 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors group cursor-pointer relative flex flex-col items-center justify-center text-center">
                 <input type="file" (change)="capturarArchivo($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                <div class="text-gray-400 group-hover:text-primary transition-colors mb-2">
-                    <svg width="32" height="32" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
-                </div>
-                <label class="block text-sm font-extrabold text-gray-700 mb-1">Evidencia / Archivo Adjunto <span class="text-gray-400 font-medium text-xs">(Opcional)</span></label>
-                <p class="text-xs text-gray-500 font-medium m-0">Haz clic o arrastra un archivo de imagen para adjuntarlo (Max 5MB)</p>
+                @if (nuevoReporte.archivoAdjunto) {
+                    <div class="text-primary mb-2">
+                        <svg width="32" height="32" fill="currentColor" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
+                    </div>
+                    <label class="block text-sm font-extrabold text-gray-700 mb-1">{{ nuevoReporte.archivoAdjunto.name }}</label>
+                    <p class="text-xs text-gray-500 font-medium m-0">Haz clic o arrastra para cambiar el archivo</p>
+                } @else {
+                    <div class="text-gray-400 group-hover:text-primary transition-colors mb-2">
+                        <svg width="32" height="32" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
+                    </div>
+                    <label class="block text-sm font-extrabold text-gray-700 mb-1">Evidencia / Archivo Adjunto <span class="text-gray-400 font-medium text-xs">(Opcional)</span></label>
+                    <p class="text-xs text-gray-500 font-medium m-0">Haz clic o arrastra un archivo de imagen para adjuntarlo (Max 5MB)</p>
+                }
             </div>
 
             <div class="pt-4 border-t border-gray-100 flex justify-end">

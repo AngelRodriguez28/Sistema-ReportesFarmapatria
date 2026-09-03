@@ -9,7 +9,12 @@ const validate = (req, res, next) => {
 };
 
 const generarTicketValidation = [
-    body('usuario_id').notEmpty().withMessage('El ID del usuario es obligatorio'),
+    body('usuario_id').custom((value, { req }) => {
+        if (!value && !req.usuarioId) {
+            throw new Error('El ID del usuario es obligatorio');
+        }
+        return true;
+    }),
     body('contacto').notEmpty().withMessage('El número de contacto es obligatorio'),
     body('nivelReporte').notEmpty().withMessage('El nivel de reporte es obligatorio'),
     body('tipificacionFalla').notEmpty().withMessage('La tipificación de la falla es obligatoria'),

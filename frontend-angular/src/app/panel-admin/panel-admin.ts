@@ -19,9 +19,27 @@ Chart.register(...registerables);
 export class PanelAdmin implements OnInit, OnDestroy { 
   
   adminActual = signal<any>({ id: 0, nombre: 'Cargando...', apellido: '', gerencia: '', rol_id: 0, rol_categoria: '' });
-  pestanaActual = signal<'home' | 'tickets' | 'usuarios' | 'estadisticas'>('home');
+  pestanaActual = signal<'home' | 'tickets' | 'mis-tickets' | 'usuarios' | 'estadisticas'>('home');
   isSidebarOpen = signal<boolean>(false);
   habilitarTransicion = false;
+  
+  esTecnico = computed(() => {
+    const rolCat = this.adminActual().rol_categoria;
+    const rolId = Number(this.adminActual().rol_id);
+    return rolCat === 'Soporte' || [3, 5, 7].includes(rolId);
+  });
+
+  esRoot = computed(() => {
+    const rolCat = this.adminActual().rol_categoria;
+    const rolId = Number(this.adminActual().rol_id);
+    return rolCat === 'Control del Sistema' || rolId === 1;
+  });
+
+  esAuditor = computed(() => {
+    const rolCat = this.adminActual().rol_categoria;
+    const rolId = Number(this.adminActual().rol_id);
+    return rolId === 4 || rolId === 6 || rolCat === 'Monitoreo' || rolCat === 'Gerencia De Tecnologia';
+  });
   
   // Variable de Estado para la Ventana Modal
   ticketSeleccionado = signal<any>(null); 
@@ -44,6 +62,14 @@ export class PanelAdmin implements OnInit, OnDestroy {
     );
   });
 
+  ticketsDisponiblesFiltrados = computed(() => {
+    return this.ticketsFiltrados().filter(t => t.estado_ticket === 'Pendiente');
+  });
+
+  misTicketsFiltrados = computed(() => {
+    return this.ticketsFiltrados().filter(t => t.tecnico_id === this.adminActual().id);
+  });
+
   usuariosFiltrados = computed(() => {
     const busqueda = this.terminoBusquedaUsuario().toLowerCase();
     const usuarios = this.todosLosUsuarios();
@@ -63,16 +89,14 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
   // KPIs Calculados para el Home
   totalTickets = computed(() => {
-    const rolCategoria = this.adminActual().rol_categoria;
-    if (rolCategoria === 'Soporte') {
+    if (this.esTecnico()) {
       return this.todosLosTickets().filter(t => t.tecnico_id === this.adminActual().id).length;
     }
     return this.todosLosTickets().length;
   });
 
   totalPendientes = computed(() => {
-    const rolCategoria = this.adminActual().rol_categoria;
-    if (rolCategoria === 'Soporte') {
+    if (this.esTecnico()) {
       return this.todosLosTickets().filter(t => t.tecnico_id === this.adminActual().id && t.estado_ticket === 'En Progreso').length;
     }
     return this.todosLosTickets().filter(t => t.estado_ticket === 'Pendiente' || t.estado_ticket === 'En Progreso').length;
@@ -83,8 +107,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   totalSinConfirmar = computed(() => this.todosLosTickets().filter(t => t.estado_ticket === 'Sin Confirmar').length);
 
   totalResueltos = computed(() => {
-    const rolCategoria = this.adminActual().rol_categoria;
-    if (rolCategoria === 'Soporte') {
+    if (this.esTecnico()) {
       return this.todosLosTickets().filter(t => t.tecnico_id === this.adminActual().id && (t.estado_ticket === 'Resuelto' || t.estado_ticket === 'Sin Confirmar')).length;
     }
     return this.todosLosTickets().filter(t => t.estado_ticket === 'Resuelto').length;
@@ -94,8 +117,8 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
   // Rendimiento de Técnicos (Vista Súper Admin y Monitoreo)
   estadisticasTecnicos = computed(() => {
-    // Filtrar solo usuarios con categoría de soporte
-    const tecnicos = this.todosLosUsuarios().filter(u => u.rol_categoria === 'Soporte');
+    // Filtrar solo usuarios con categoría de soporte o roles técnicos (Soporte Técnico: 3, Aplicaciones: 5, Redes: 7)
+    const tecnicos = this.todosLosUsuarios().filter(u => u.rol_categoria === 'Soporte' || [3, 5, 7].includes(Number(u.rol_id)));
     const tickets = this.todosLosTickets();
 
     return tecnicos.map(tecnico => {
@@ -105,10 +128,10 @@ export class PanelAdmin implements OnInit, OnDestroy {
       const enProgreso = ticketsDelTecnico.filter(t => t.estado_ticket === 'En Progreso').length;
       const eficiencia = asignados === 0 ? 0 : Math.round((resueltos / asignados) * 100);
 
-      // Determinar color de rol para UI (Soporte Tecnico es ID 3, Aplicaciones es ID 5)
+      // Determinar color de rol para UI (Soporte Tecnico es ID 3, Aplicaciones es ID 5, Redes es ID 7)
       let colorRol = 'bg-blue-100 text-blue-700 border-blue-200';
-      if (tecnico.rol_id === 5) colorRol = 'bg-purple-100 text-purple-700 border-purple-200';
-      if (tecnico.rol_id === 7) colorRol = 'bg-teal-100 text-teal-700 border-teal-200';
+      if (Number(tecnico.rol_id) === 5) colorRol = 'bg-purple-100 text-purple-700 border-purple-200';
+      if (Number(tecnico.rol_id) === 7) colorRol = 'bg-teal-100 text-teal-700 border-teal-200';
 
       return {
         ...tecnico,
@@ -120,8 +143,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
 
   // Mi Eficiencia (Vista Técnico)
   miEficiencia = computed(() => {
-    const rolCategoria = this.adminActual().rol_categoria;
-    if (rolCategoria !== 'Soporte') return 0;
+    if (!this.esTecnico()) return 0;
 
     const asignados = this.totalTickets();
     const resueltos = this.totalResueltos();
@@ -133,6 +155,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
   private motorDeTiempo: Subscription | undefined;
   graficoEstatus: any;
   graficoFallas: any;
+  graficoMisTickets: any;
 
   constructor(private adminService: AdminService, private router: Router) {}
 
@@ -164,6 +187,7 @@ export class PanelAdmin implements OnInit, OnDestroy {
     if (this.motorDeTiempo) this.motorDeTiempo.unsubscribe();
     if (this.graficoEstatus) this.graficoEstatus.destroy();
     if (this.graficoFallas) this.graficoFallas.destroy();
+    if (this.graficoMisTickets) this.graficoMisTickets.destroy();
   }
 
   // ==========================================
@@ -188,10 +212,19 @@ export class PanelAdmin implements OnInit, OnDestroy {
     this.terminoBusqueda.set(event.target.value);
   }
 
-  cambiarPestana(pestana: 'home' | 'tickets' | 'usuarios' | 'estadisticas') {
+  cambiarPestana(pestana: 'home' | 'tickets' | 'mis-tickets' | 'usuarios' | 'estadisticas') {
+    if ((pestana === 'tickets' || pestana === 'mis-tickets') && !this.esTecnico()) {
+      return;
+    }
+    if (pestana === 'usuarios' && !this.esRoot()) {
+      return;
+    }
     this.pestanaActual.set(pestana);
     if (pestana === 'estadisticas') {
       setTimeout(() => this.renderizarGraficosGlobales(), 100);
+    }
+    if (pestana === 'mis-tickets') {
+      setTimeout(() => this.renderizarGraficoMisTickets(), 100);
     }
   }
 
@@ -204,8 +237,8 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   renderizarGraficosGlobales() {
-    const canvasEstatus = document.getElementById('chartEstatusAdmin') as HTMLCanvasElement;
-    const canvasFallas = document.getElementById('chartFallasAdmin') as HTMLCanvasElement;
+    const canvasEstatus = document.getElementById('graficoEstatusGlobal') as HTMLCanvasElement;
+    const canvasFallas = document.getElementById('graficoFallasGlobal') as HTMLCanvasElement;
     if (!canvasEstatus || !canvasFallas) return;
 
     const pendientes = this.todosLosTickets().filter(t => t.estado_ticket === 'Pendiente').length;
@@ -247,9 +280,32 @@ export class PanelAdmin implements OnInit, OnDestroy {
     });
   }
 
+  renderizarGraficoMisTickets() {
+    const canvasMisTickets = document.getElementById('graficoMisTickets') as HTMLCanvasElement;
+    if (!canvasMisTickets) return;
+
+    const misTickets = this.todosLosTickets().filter(t => t.tecnico_id === this.adminActual().id);
+    const enProgreso = misTickets.filter(t => t.estado_ticket === 'En Progreso').length;
+    const sinConfirmar = misTickets.filter(t => t.estado_ticket === 'Sin Confirmar').length;
+    const resueltos = misTickets.filter(t => t.estado_ticket === 'Resuelto').length;
+
+    if (this.graficoMisTickets) this.graficoMisTickets.destroy();
+    this.graficoMisTickets = new Chart(canvasMisTickets, {
+       type: 'doughnut',
+       data: {
+           labels: ['En Progreso', 'Sin Confirmar', 'Resueltos'],
+           datasets: [{
+               label: 'Mis Tickets',
+               data: [enProgreso, sinConfirmar, resueltos],
+               backgroundColor: ['#17a2b8', '#FFC907', '#28a745']
+           }]
+       },
+       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
   cargarTodosLosTickets() {
     this.adminService.obtenerTicketsGlobales().subscribe(tickets => {
-        const rolCategoria = this.adminActual().rol_categoria;
         const adminId = this.adminActual().id;
         
         // ORDENAMIENTO: Del más reciente al más antiguo
@@ -259,8 +315,8 @@ export class PanelAdmin implements OnInit, OnDestroy {
             return fechaB - fechaA; 
         });
 
-        // FILTRO POR CATEGORÍA: Soporte solo ve 'Pendientes' globales y sus propios tickets tomados/resueltos
-        if (rolCategoria === 'Soporte') {
+        // FILTRO POR PERFIL: Personal técnico solo ve 'Pendientes' globales y sus propios tickets tomados/resueltos
+        if (this.esTecnico()) {
             ticketsOrdenados = ticketsOrdenados.filter(t => t.estado_ticket === 'Pendiente' || t.tecnico_id === adminId);
         }
 
@@ -268,6 +324,9 @@ export class PanelAdmin implements OnInit, OnDestroy {
         
         if (this.pestanaActual() === 'estadisticas') {
             this.renderizarGraficosGlobales();
+        }
+        if (this.pestanaActual() === 'mis-tickets') {
+            this.renderizarGraficoMisTickets();
         }
     });
   }
@@ -328,8 +387,8 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   tomarTicket(ticket: any) {
-    if (this.adminActual().rol_categoria !== 'Soporte') {
-      alert('Acción no permitida: Solo los técnicos de soporte pueden tomar casos.');
+    if (!this.esTecnico()) {
+      alert('Acción no permitida: Solo el personal técnico (Soporte Técnico, Aplicaciones, Redes) puede tomar casos.');
       return;
     }
     if(confirm(`¿Estás seguro de tomar el ticket ${ticket.numero_reporte}? Pasará a estar "En Progreso".`)) {
@@ -345,8 +404,8 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   marcarComoResuelto(ticket: any) {
-    if (this.adminActual().rol_categoria !== 'Soporte') {
-      alert('Acción no permitida: Solo los técnicos de soporte pueden resolver casos.');
+    if (!this.esTecnico()) {
+      alert('Acción no permitida: Solo el personal técnico (Soporte Técnico, Aplicaciones, Redes) puede resolver casos.');
       return;
     }
     if(confirm(`¿Estás seguro de marcar el ticket ${ticket.numero_reporte} como RESUELTO? (Se enviará a confirmación del usuario)`)) {

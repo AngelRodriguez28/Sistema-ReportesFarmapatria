@@ -43,7 +43,7 @@ export class LoginLoginComponent implements OnInit {
         
         console.log('ngOnInit: redirigiendo de inmediato al panel por sesión activa...');
         // Lo redirige inmediatamente a su panel reemplazando el historial para evitar bucles
-        if ([1, 3, 4, 5].includes(rolUsuario)) {
+        if ([1, 3, 4, 5, 6, 7].includes(rolUsuario)) {
           this.router.navigate(['/panel-admin'], { replaceUrl: true });
         } else {
           this.router.navigate(['/panel-usuario'], { replaceUrl: true });
@@ -65,14 +65,17 @@ export class LoginLoginComponent implements OnInit {
           this.esPrimeraVezMFA.set(data.mfaSetup);
           this.tokenTemporal = data.tokenTemp;
 
-          // Si es la primera vez, cargar el QR Code
           if (data.mfaSetup) {
+            // Solo cargar el QR automáticamente si es la configuración inicial (primera vez o reconfiguración)
             this.authService.setupMFA(this.tokenTemporal).subscribe({
               next: (mfaData) => {
                 this.qrCodeUrl.set(mfaData.qr_code);
               },
               error: (err) => alert("Error generando código QR para MFA.")
             });
+          } else {
+            // De lo contrario, ocultarlo por defecto para uso frecuente
+            this.qrCodeUrl.set('');
           }
           return; // Detener flujo normal, esperar ingreso de código
         }
@@ -101,6 +104,19 @@ export class LoginLoginComponent implements OnInit {
     });
   }
 
+  regenerarQR() {
+    if (confirm("¿Estás seguro de que deseas generar un nuevo código QR? Esto invalidará el autenticador vinculado anteriormente y los demás usuarios de tecnología deberán escanear el nuevo código QR.")) {
+      this.authService.setupMFA(this.tokenTemporal, true).subscribe({
+        next: (mfaData) => {
+          this.qrCodeUrl.set(mfaData.qr_code);
+          this.esPrimeraVezMFA.set(true);
+          alert("Nuevo código QR generado con éxito. Escanéalo en tu aplicación autenticadora.");
+        },
+        error: (err) => alert("Error al regenerar el código QR.")
+      });
+    }
+  }
+
   private procesarLoginExitoso(data: any) {
     if (data.usuario.avatar) {
       const timestamp = new Date().getTime();
@@ -114,7 +130,7 @@ export class LoginLoginComponent implements OnInit {
 
     const rolUsuario = Number(data.usuario.rol_id);
     setTimeout(() => {
-      if ([1, 3, 4, 5].includes(rolUsuario)) {
+      if ([1, 3, 4, 5, 6, 7].includes(rolUsuario)) {
         this.router.navigate(['/panel-admin'], { replaceUrl: true }); 
       } else {
         this.router.navigate(['/panel-usuario'], { replaceUrl: true }); 

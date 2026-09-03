@@ -24,11 +24,16 @@
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.293l6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/><path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/></svg> Dashboard
         </a>
 
-        <a (click)="cambiarPestana('tickets')" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium" [class.bg-secondary]="pestanaActual() === 'tickets'" [class.text-white]="pestanaActual() === 'tickets'" [class.font-bold]="pestanaActual() === 'tickets'">
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg> Gestión de Tickets
-        </a>
+        @if (esTecnico()) {
+          <a (click)="cambiarPestana('tickets')" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium" [class.bg-secondary]="pestanaActual() === 'tickets'" [class.text-white]="pestanaActual() === 'tickets'" [class.font-bold]="pestanaActual() === 'tickets'">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg> Gestión de Tickets
+          </a>
+          <a (click)="cambiarPestana('mis-tickets')" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium" [class.bg-secondary]="pestanaActual() === 'mis-tickets'" [class.text-white]="pestanaActual() === 'mis-tickets'" [class.font-bold]="pestanaActual() === 'mis-tickets'">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg> Mis Tickets
+          </a>
+        }
 
-        @if (adminActual().rol_categoria === 'Control del Sistema') {
+        @if (esRoot()) {
           <a (click)="cambiarPestana('usuarios')" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium" [class.bg-secondary]="pestanaActual() === 'usuarios'" [class.text-white]="pestanaActual() === 'usuarios'" [class.font-bold]="pestanaActual() === 'usuarios'">
               <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/><path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg> Gestión de Usuarios
           </a>
@@ -80,7 +85,7 @@
         
         <!-- ======================= HOME ======================= -->
         @if (pestanaActual() === 'home') {
-          @if (adminActual().rol_categoria === 'Control del Sistema') {
+          @if (esRoot()) {
             <!-- Vista para Super Administrador -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <!-- Total Usuarios -->
@@ -114,7 +119,7 @@
                       <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
                   </div>
                   <div>
-                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Asignados' : 'Total Tickets' }}</h4>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ esTecnico() ? 'Mis Asignados' : 'Total Tickets' }}</h4>
                       <span class="text-2xl font-extrabold text-gray-800">{{ totalTickets() }}</span>
                   </div>
               </div>
@@ -124,7 +129,7 @@
                       <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
                   </div>
                   <div>
-                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Pendientes' : 'Pendientes' }}</h4>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ esTecnico() ? 'Mis Pendientes' : 'Pendientes' }}</h4>
                       <span class="text-2xl font-extrabold text-gray-800">{{ totalPendientes() }}</span>
                   </div>
               </div>
@@ -134,8 +139,8 @@
                       <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
                   </div>
                   <div>
-                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Nuevos Disponibles' : 'En Progreso' }}</h4>
-                      <span class="text-2xl font-extrabold text-gray-800">{{ adminActual().rol_categoria === 'Soporte' ? ticketsGlobalesNuevos() : todosLosTickets().filter(t => t.estado_ticket === 'En Progreso').length }}</span>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ esTecnico() ? 'Nuevos Disponibles' : 'En Progreso' }}</h4>
+                      <span class="text-2xl font-extrabold text-gray-800">{{ esTecnico() ? ticketsGlobalesNuevos() : todosLosTickets().filter(t => t.estado_ticket === 'En Progreso').length }}</span>
                   </div>
               </div>
 
@@ -144,7 +149,7 @@
                       <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg>
                   </div>
                   <div>
-                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ adminActual().rol_categoria === 'Soporte' ? 'Mis Resueltos' : 'Resueltos' }}</h4>
+                      <h4 class="text-gray-500 font-medium text-sm m-0">{{ esTecnico() ? 'Mis Resueltos' : 'Resueltos' }}</h4>
                       <span class="text-2xl font-extrabold text-gray-800">{{ totalResueltos() }}</span>
                   </div>
               </div>
@@ -152,7 +157,7 @@
           }
           
           <!-- SECCIÓN DE EFICIENCIA (Solo Técnicos) -->
-          @if (adminActual().rol_categoria === 'Soporte') {
+          @if (esTecnico()) {
             <div class="mt-6 bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 transition-all">
               <div class="flex justify-between items-end mb-2">
                 <h3 class="text-primary font-extrabold text-lg m-0">Mi Eficiencia de Resolución</h3>
@@ -176,8 +181,8 @@
             <p class="text-gray-600 text-base leading-relaxed max-w-3xl">Bienvenido al Centro de Control. Desde aquí puedes gestionar los reportes técnicos, auditar el estado de los tickets y administrar los niveles de acceso de los usuarios del sistema.</p>
           </div>
 
-          <!-- SECCIÓN DE RENDIMIENTO DE TÉCNICOS (Super Admin y Monitoreo/Gerente de Tecnología) -->
-          @if (adminActual().rol_categoria === 'Control del Sistema' || adminActual().rol_categoria === 'Monitoreo') {
+          <!-- SECCIÓN DE RENDIMIENTO DE TÉCNICOS (Super Admin, Monitoreo y Gerente 1) -->
+          @if (esRoot() || esAuditor()) {
             <div class="mt-8">
               <h3 class="text-primary font-extrabold text-xl mb-4 flex items-center gap-2">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/><path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
@@ -240,7 +245,7 @@
         }
 
         <!-- ======================= GESTIÓN DE TICKETS ======================= -->
-        @if (pestanaActual() === 'tickets') {
+        @if (pestanaActual() === 'tickets' && esTecnico()) {
           <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6">
             
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-4 mb-6 gap-4">
@@ -256,7 +261,7 @@
 
             <!-- Contenedor Responsive para Tarjetas/Tablas de Tickets -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              @for (ticket of ticketsFiltrados(); track ticket.id) {
+              @for (ticket of ticketsDisponiblesFiltrados(); track ticket.id) {
                 <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group flex flex-col">
                   
                   <!-- Borde de color según estado -->
@@ -301,16 +306,8 @@
                     </button>
                     
                     @if (ticket.estado_ticket === 'Pendiente') {
-                        @if (adminActual().rol_categoria === 'Soporte') {
+                        @if (esTecnico()) {
                             <button class="flex-1 bg-primary hover:bg-[#1a2352] text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition-all" (click)="tomarTicket(ticket)">Tomar</button>
-                        }
-                    }
-
-                    @if (ticket.estado_ticket === 'En Progreso') {
-                        @if (ticket.tecnico_id == adminActual().id) {
-                            <button class="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition-all" (click)="marcarComoResuelto(ticket)">Resolver</button>
-                        } @else {
-                            <button class="flex-1 bg-gray-200 text-gray-400 cursor-not-allowed px-3 py-2 rounded-lg text-xs font-bold" disabled>Resolver</button>
                         }
                     }
 
@@ -321,7 +318,7 @@
                 </div>
               }
               
-              @if (ticketsFiltrados().length === 0) {
+              @if (ticketsDisponiblesFiltrados().length === 0) {
                 <div class="col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
                   <div class="text-4xl mb-3">📭</div>
                   <div class="font-medium">No se encontraron tickets con ese criterio.</div>
@@ -331,8 +328,85 @@
           </div>
         }
 
+        <!-- ======================= MIS TICKETS ======================= -->
+        @if (pestanaActual() === 'mis-tickets' && esTecnico()) {
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- Gráfico de Métricas Personales -->
+            <div class="col-span-1 bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6 flex flex-col items-center">
+              <h3 class="text-gray-500 font-extrabold text-sm uppercase tracking-widest mb-4">Mis Métricas</h3>
+              <div class="w-full h-[200px] relative mb-4">
+                <canvas id="graficoMisTickets"></canvas>
+              </div>
+              <div class="w-full text-center bg-gray-50 rounded-xl p-3 border border-gray-100 mt-auto">
+                <span class="block text-xs font-bold text-gray-500 uppercase">Eficiencia Total</span>
+                <span class="text-xl font-extrabold text-secondary">{{ miEficiencia() }}%</span>
+              </div>
+            </div>
+
+            <!-- Lista de Mis Tickets -->
+            <div class="col-span-1 md:col-span-2 bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6 flex flex-col">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-100 pb-4 mb-4 gap-4">
+                <h3 class="text-primary font-extrabold text-xl m-0">Mis Tickets Asignados</h3>
+                
+                <div class="relative w-full sm:w-64">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.324a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+                  </span>
+                  <input type="text" placeholder="Buscar..." (input)="actualizarBusqueda($event)" class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+                </div>
+              </div>
+
+              <div class="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[500px]">
+                @for (ticket of misTicketsFiltrados(); track ticket.id) {
+                  <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl" 
+                         [class.bg-blue-500]="ticket.estado_ticket === 'En Progreso'"
+                         [class.bg-yellow-400]="ticket.estado_ticket === 'Sin Confirmar'"
+                         [class.bg-green-500]="ticket.estado_ticket === 'Resuelto'"></div>
+                    
+                    <div class="flex justify-between items-center mb-2 pl-2">
+                      <strong class="text-primary text-sm">{{ ticket.numero_reporte }}</strong>
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase"
+                            [class.bg-blue-50]="ticket.estado_ticket === 'En Progreso'" [class.text-blue-700]="ticket.estado_ticket === 'En Progreso'"
+                            [class.bg-yellow-50]="ticket.estado_ticket === 'Sin Confirmar'" [class.text-yellow-700]="ticket.estado_ticket === 'Sin Confirmar'"
+                            [class.bg-green-50]="ticket.estado_ticket === 'Resuelto'" [class.text-green-700]="ticket.estado_ticket === 'Resuelto'">
+                        {{ ticket.estado_ticket }}
+                      </span>
+                    </div>
+
+                    <div class="text-[12px] text-gray-700 space-y-1 mb-3 pl-2">
+                      <div class="line-clamp-1"><strong class="font-bold">Falla:</strong> {{ ticket.tipificacion_falla }}</div>
+                      <div class="line-clamp-1"><strong class="font-bold">Unidad:</strong> {{ ticket.unidad_afectada }}</div>
+                    </div>
+
+                    <div class="flex gap-2 mt-auto pl-2">
+                      <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors" (click)="abrirModalDetalle(ticket)">
+                        Detalle
+                      </button>
+
+                      @if (ticket.estado_ticket === 'En Progreso') {
+                          <button class="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all" (click)="marcarComoResuelto(ticket)">Resolver</button>
+                      }
+
+                      <button class="bg-white border border-gray-200 hover:bg-gray-50 text-primary px-3 py-1.5 rounded-lg text-xs transition-colors shadow-sm" (click)="descargarPDF(ticket)" title="Descargar PDF">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                @if (misTicketsFiltrados().length === 0) {
+                  <div class="py-8 text-center text-gray-400 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                    <div class="font-medium text-sm">No tienes tickets asignados actualmente.</div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
         <!-- ======================= GESTIÓN DE USUARIOS ======================= -->
-        @if (pestanaActual() === 'usuarios' && adminActual().rol_categoria === 'Control del Sistema') {
+        @if (pestanaActual() === 'usuarios' && esRoot()) {
           <div class="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-0 overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <h3 class="text-primary font-extrabold text-xl m-0 flex items-center gap-2">

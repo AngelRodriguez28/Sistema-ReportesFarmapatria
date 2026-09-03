@@ -38,9 +38,12 @@ const obtenerTicketsGlobalesService = async () => {
     return result.rows;
 };
 
-const tomarTicketService = async (ticketId, tecnicoId, usuarioCategoria) => {
-    if (usuarioCategoria !== 'Soporte') {
-        throw { status: 403, message: 'Acceso Denegado. Solo el personal de soporte técnico puede tomar casos.' };
+const tomarTicketService = async (ticketId, tecnicoId, usuarioCategoria, usuarioRol) => {
+    const rolesTecnicos = [ROLES.SOPORTE, ROLES.SOPORTE_APLICACIONES, ROLES.REDES];
+    const esTecnico = usuarioCategoria === 'Soporte' || rolesTecnicos.includes(Number(usuarioRol));
+
+    if (!esTecnico) {
+        throw { status: 403, message: 'Acceso Denegado. Solo el personal técnico (Soporte Técnico, Aplicaciones, Redes) puede tomar casos.' };
     }
 
     const queryUpdate = `UPDATE tickets SET estado_ticket = '${ESTADOS_TICKET.EN_PROGRESO}', tecnico_id = $1 WHERE id = $2 RETURNING *`;
@@ -55,9 +58,12 @@ const tomarTicketService = async (ticketId, tecnicoId, usuarioCategoria) => {
     return ticketActualizado;
 };
 
-const resolverTicketService = async (ticketId, usuarioCategoria) => {
-    if (usuarioCategoria !== 'Soporte') {
-        throw { status: 403, message: 'Acceso Denegado. Solo el personal de soporte técnico puede resolver casos.' };
+const resolverTicketService = async (ticketId, usuarioCategoria, usuarioRol) => {
+    const rolesTecnicos = [ROLES.SOPORTE, ROLES.SOPORTE_APLICACIONES, ROLES.REDES];
+    const esTecnico = usuarioCategoria === 'Soporte' || rolesTecnicos.includes(Number(usuarioRol));
+
+    if (!esTecnico) {
+        throw { status: 403, message: 'Acceso Denegado. Solo el personal técnico (Soporte Técnico, Aplicaciones, Redes) puede resolver casos.' };
     }
 
     const queryUpdate = `UPDATE tickets SET estado_ticket = '${ESTADOS_TICKET.SIN_CONFIRMAR}' WHERE id = $1 RETURNING *`;

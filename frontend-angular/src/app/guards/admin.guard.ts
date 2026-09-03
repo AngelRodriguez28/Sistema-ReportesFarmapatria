@@ -18,7 +18,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
       
       // Validamos por la categoría del rol en lugar de IDs fijos
       // Control del Sistema, Soporte y Monitoreo (Gerente de Tecnología) acceden al panel
-      const categoriasPermitidas = ['Control del Sistema', 'Soporte', 'Monitoreo'];
+      const categoriasPermitidas = ['Control del Sistema', 'Soporte', 'Monitoreo', 'Gerencia De Tecnologia'];
       if (categoriasPermitidas.includes(usuario.rol_categoria)) {
         return true; // ¡Acceso concedido!
       } else {

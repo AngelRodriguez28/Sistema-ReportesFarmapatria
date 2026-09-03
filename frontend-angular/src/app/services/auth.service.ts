@@ -16,8 +16,9 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/login`, credenciales);
   }
 
-  setupMFA(token: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/login/mfa/setup`, {
+  setupMFA(token: string, regenerate = false): Observable<any> {
+    const url = regenerate ? `${this.apiUrl}/login/mfa/setup?regenerate=true` : `${this.apiUrl}/login/mfa/setup`;
+    return this.http.get<any>(url, {
       headers: { Authorization: `Bearer ${token}` }
     });
   }

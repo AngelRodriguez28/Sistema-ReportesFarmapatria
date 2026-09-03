@@ -5,7 +5,12 @@ const generarTicket = async (req, res, next) => {
         const archivoRuta = req.files && req.files['archivoAdjunto'] ? req.files['archivoAdjunto'][0].path : null;
         const imagenAnydeskRuta = req.files && req.files['imagenAnydesk'] ? req.files['imagenAnydesk'][0].path : null;
 
-        const ticket = await ticketsService.generarTicketService(req.body, archivoRuta, imagenAnydeskRuta);
+        const datosTicket = {
+            ...req.body,
+            usuario_id: req.usuarioId || req.body.usuario_id
+        };
+
+        const ticket = await ticketsService.generarTicketService(datosTicket, archivoRuta, imagenAnydeskRuta);
         res.status(201).json({ mensaje: "Ticket creado exitosamente", ticket });
     } catch (error) {
         next(error);

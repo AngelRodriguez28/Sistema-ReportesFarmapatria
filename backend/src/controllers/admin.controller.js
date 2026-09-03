@@ -46,7 +46,7 @@ const obtenerTicketsGlobales = async (req, res, next) => {
 
 const tomarTicket = async (req, res, next) => {
     try {
-        const ticket = await adminService.tomarTicketService(req.params.id, req.usuarioId, req.usuarioCategoria);
+        const ticket = await adminService.tomarTicketService(req.params.id, req.usuarioId, req.usuarioCategoria, req.usuarioRol);
         res.status(200).json({ message: 'Ticket tomado exitosamente', ticket });
     } catch (error) {
         if (error.status) {
@@ -58,7 +58,7 @@ const tomarTicket = async (req, res, next) => {
 
 const resolverTicket = async (req, res, next) => {
     try {
-        await adminService.resolverTicketService(req.params.id, req.usuarioCategoria);
+        await adminService.resolverTicketService(req.params.id, req.usuarioCategoria, req.usuarioRol);
         res.status(200).json({ message: 'Ticket enviado a confirmación exitosamente' });
     } catch (error) {
         if (error.status) {

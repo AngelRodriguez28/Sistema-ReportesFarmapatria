@@ -127,7 +127,7 @@ export class Perfil implements OnInit {
 
   regresar() {
     // Si la categoría permite acceder al panel administrativo
-    const categoriasAdmin = ['Control del Sistema', 'Soporte', 'Monitoreo'];
+    const categoriasAdmin = ['Control del Sistema', 'Soporte', 'Monitoreo', 'Gerencia De Tecnologia'];
     if (categoriasAdmin.includes(this.usuario.rol_categoria)) {
       this.router.navigate(['/panel-admin']); 
     } else {

@@ -29,15 +29,18 @@ export class GenerarReporte implements OnInit {
       if (usuarioGuardado) {
         this.usuarioActual = JSON.parse(usuarioGuardado);
         
+        const rolNum = Number(this.usuarioActual.rol_id);
+        if ([1, 3, 4, 5, 6, 7].includes(rolNum)) {
+          this.rutaRetorno = '/panel-admin';
+        } else {
+          this.rutaRetorno = '/panel-usuario';
+        }
+        
         let state = history.state;
         
         if (state && state.ticketAEditar) {
             this.estaEditando = true;
             this.idTicketEditar = state.ticketAEditar.id;
-            
-            if (this.usuarioActual.rol_id === 1 || this.usuarioActual.rol_id === 2) {
-                 this.rutaRetorno = '/panel-admin';
-            }
             
             this.nuevoReporte.contacto = state.ticketAEditar.numero_contacto || '';
             this.nuevoReporte.nivelReporte = state.ticketAEditar.nivel_reporte || '';
@@ -214,93 +217,107 @@ export class GenerarReporte implements OnInit {
     }
   }
 
-  generarPDF(numeroReporte: string) {
-    const doc = new jsPDF('p', 'mm', 'a4'); 
+  generarPDF(numeroReporte: string): Promise<void> {
+    return new Promise((resolve) => {
+      const doc = new jsPDF('p', 'mm', 'a4'); 
 
-    const img = new Image();
-    img.src = '/cintillo.png';
+      const img = new Image();
+      img.src = '/cintillo.png';
 
-    const construirDocumento = (tieneMembrete: boolean = true) => {
-      if (tieneMembrete) {
-        try {
-          doc.addImage(img, 'PNG', 10, 10, 190, 30); 
-        } catch (e) {
-          console.warn("Error al intentar añadir la imagen del membrete.", e);
+      const construirDocumento = (tieneMembrete: boolean = true) => {
+        if (tieneMembrete) {
+          try {
+            doc.addImage(img, 'PNG', 10, 10, 190, 30); 
+          } catch (e) {
+            try {
+              doc.addImage(img, 'JPEG', 10, 10, 190, 30);
+            } catch (e2) {
+              console.warn("Error al intentar añadir la imagen del membrete.", e2);
+            }
+          }
         }
-      }
 
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
-      doc.setTextColor(0, 86, 179); 
-      doc.text('REPORTE DE INCIDENCIA TÉCNICA', 105, 55, { align: 'center' });
-
-      doc.setDrawColor(0, 86, 179);
-      doc.setLineWidth(1);
-      doc.line(15, 60, 195, 60);
-
-      doc.setFillColor(255, 235, 238); 
-      doc.roundedRect(140, 65, 55, 25, 3, 3, 'F');
-      
-      doc.setFontSize(12);
-      doc.setTextColor(183, 28, 28); 
-      doc.text('CÓDIGO DE TICKET', 167.5, 73, { align: 'center' });
-      doc.setFontSize(14);
-      doc.text(numeroReporte, 167.5, 83, { align: 'center' });
-
-      doc.setFontSize(11);
-      doc.setTextColor(33, 33, 33); 
-      let y = 70; 
-
-      const drawField = (label: string, value: string) => {
-        if (!value || value === '') return; 
         doc.setFont("helvetica", "bold");
-        doc.text(label, 15, y);
+        doc.setFontSize(18);
+        doc.setTextColor(0, 86, 179); 
+        doc.text('REPORTE DE INCIDENCIA TÉCNICA', 105, 55, { align: 'center' });
+
+        doc.setDrawColor(0, 86, 179);
+        doc.setLineWidth(1);
+        doc.line(15, 60, 195, 60);
+
+        doc.setFillColor(255, 235, 238); 
+        doc.roundedRect(140, 65, 55, 25, 3, 3, 'F');
+        
+        doc.setFontSize(12);
+        doc.setTextColor(183, 28, 28); 
+        doc.text('CÓDIGO DE TICKET', 167.5, 73, { align: 'center' });
+        doc.setFontSize(14);
+        doc.text(numeroReporte, 167.5, 83, { align: 'center' });
+
+        doc.setFontSize(11);
+        doc.setTextColor(33, 33, 33); 
+        let y = 70; 
+
+        const drawField = (label: string, value: string) => {
+          if (!value || value === '') return; 
+          doc.setFont("helvetica", "bold");
+          doc.text(label, 15, y);
+          doc.setFont("helvetica", "normal");
+          const splitValue = doc.splitTextToSize(value, 100); 
+          doc.text(splitValue, 60, y);
+          y += (splitValue.length * 7); 
+        };
+
+        drawField('Fecha de Registro:', this.nuevoReporte.fecha);
+        drawField('Número de Contacto:', this.nuevoReporte.contacto);
+        drawField('Nivel de Reporte:', this.nuevoReporte.nivelReporte);
+        drawField('Unidad que Reporta:', this.nuevoReporte.unidadReporta);
+        drawField('Unidad Afectada:', this.nuevoReporte.unidadAfectada);
+        drawField('Tipificación:', this.nuevoReporte.tipificacionFalla);
+        const anydeskText = this.nuevoReporte.anydesk || 'N/A';
+        const anydeskImagenText = this.nuevoReporte.imagenAnydesk ? ' (Imagen adjunta)' : '';
+        drawField('N° Anydesk:', anydeskText + anydeskImagenText);
+
+        y += 5;
+        doc.setFont("helvetica", "bold");
+        doc.text('Descripción Detallada del Evento:', 15, y);
+        
+        y += 5;
+        doc.setFillColor(245, 245, 245); 
+        const descLines = doc.splitTextToSize(this.nuevoReporte.descripcion || 'Sin descripción', 175);
+        const rectHeight = (descLines.length * 6) + 10;
+        doc.roundedRect(15, y, 180, rectHeight, 2, 2, 'F');
+        
         doc.setFont("helvetica", "normal");
-        const splitValue = doc.splitTextToSize(value, 100); 
-        doc.text(splitValue, 60, y);
-        y += (splitValue.length * 7); 
+        doc.text(descLines, 20, y + 8);
+
+        doc.setFontSize(9);
+        doc.setTextColor(158, 158, 158); 
+        doc.text('Documento generado por la Plataforma de Gestión - Farmapatria', 105, 285, { align: 'center' });
+
+        try {
+          doc.save(`Ticket_${numeroReporte}.pdf`);
+        } catch (saveErr) {
+          console.error("Error al descargar PDF del ticket:", saveErr);
+        }
+        resolve();
       };
 
-      drawField('Fecha de Registro:', this.nuevoReporte.fecha);
-      drawField('Número de Contacto:', this.nuevoReporte.contacto);
-      drawField('Nivel de Reporte:', this.nuevoReporte.nivelReporte);
-      drawField('Unidad que Reporta:', this.nuevoReporte.unidadReporta);
-      drawField('Unidad Afectada:', this.nuevoReporte.unidadAfectada);
-      drawField('Tipificación:', this.nuevoReporte.tipificacionFalla);
-      const anydeskText = this.nuevoReporte.anydesk || 'N/A';
-      const anydeskImagenText = this.nuevoReporte.imagenAnydesk ? ' (Imagen adjunta)' : '';
-      drawField('N° Anydesk:', anydeskText + anydeskImagenText);
+      img.onload = () => construirDocumento(true);
 
-      y += 5;
-      doc.setFont("helvetica", "bold");
-      doc.text('Descripción Detallada del Evento:', 15, y);
-      
-      y += 5;
-      doc.setFillColor(245, 245, 245); 
-      const descLines = doc.splitTextToSize(this.nuevoReporte.descripcion || 'Sin descripción', 175);
-      const rectHeight = (descLines.length * 6) + 10;
-      doc.roundedRect(15, y, 180, rectHeight, 2, 2, 'F');
-      
-      doc.setFont("helvetica", "normal");
-      doc.text(descLines, 20, y + 8);
-
-      doc.setFontSize(9);
-      doc.setTextColor(158, 158, 158); 
-      doc.text('Documento generado por la Plataforma de Gestión - Farmapatria', 105, 285, { align: 'center' });
-
-      doc.save(`Ticket_${numeroReporte}.pdf`);
-    };
-
-    img.onload = () => construirDocumento(true);
-
-    img.onerror = () => {
-        console.warn("Aviso: No se encontró la imagen cintillo.png en la carpeta 'public'. Generando panel en modo soporte.");
+      img.onerror = () => {
+        console.warn("Aviso: No se pudo cargar el membrete oficial cintillo.png. Generando ticket en modo estándar.");
         construirDocumento(false);
-    };
+      };
+    });
   }
 
   async enviarReporte() {
-    // B2-FIX: Validar todos los campos obligatorios antes de enviar
+    if (!this.nuevoReporte.contacto || this.nuevoReporte.contacto.trim() === '') {
+      alert('Error: Debe ingresar un Número de Contacto.');
+      return;
+    }
     if (!this.nuevoReporte.nivelReporte) {
       alert('Error: Debe seleccionar un Nivel de Reporte.');
       return;
@@ -321,10 +338,13 @@ export class GenerarReporte implements OnInit {
       alert('Error: Debe ingresar una Descripción del evento.');
       return;
     }
+    if (this.nuevoReporte.descripcion.trim().length < 10) {
+      alert('Error: La descripción debe tener al menos 10 caracteres explicativos.');
+      return;
+    }
 
     const formData = new FormData();
-    // Le inyectamos el ID real de tu usuario logueado
-    formData.append('usuario_id', this.usuarioActual.id); 
+    formData.append('usuario_id', this.usuarioActual?.id || ''); 
     formData.append('contacto', this.nuevoReporte.contacto);
     formData.append('nivelReporte', this.nuevoReporte.nivelReporte);
     formData.append('tipificacionFalla', this.nuevoReporte.tipificacionFalla);
@@ -349,20 +369,36 @@ export class GenerarReporte implements OnInit {
           },
           error: (err) => {
             console.error("Error al editar:", err);
-            alert("Ocurrió un error al intentar comunicar con el servidor.");
+            let mensajeError = "Ocurrió un error al intentar comunicar con el servidor.";
+            if (err.error?.errors && Array.isArray(err.error.errors)) {
+              mensajeError = err.error.errors.map((e: any) => e.msg).join('\n');
+            } else if (err.error?.error) {
+              mensajeError = err.error.error;
+            }
+            alert("Error al corregir el reporte:\n" + mensajeError);
           }
         });
       } else {
         this.ticketService.crearTicket(formData).subscribe({
-          next: (resultado) => {
+          next: async (resultado) => {
             alert(`¡Éxito! Su reporte ha sido generado bajo el código: ${resultado.ticket.numero_reporte}`);
-            this.generarPDF(resultado.ticket.numero_reporte);
+            try {
+              await this.generarPDF(resultado.ticket.numero_reporte);
+            } catch (pdfErr) {
+              console.error("Error al generar PDF:", pdfErr);
+            }
             this.ticketService.notificarNuevoTicket(); 
-            this.router.navigate(['/panel-usuario']);
+            this.router.navigate([this.rutaRetorno]);
           },
           error: (err) => {
             console.error("Error al crear:", err);
-            alert("Ocurrió un error al intentar comunicar con el servidor de base de datos.");
+            let mensajeError = "Ocurrió un error al intentar comunicar con el servidor.";
+            if (err.error?.errors && Array.isArray(err.error.errors)) {
+              mensajeError = err.error.errors.map((e: any) => e.msg).join('\n');
+            } else if (err.error?.error) {
+              mensajeError = err.error.error;
+            }
+            alert("Error al generar el reporte:\n" + mensajeError);
           }
         });
       }

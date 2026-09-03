@@ -10,11 +10,10 @@ const errorHandler = (err, req, res, next) => {
         return res.status(400).json({ error: 'El archivo excede el límite de 5MB.' });
     }
 
-    // Respuesta genérica para errores no controlados
-    res.status(500).json({ 
-        error: 'Ha ocurrido un error interno en el servidor.',
-        // En desarrollo podríamos enviar err.message, pero en prod es mejor ocultarlo
-        detalle: process.env.NODE_ENV === 'development' ? err.message : undefined
+    const statusCode = err.status || err.statusCode || 500;
+    res.status(statusCode).json({ 
+        error: err.message || 'Ha ocurrido un error interno en el servidor.',
+        detalle: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 };
 

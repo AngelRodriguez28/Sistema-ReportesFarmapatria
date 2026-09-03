@@ -96,23 +96,41 @@ A continuación se detalla la lógica de negocio de los módulos principales que
     *   Permite el establecimiento de una nueva contraseña encriptada en la base de datos sin necesidad de intervención del administrador.
 
 ### 4.2. Módulo de Gestión de Tickets (Ciclo de Vida)
-El núcleo del proceso de atención técnica sigue un flujo de estados estricto:
+El núcleo del proceso de atención técnica sigue un flujo de estados estricto. A continuación se detalla el ciclo y los pasos que cada actor debe realizar:
 
-1.  **Creación (Estado: `Pendiente`):**
-    *   El usuario completa el formulario en `/generar-reporte`.
-    *   Puede adjuntar evidencia (PNG, JPG, PDF).
-    *   Se genera un identificador único (Ej. `REP-0042`).
-2.  **Atención (Estado: `En Progreso`):**
-    *   Un usuario con privilegios (Administrador/Técnico) visualiza el ticket en su dashboard.
-    *   Hace clic en "Tomar Ticket". El sistema registra el `tecnico_id` y cambia el estado.
-    *   Se notifica automáticamente al creador original.
-3.  **Resolución Técnica (Estado: `Sin Confirmar`):**
-    *   El técnico marca el ticket como solucionado desde su panel.
-    *   El estado cambia a `Sin Confirmar`. Se requiere que el usuario original valide que el problema realmente se solucionó.
-4.  **Confirmación de Usuario (Estado: `Resuelto` o Retorno a `En Progreso`):**
-    *   El usuario recibe una notificación.
-    *   **Si el problema se solucionó:** El usuario hace clic en confirmar. El estado cambia a `Resuelto` (Cierre definitivo).
-    *   **Si el problema persiste:** El usuario reporta "Error Persistente". El ticket regresa a estado `En Progreso` y se notifica al técnico asignado para que retome el caso.
+1.  **Creación (Estado: `Pendiente`) - *Acción del Usuario*:**
+    *   **Paso a paso para crear un ticket:**
+        1. Iniciar sesión en el sistema y navegar a la opción **"Generar Reporte"** en el panel lateral.
+        2. Seleccionar la **Unidad Afectada** (por defecto, la farmacia o gerencia del usuario).
+        3. Clasificar el problema: Seleccionar el **Nivel de Reporte** (Ej. Medio, Urgente) y la **Tipificación de Falla** (Ej. Falla de Impresora, Falla de Conexión).
+        4. Ingresar el código de **AnyDesk** si aplica (para soporte remoto).
+        5. Llenar el campo **Descripción** con todos los detalles técnicos posibles sobre el problema.
+        6. (Opcional) Adjuntar un archivo de evidencia (PNG, JPG, PDF) en el campo designado.
+        7. Hacer clic en **"Generar Reporte"**.
+    *   *Resultado interno:* Se guarda en base de datos con un identificador correlativo único (Ej. `REP-0042`) en estado `Pendiente`.
+
+2.  **Atención (Estado: `En Progreso`) - *Acción del Técnico/Admin*:**
+    *   **Paso a paso para atender un reporte:**
+        1. El técnico o administrador ingresa al **Dashboard** (Panel de Administración).
+        2. Navega a la tabla de reportes activos y busca aquellos en estado `Pendiente`.
+        3. Hace clic en el botón de opciones (o directamente en el botón **"Tomar Ticket"** / **"Atender"**).
+        4. Inicia su labor técnica contactando al usuario o mediante conexión AnyDesk usando los datos del reporte.
+    *   *Resultado interno:* El sistema registra el `tecnico_id` (usuario que tomó el caso), cambia el estado a `En Progreso`, y emite una notificación al usuario creador de que su caso está siendo atendido.
+
+3.  **Resolución Técnica (Estado: `Sin Confirmar`) - *Acción del Técnico*:**
+    *   **Paso a paso para solucionar un reporte:**
+        1. Una vez que el técnico ha solucionado el problema remotamente o localmente, vuelve a su Panel de Administración.
+        2. Busca el ticket en estado `En Progreso` que tiene asignado.
+        3. Presiona el botón **"Marcar como Solucionado"** (o resolver).
+    *   *Resultado interno:* El estado cambia a `Sin Confirmar`. Se envía una notificación al usuario indicando que debe validar si el servicio fue restablecido.
+
+4.  **Confirmación de Usuario (Estado: `Resuelto` o Retorno a `En Progreso`) - *Acción del Usuario*:**
+    *   **Paso a paso para confirmar la solución:**
+        1. El usuario revisa sus notificaciones o su panel de tickets y ve que su caso está `Sin Confirmar`.
+        2. Verifica en su sitio de trabajo si el problema realmente desapareció.
+        3. En el sistema, hace clic en el ticket. Si todo está bien, presiona **"Confirmar Solución"**. El ticket se cierra (Estado `Resuelto`).
+        4. Si el equipo sigue fallando, presiona **"Reportar Error Persistente"**.
+    *   *Resultado interno:* En caso de "Error Persistente", el ticket regresa a estado `En Progreso` y el sistema alerta al técnico asignado para que retome el caso de inmediato.
 
 ### 4.3. Módulo de Administración de Usuarios
 Accesible únicamente para perfiles administrativos (Soporte Técnico/Super Admin).

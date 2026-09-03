@@ -63,20 +63,22 @@ const setupMFA = async (req, res, next) => {
         // req.usuarioId debe venir del token temporal
         if (Number(req.usuarioRol) !== 1) return res.status(403).json({ error: 'Solo ROOT puede configurar MFA.' });
 
+        const { regenerate } = req.query;
+
         const result = await pool.query('SELECT mfa_secret FROM usuarios WHERE id = $1', [req.usuarioId]);
         const user = result.rows[0];
 
         let secret;
-        if (user && user.mfa_secret) {
+        if (user && user.mfa_secret && regenerate !== 'true') {
             // Reutilizar el secreto que ya se generó para no invalidar el QR anterior
             secret = {
                 base32: user.mfa_secret,
                 otpauth_url: speakeasy.otpauthURL({ secret: user.mfa_secret, label: 'SIGSO Farmapatria (ROOT)', encoding: 'base32' })
             };
         } else {
-            // Generar uno nuevo solo si no existe
+            // Generar uno nuevo si no existe o si se solicita explícitamente regenerar
             secret = speakeasy.generateSecret({ name: 'SIGSO Farmapatria (ROOT)' });
-            await pool.query('UPDATE usuarios SET mfa_secret = $1 WHERE id = $2', [secret.base32, req.usuarioId]);
+            await pool.query('UPDATE usuarios SET mfa_secret = $1, mfa_habilitado = false WHERE id = $2', [secret.base32, req.usuarioId]);
         }
 
         qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
