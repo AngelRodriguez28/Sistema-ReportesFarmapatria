@@ -6,11 +6,10 @@ import { provideHttpClient, withFetch, withInterceptors, HttpInterceptorFn } fro
 
 // BUG-C3 FIX: Interceptor global para inyectar JWT en todas las consultas HTTP
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  if (!req.headers.has('Authorization')) {
-    const token = typeof window !== 'undefined' && localStorage ? localStorage.getItem('authToken') : null;
-    if (token) {
-      req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-    }
+  const token = typeof window !== 'undefined' && localStorage ? (localStorage.getItem('authToken') || localStorage.getItem('token')) : null;
+  const currentAuth = req.headers.get('Authorization');
+  if (token && (!currentAuth || currentAuth === 'Bearer null' || currentAuth === 'Bearer undefined')) {
+    req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
   }
   return next(req);
 };

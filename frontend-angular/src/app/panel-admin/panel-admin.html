@@ -39,6 +39,12 @@
           </a>
         }
 
+        @if (esGestionServicios()) {
+          <a (click)="cambiarPestana('servicios')" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium" [class.bg-secondary]="pestanaActual() === 'servicios'" [class.text-white]="pestanaActual() === 'servicios'" [class.font-bold]="pestanaActual() === 'servicios'">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/></svg> Reporte De Servicios
+          </a>
+        }
+
         <a (click)="cambiarPestana('estadisticas')" class="px-4 py-3 rounded-xl flex items-center gap-3 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer font-medium" [class.bg-secondary]="pestanaActual() === 'estadisticas'" [class.text-white]="pestanaActual() === 'estadisticas'" [class.font-bold]="pestanaActual() === 'estadisticas'">
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M0 0h1v15h15v1H0V0zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07z"/></svg> Estadísticas
         </a>
@@ -59,7 +65,7 @@
       </div>
       
       <div class="flex items-center gap-4 md:gap-6">
-        <div class="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-white/10 transition-colors" (click)="irAlPerfil()">
+        <div class="flex items-center gap-3 cursor-pointer p-2 rounded-xl transition-colors" [class.bg-white_10]="pestanaActual() === 'perfil'" [class.bg-white_20]="pestanaActual() === 'perfil'" [ngClass]="{'bg-white/10': pestanaActual() === 'perfil', 'hover:bg-white/10': pestanaActual() !== 'perfil'}" (click)="irAlPerfil()">
           <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm overflow-hidden border-2 border-white/30 shadow-inner">
             @if (adminActual().avatarUrl) {
               <img [src]="adminActual().avatarUrl" class="w-full h-full object-cover">
@@ -532,6 +538,16 @@
         }
         
       </div>
+      <!-- Pestaña Perfil -->
+      @if (pestanaActual() === 'perfil') {
+        <app-perfil></app-perfil>
+      }
+
+      <!-- Pestaña Servicios -->
+      @if (pestanaActual() === 'servicios') {
+        <app-admin-servicios></app-admin-servicios>
+      }
+
     </main>
   </div>
 

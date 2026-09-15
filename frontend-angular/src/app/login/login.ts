@@ -124,6 +124,7 @@ export class LoginLoginComponent implements OnInit {
     }
     localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
     localStorage.setItem('authToken', data.token);
+    localStorage.setItem('token', data.token);
     
     this.nombreUsuario.set(data.usuario.nombre);
     this.mostrarBienvenida.set(true);

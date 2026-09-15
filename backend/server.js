@@ -14,6 +14,7 @@ const errorHandler = require('./src/middlewares/errorHandler.middleware');
 const authRoutes = require('./src/routes/auth.routes');
 const ticketsRoutes = require('./src/routes/tickets.routes');
 const adminRoutes = require('./src/routes/admin.routes');
+const serviciosRoutes = require('./src/routes/servicios.routes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api', authRoutes);          // /api/registro, /api/login, /api/usuarios/...
 app.use('/api', ticketsRoutes);       // /api/tickets/..., /api/notificaciones/...
 app.use('/api/admin', adminRoutes);   // /api/admin/usuarios/..., /api/admin/tickets/...
+app.use('/api/servicios', serviciosRoutes);
 
 // Servir Frontend Angular Estáticamente
 const frontendPath = path.join(__dirname, '../frontend-angular/dist/frontend-angular/browser');

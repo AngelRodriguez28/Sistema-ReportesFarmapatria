@@ -7,19 +7,22 @@ import { jsPDF } from 'jspdf';
 import { timer, Subscription } from 'rxjs'; 
 import { environment } from '../../environments/environment'; // B1-FIX
 import { Chart, registerables } from 'chart.js';
+import { Perfil } from '../perfil/perfil';
+import { AdminServicios } from '../admin-servicios/admin-servicios';
+
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-panel-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Perfil, AdminServicios],
   templateUrl: './panel-admin.html',
   styleUrl: './panel-admin.css'
 })
 export class PanelAdmin implements OnInit, OnDestroy { 
   
   adminActual = signal<any>({ id: 0, nombre: 'Cargando...', apellido: '', gerencia: '', rol_id: 0, rol_categoria: '' });
-  pestanaActual = signal<'home' | 'tickets' | 'mis-tickets' | 'usuarios' | 'estadisticas'>('home');
+  pestanaActual = signal<'home' | 'tickets' | 'mis-tickets' | 'usuarios' | 'estadisticas' | 'perfil' | 'servicios'>('home');
   isSidebarOpen = signal<boolean>(false);
   habilitarTransicion = false;
   
@@ -39,6 +42,12 @@ export class PanelAdmin implements OnInit, OnDestroy {
     const rolCat = this.adminActual().rol_categoria;
     const rolId = Number(this.adminActual().rol_id);
     return rolId === 4 || rolId === 6 || rolCat === 'Monitoreo' || rolCat === 'Gerencia De Tecnologia';
+  });
+
+  esGestionServicios = computed(() => {
+    const rolCat = this.adminActual().rol_categoria;
+    const rolId = Number(this.adminActual().rol_id);
+    return rolCat === 'Gerente 1' || rolCat === 'Gerencia De Tecnologia' || rolCat === 'Gerente General De Tecnologia' || rolId === 4;
   });
   
   // Variable de Estado para la Ventana Modal
@@ -212,11 +221,14 @@ export class PanelAdmin implements OnInit, OnDestroy {
     this.terminoBusqueda.set(event.target.value);
   }
 
-  cambiarPestana(pestana: 'home' | 'tickets' | 'mis-tickets' | 'usuarios' | 'estadisticas') {
+  cambiarPestana(pestana: 'home' | 'tickets' | 'mis-tickets' | 'usuarios' | 'estadisticas' | 'perfil' | 'servicios') {
     if ((pestana === 'tickets' || pestana === 'mis-tickets') && !this.esTecnico()) {
       return;
     }
     if (pestana === 'usuarios' && !this.esRoot()) {
+      return;
+    }
+    if (pestana === 'servicios' && !this.esGestionServicios()) {
       return;
     }
     this.pestanaActual.set(pestana);
@@ -233,7 +245,10 @@ export class PanelAdmin implements OnInit, OnDestroy {
   }
 
   irAlPerfil() {
-    this.router.navigate(['/perfil']);
+    this.cambiarPestana('perfil');
+    if (window.innerWidth < 768) {
+      this.isSidebarOpen.set(false);
+    }
   }
 
   renderizarGraficosGlobales() {

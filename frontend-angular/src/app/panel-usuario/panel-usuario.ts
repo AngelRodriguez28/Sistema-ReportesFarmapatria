@@ -9,12 +9,15 @@ import { timer, Subscription } from 'rxjs';
 import { environment } from '../../environments/environment'; // B1-FIX
 // --- NUEVO: IMPORTAMOS CHART.JS ---
 import { Chart, registerables } from 'chart.js';
+import { Perfil } from '../perfil/perfil';
+import { ReporteServicios } from '../reporte-servicios/reporte-servicios';
+
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-panel-usuario',
   standalone: true,
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, Perfil, ReporteServicios],
   templateUrl: './panel-usuario.html',
   styleUrl: './panel-usuario.css'
 })
@@ -59,11 +62,13 @@ export class PanelUsuario implements OnInit, OnDestroy {
     );
   });
 
-  pestanaActual = signal<'estatus' | 'historico'>('estatus');
-
   ticketsPendientes = signal<any[]>([]);
   ticketsSinConfirmar = signal<any[]>([]);
   ticketsResueltos = signal<any[]>([]);
+
+  pestanaActual = signal<'estatus' | 'historico' | 'perfil' | 'servicios'>('estatus');
+  suscripcion: Subscription | undefined;
+  graficoInstancia: any; 
 
   private motorDeTiempo: Subscription | undefined;
   // B8-FIX: Guardar referencia a la suscripción del ticketService para poder cancelarla
@@ -194,7 +199,7 @@ export class PanelUsuario implements OnInit, OnDestroy {
     this.isSidebarOpen.update(v => !v);
   }
 
-  cambiarPestana(pestana: 'estatus' | 'historico') {
+  cambiarPestana(pestana: 'estatus' | 'historico' | 'perfil' | 'servicios') {
     this.pestanaActual.set(pestana);
     if (pestana === 'estatus') {
       setTimeout(() => this.renderizarGrafico(), 100);
@@ -202,7 +207,10 @@ export class PanelUsuario implements OnInit, OnDestroy {
   }
 
   irAlPerfil() {
-    this.router.navigate(['/perfil']);
+    this.cambiarPestana('perfil');
+    if (window.innerWidth < 768) {
+      this.isSidebarOpen.set(false);
+    }
   }
 
   // B3-FIX: Implementación completa del PDF para el Panel Usuario

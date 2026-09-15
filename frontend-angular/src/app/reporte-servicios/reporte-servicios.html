@@ -1,0 +1,211 @@
+<div class="h-full flex flex-col font-sans p-4 md:p-6 bg-[#f8f9fa] md:bg-transparent overflow-hidden">
+  
+  <!-- Header Global -->
+  <div class="flex items-center justify-between mb-6 shrink-0">
+    <div class="flex items-center gap-3">
+      @if (vistaActual !== 'grid') {
+        <button class="w-10 h-10 bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-700 hover:bg-gray-50 rounded-full transition-colors" (click)="vistaActual === 'form' ? volverAPreForm() : (vistaActual === 'pre-form' ? volverAGrid() : volverAGrid())">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+      }
+      <h3 class="text-xl md:text-2xl font-extrabold text-gray-800 m-0">
+        {{ vistaActual === 'grid' ? 'Pago de servicios' : (vistaActual === 'listar' ? 'Mis Reportes' : 'Reportar Falla') }}
+      </h3>
+    </div>
+    @if (vistaActual === 'grid') {
+      <button class="text-xs md:text-sm font-bold text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 px-4 py-2 rounded-full transition-all" (click)="irAListar()">
+        Ver Historial
+      </button>
+    }
+  </div>
+
+  <div class="flex-1 overflow-y-auto pb-8">
+    
+    <!-- VISTA 1: GRID DE PROVEEDORES (TARJETAS SEPARADAS) -->
+    @if (vistaActual === 'grid') {
+      <p class="text-gray-500 text-sm md:text-base mb-6 font-medium">Selecciona el proveedor o servicio para generar el reporte.</p>
+      
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        @for (prov of proveedores; track prov.id) {
+          <div class="bg-white rounded-2xl shadow-sm hover:shadow-md border border-gray-100 p-5 md:p-6 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all transform hover:-translate-y-1 active:scale-95 group" (click)="seleccionarProveedor(prov)">
+            <!-- Circulo con imagen/logo -->
+            <div class="w-20 h-20 md:w-24 md:h-24 rounded-full shadow-sm border-4 border-gray-50 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105" [ngClass]="prov.color">
+              <span class="font-black text-xl md:text-2xl tracking-wide" [ngClass]="prov.text">{{ prov.nombre.substring(0,4).toUpperCase() }}</span>
+            </div>
+            <!-- Nombre del servicio -->
+            <div class="text-center w-full">
+              <div class="h-[2px] w-12 bg-gray-100 mx-auto mb-3 rounded-full"></div>
+              <h4 class="text-sm md:text-base font-bold text-gray-800 m-0 truncate px-2">{{ prov.nombre }}</h4>
+              <p class="text-[10px] md:text-xs text-gray-400 font-semibold mt-1 truncate px-2">{{ prov.subservicios.length }} opciones</p>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- OTRAS VISTAS (Dentro de un contenedor centrado) -->
+    @if (vistaActual !== 'grid') {
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 relative mx-auto p-6 md:p-8 transition-all"
+           [ngClass]="vistaActual === 'listar' ? 'max-w-4xl' : 'max-w-md'">
+        
+        <!-- VISTA 2: PRE-FORM (Selección de tipo de servicio con Logo) -->
+        @if (vistaActual === 'pre-form' && proveedorSeleccionado) {
+          <div class="flex flex-col items-center animate-fade-in">
+            <!-- Logo -->
+            <div class="w-24 h-24 rounded-full shadow-sm mb-4 flex items-center justify-center text-3xl font-extrabold border-4 border-gray-50" [ngClass]="[proveedorSeleccionado.color, proveedorSeleccionado.text]">
+               {{ proveedorSeleccionado.nombre.substring(0,1) }}
+            </div>
+            <h2 class="text-2xl font-black text-gray-800 mb-8 text-center">{{ proveedorSeleccionado.nombre }}</h2>
+            
+            <h3 class="text-gray-500 w-full text-left mb-4 font-bold text-sm uppercase tracking-wide">Ingrese los datos</h3>
+
+            <div class="w-full relative mb-8">
+              <label class="absolute -top-2.5 left-3 bg-white px-1 text-xs text-gray-500 font-bold z-10">Tipo de servicio</label>
+              <select [(ngModel)]="subservicioSeleccionado" class="w-full px-4 py-3.5 bg-transparent border-2 border-gray-200 rounded-xl text-gray-800 font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 appearance-none transition-all cursor-pointer">
+                <option value="" disabled selected>Selecciona una opción</option>
+                @for (sub of proveedorSeleccionado.subservicios; track sub) {
+                  <option [value]="sub">{{ sub }}</option>
+                }
+              </select>
+              <div class="absolute right-4 top-4 pointer-events-none text-gray-400">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
+              </div>
+            </div>
+
+            <button class="w-full bg-blue-600 text-white font-bold text-lg py-3.5 rounded-xl shadow-md hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-all" (click)="continuarAFormulario()">
+              Continuar
+            </button>
+          </div>
+        }
+
+        <!-- VISTA 3: FORMULARIO PRINCIPAL -->
+        @if (vistaActual === 'form') {
+          <div class="animate-fade-in">
+            <div class="bg-blue-50/50 text-blue-800 p-4 rounded-xl mb-6 flex items-center justify-between border border-blue-100/50">
+              <div>
+                <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Proveedor Seleccionado</p>
+                <p class="font-extrabold text-sm m-0">{{ nuevoReporte.proveedor }} <span class="text-blue-300 mx-1">•</span> {{ nuevoReporte.tipo_servicio }}</p>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="relative">
+                <label class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-gray-500 uppercase z-10">Tiempo sin servicio</label>
+                <input type="text" [(ngModel)]="nuevoReporte.tiempo_sin_servicio" placeholder="Ej: 2 horas, 3 días..." class="w-full px-4 py-3.5 bg-transparent border-2 border-gray-200 rounded-xl text-sm font-bold text-gray-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-gray-300 placeholder:font-medium">
+              </div>
+
+              <div class="relative">
+                <label class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-gray-500 uppercase z-10">Descripción Adicional</label>
+                <textarea [(ngModel)]="nuevoReporte.descripcion" rows="4" placeholder="Detalles específicos de la falla..." class="w-full px-4 py-3.5 bg-transparent border-2 border-gray-200 rounded-xl text-sm font-bold text-gray-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 resize-none transition-all placeholder:text-gray-300 placeholder:font-medium"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Archivo Adjunto (Opcional)</label>
+                <div class="relative border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group">
+                  <input type="file" (change)="onFileSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                  <svg class="mx-auto h-8 w-8 text-gray-300 group-hover:text-blue-400 mb-3 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                  <p class="text-sm font-bold text-gray-600 m-0">Toca para adjuntar imagen o documento</p>
+                  @if (archivoSeleccionado) {
+                    <div class="mt-4 inline-flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                      <svg width="14" height="14" fill="currentColor" class="text-blue-500" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
+                      <p class="text-xs text-blue-700 font-bold m-0 max-w-[200px] truncate">{{ archivoSeleccionado.name }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8">
+              <button class="w-full bg-blue-600 text-white font-bold text-lg py-3.5 rounded-xl shadow-md hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 disabled:hover:shadow-md disabled:cursor-not-allowed" (click)="enviarReporte()" [disabled]="enviando">
+                <div class="flex items-center justify-center gap-2">
+                  @if (enviando) {
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  }
+                  {{ enviando ? 'Enviando...' : 'Generar Reporte' }}
+                </div>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- VISTA 4: LISTAR REPORTES -->
+        @if (vistaActual === 'listar') {
+          <div class="animate-fade-in">
+            @if (reportesServicios.length === 0) {
+              <div class="text-center py-12">
+                <div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                  <svg class="w-10 h-10 text-gray-300" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/></svg>
+                </div>
+                <h4 class="text-lg font-bold text-gray-700 m-0">No hay reportes</h4>
+                <p class="text-sm text-gray-400 font-medium mt-1">Aún no has generado ningún reporte.</p>
+              </div>
+            } @else {
+              <div class="space-y-4">
+                @for (r of reportesServicios; track r.id) {
+                  <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all">
+                    <div class="flex justify-between items-start mb-3 gap-2 flex-wrap">
+                      <div>
+                        <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md uppercase tracking-wider border border-blue-100">{{ r.numero_reporte }}</span>
+                        <h4 class="font-extrabold text-gray-800 m-0 leading-tight mt-1.5 text-base">{{ r.proveedor || r.tipo_servicio }}</h4>
+                      </div>
+                      <span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg"
+                        [ngClass]="{
+                          'bg-yellow-50 border border-yellow-200 text-yellow-600': r.estado === 'Pendiente',
+                          'bg-blue-50 border border-blue-200 text-blue-600': r.estado === 'En Progreso',
+                          'bg-green-50 border border-green-200 text-green-600': r.estado === 'Resuelto'
+                        }">
+                        {{ r.estado }}
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-2 mb-2">
+                      <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <p class="text-xs text-gray-600 font-bold m-0">{{ r.tipo_servicio }}</p>
+                    </div>
+
+                    @if (r.tiempo_sin_servicio) {
+                      <div class="flex items-center gap-2 mt-2 mb-3 bg-red-50 p-2.5 rounded-lg border border-red-100">
+                        <svg width="14" height="14" fill="currentColor" class="text-red-500 shrink-0" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0zM8 3.5a.5.5 0 0 0-1 0V8a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.118V3.5z"/></svg>
+                        <p class="text-xs text-red-600 font-bold m-0">Tiempo sin servicio: {{ r.tiempo_sin_servicio }}</p>
+                      </div>
+                    }
+
+                    @if (r.descripcion) {
+                      <div class="bg-gray-50 border border-gray-100 rounded-lg p-3 text-xs text-gray-700 mb-3 italic font-medium">
+                        {{ r.descripcion }}
+                      </div>
+                    }
+
+                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 flex-wrap">
+                      <div class="flex items-center gap-2">
+                        @if (r.archivo_adjunto) {
+                          <a [href]="serverUrl + '/' + r.archivo_adjunto" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-100 transition-colors">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0V3z"/></svg>
+                            Ver Adjunto
+                          </a>
+                        }
+                        @if (r.tecnico_nombre) {
+                          <span class="text-[11px] font-bold text-blue-800 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
+                            Atendido por: {{ r.tecnico_nombre }} {{ r.tecnico_apellido }}
+                          </span>
+                        }
+                      </div>
+
+                      <button (click)="descargarPDF(r)" class="inline-flex items-center gap-1.5 bg-white border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer ml-auto">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 3a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/></svg>
+                        Descargar Soporte
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

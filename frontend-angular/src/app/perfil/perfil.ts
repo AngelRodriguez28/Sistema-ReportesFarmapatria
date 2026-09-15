@@ -32,7 +32,13 @@ export class Perfil implements OnInit {
       if (usuarioGuardado) {
         this.usuario = JSON.parse(usuarioGuardado);
         // Aseguramos que el input de fecha se llene si la BD devolvió fecha_nacimiento
-        this.usuario.fecha_nac = this.usuario.fecha_nac || this.usuario.fecha_nacimiento;
+        let rawDate = this.usuario.fecha_nac || this.usuario.fecha_nacimiento;
+        if (rawDate) {
+          // Extraemos solo la porción YYYY-MM-DD para que el input type="date" la pueda leer
+          this.usuario.fecha_nac = rawDate.split('T')[0];
+        } else {
+          this.usuario.fecha_nac = '';
+        }
         this.actualizarInicial();
       } else {
         this.router.navigate(['/login'], { replaceUrl: true });
@@ -108,14 +114,18 @@ export class Perfil implements OnInit {
           const timestamp = new Date().getTime();
           usrServer.avatarUrl = `${environment.serverUrl}/${usrServer.avatar.replace(/\\/g, '/')}?t=${timestamp}`;
         }
-        usrServer.fecha_nac = usrServer.fecha_nacimiento || usrServer.fecha_nac;
+        let rawServerDate = usrServer.fecha_nacimiento || usrServer.fecha_nac;
+        if (rawServerDate) {
+          usrServer.fecha_nac = rawServerDate.split('T')[0];
+        } else {
+          usrServer.fecha_nac = '';
+        }
         
         const usuarioActualizado = { ...this.usuario, ...usrServer };
         localStorage.setItem('usuarioLogueado', JSON.stringify(usuarioActualizado));
         this.usuario = usuarioActualizado;
         this.actualizarInicial();
         alert('Cambios guardados con éxito.');
-        this.regresar();
       },
       error: (err) => {
         console.error('Error al guardar perfil:', err);
@@ -123,15 +133,5 @@ export class Perfil implements OnInit {
         alert('Error al guardar: ' + msj);
       }
     });
-  }
-
-  regresar() {
-    // Si la categoría permite acceder al panel administrativo
-    const categoriasAdmin = ['Control del Sistema', 'Soporte', 'Monitoreo', 'Gerencia De Tecnologia'];
-    if (categoriasAdmin.includes(this.usuario.rol_categoria)) {
-      this.router.navigate(['/panel-admin']); 
-    } else {
-      this.router.navigate(['/panel-usuario']);
-    }
   }
 }
