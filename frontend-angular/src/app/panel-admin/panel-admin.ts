@@ -26,6 +26,22 @@ export class PanelAdmin implements OnInit, OnDestroy {
   isSidebarOpen = signal<boolean>(false);
   habilitarTransicion = false;
   
+  // Interacción de KPIs (Opción A)
+  filtroKpiSeleccionado = signal<'Todos' | 'Pendiente' | 'En Progreso' | 'Resuelto' | null>(null);
+
+  tituloPestana = computed(() => {
+    switch(this.pestanaActual()) {
+      case 'home': return 'Dashboard';
+      case 'tickets': return 'Gestión de Tickets';
+      case 'mis-tickets': return 'Mis Tickets';
+      case 'usuarios': return 'Gestión de Usuarios';
+      case 'servicios': return 'Reporte De Servicios';
+      case 'estadisticas': return 'Estadísticas';
+      case 'perfil': return 'Mi Perfil';
+      default: return 'Centro de Control';
+    }
+  });
+  
   esTecnico = computed(() => {
     const rolCat = this.adminActual().rol_categoria;
     const rolId = Number(this.adminActual().rol_id);
@@ -160,6 +176,35 @@ export class PanelAdmin implements OnInit, OnDestroy {
     if (asignados === 0) return 0;
     return Math.round((resueltos / asignados) * 100);
   });
+
+  // Tickets Filtrados para Opción A (Tabla debajo de KPIs)
+  ticketsKpiFiltrados = computed(() => {
+    const estado = this.filtroKpiSeleccionado();
+    if (!estado) return null;
+    
+    let tickets = this.todosLosTickets();
+    
+    if (this.esTecnico()) {
+       if (estado === 'Todos') return tickets.filter(t => t.tecnico_id === this.adminActual().id);
+       if (estado === 'Pendiente') return tickets.filter(t => t.tecnico_id === this.adminActual().id && t.estado_ticket === 'En Progreso');
+       if (estado === 'En Progreso') return tickets.filter(t => t.estado_ticket === 'Pendiente');
+       if (estado === 'Resuelto') return tickets.filter(t => t.tecnico_id === this.adminActual().id && (t.estado_ticket === 'Resuelto' || t.estado_ticket === 'Sin Confirmar'));
+    } else {
+       if (estado === 'Todos') return tickets;
+       if (estado === 'Pendiente') return tickets.filter(t => t.estado_ticket === 'Pendiente' || t.estado_ticket === 'En Progreso');
+       if (estado === 'En Progreso') return tickets.filter(t => t.estado_ticket === 'En Progreso');
+       if (estado === 'Resuelto') return tickets.filter(t => t.estado_ticket === 'Resuelto');
+    }
+    return [];
+  });
+
+  seleccionarFiltroKpi(estado: 'Todos' | 'Pendiente' | 'En Progreso' | 'Resuelto') {
+    if (this.filtroKpiSeleccionado() === estado) {
+      this.filtroKpiSeleccionado.set(null);
+    } else {
+      this.filtroKpiSeleccionado.set(estado);
+    }
+  }
 
   private motorDeTiempo: Subscription | undefined;
   graficoEstatus: any;

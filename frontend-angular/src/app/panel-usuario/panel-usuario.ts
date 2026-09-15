@@ -70,6 +70,16 @@ export class PanelUsuario implements OnInit, OnDestroy {
   suscripcion: Subscription | undefined;
   graficoInstancia: any; 
 
+  tituloPestana = computed(() => {
+    switch(this.pestanaActual()) {
+      case 'estatus': return 'Mis Tickets';
+      case 'historico': return 'Histórico de Tickets';
+      case 'perfil': return 'Mi Perfil';
+      case 'servicios': return 'Mis Servicios';
+      default: return 'Dashboard';
+    }
+  });
+
   private motorDeTiempo: Subscription | undefined;
   // B8-FIX: Guardar referencia a la suscripción del ticketService para poder cancelarla
   private ticketSub: Subscription | undefined;

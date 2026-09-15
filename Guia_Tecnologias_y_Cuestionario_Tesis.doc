@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Guía de Tecnologías y Cuestionario de Tesis - Farmapatria</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1.8cm 1.5cm;
+        }
+        body {
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292f;
+            background: #fff;
+            padding: 10px 20px;
+        }
+        .header-box {
+            text-align: center;
+            border-bottom: 3px solid #1e3a8a;
+            padding-bottom: 18px;
+            margin-bottom: 25px;
+        }
+        .header-box h1 {
+            color: #1e3a8a;
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .header-box h2 {
+            color: #2563eb;
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        h2 {
+            color: #1e3a8a;
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 5px;
+            margin-top: 28px;
+            font-size: 18px;
+            page-break-after: avoid;
+        }
+        h3 {
+            color: #1e40af;
+            margin-top: 20px;
+            font-size: 15px;
+            page-break-after: avoid;
+        }
+        h4 {
+            color: #0f172a;
+            margin-top: 14px;
+            margin-bottom: 4px;
+            font-size: 13.5px;
+            page-break-after: avoid;
+        }
+        p, li {
+            font-size: 12.5px;
+            color: #334155;
+        }
+        ul, ol {
+            padding-left: 20px;
+            margin-top: 4px;
+            margin-bottom: 10px;
+        }
+        li {
+            margin-bottom: 4px;
+        }
+        pre {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 10.5px;
+            font-family: Consolas, 'Courier New', monospace;
+            overflow-x: auto;
+            page-break-inside: avoid;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 11.5px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 22px 0;
+        }
+        strong {
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-box">
+        <h1>Sistema de Reportes Farmapatria</h1>
+        <h2>Guía de Arquitectura, Tecnologías y Cuestionario de Estudio para Defensa de Tesis</h2>
+    </div>
+    <h1>GUÍA DE TECNOLOGÍAS Y CUESTIONARIO DE ESTUDIO</h1>
+<h2>Sistema de Reportes e Incidencias Técnicas — Farmapatria (Proyecto de Tesis)</h2>
+<hr>
+<h3>Resumen Ejecutivo del Proyecto</h3>
+<p>El <strong>Sistema de Reportes Farmapatria</strong> es una plataforma web integral diseñada para la gestión, seguimiento, diagnóstico y resolución oportuna de incidencias técnicas y fallas de servicios en la red nacional de farmacias y dependencias de Farmapatria.</p>
+<p>El sistema fue concebido bajo estándares modernos de ingeniería de software:</p>
+<ul>
+<li><strong>Arquitectura Cliente-Servidor Desacoplada</strong> basada en una API RESTful.</li>
+<li><strong>Frontend SPA (Single Page Application)</strong> rápido, reactivo y moderno.</li>
+<li><strong>Backend Modular por Capas</strong> con división estricta de rutas, controladores, servicios y middlewares.</li>
+<li><strong>Seguridad Multicapa</strong>: Sesiones sin estado con JWT, encriptación con BCrypt, protección de rutas con Guards e interceptores en cliente, middlewares en servidor y autenticación de dos factores (2FA / MFA).</li>
+</ul>
+<hr>
+<h2>1. Arquitectura General del Sistema</h2>
+<p>El sistema opera bajo un esquema desacoplado donde la interfaz de usuario y la lógica de datos funcionan como entidades independientes comunicadas a través del protocolo HTTP/HTTPS:</p>
+<ol>
+<li><strong>Capa Cliente (Frontend):</strong> Angular 21 + Tailwind CSS v4 + TypeScript + Chart.js + jsPDF.</li>
+<li><strong>Capa de Transporte y Acceso:</strong> Cloudflare Tunnels (acceso remoto seguro cifrado) + CORS.</li>
+<li><strong>Capa Servidor (Backend):</strong> Node.js + Express.js v5 con arquitectura por capas (MVC).</li>
+<li><strong>Capa de Persistencia:</strong> Base de datos relacional PostgreSQL con pool de conexiones gestionado por <code>pg</code> (<code>node-postgres</code>).</li>
+</ol>
+<pre><code>+-------------------------------------------------------------+
+|                     CLIENTE (FRONTEND)                      |
+|  Angular 21 + Tailwind CSS v4 + TypeScript + Chart.js       |
+|  - Interceptor HTTP (Inyección automática de Token JWT)     |
+|  - Guards de Navegación (AuthGuard, AdminGuard)             |
++-------------------------------------------------------------+
+                              |
+                     HTTPS / REST API
+                              |
+                              v
++-------------------------------------------------------------+
+|             ACCESO SEGURO / INFRAESTRUCTURA                 |
+|  Cloudflare Tunnel (cloudflared) -&gt; trycloudflare.com       |
+|  - Conexión cifrada sin apertura de puertos locales         |
++-------------------------------------------------------------+
+                              |
+                              v
++-------------------------------------------------------------+
+|                     SERVIDOR (BACKEND)                      |
+|  Node.js + Express.js v5                                    |
+|  - Middlewares: Auth (JWT), CORS, Upload (Multer), Audit    |
+|  - Validaciones: express-validator                          |
+|  - Manejador Centralizado de Errores (Fail-Safe)            |
+|  - 2FA / MFA: speakeasy + qrcode (TOTP)                     |
++-------------------------------------------------------------+
+                              |
+                     node-postgres (Pool)
+                              |
+                              v
++-------------------------------------------------------------+
+|                 BASE DE DATOS RELACIONAL                    |
+|  PostgreSQL                                                 |
+|  - Tablas: usuarios, tickets, reportes_servicios,           |
+|            notificaciones, auditoria_root                   |
++-------------------------------------------------------------+
+</code></pre>
+<hr>
+<h2>2. Inventario y Ficha Técnica de Tecnologías</h2>
+<h3>A. Frontend (Presentación y Experiencia de Usuario)</h3>
+<h4>1. Angular (v21.2)</h4>
+<ul>
+<li><strong>Qué es:</strong> Framework de desarrollo web para aplicaciones de una sola página (SPA).</li>
+<li><strong>Función en el Sistema:</strong> Administra toda la experiencia del usuario en el navegador sin recargas de página, implementando la arquitectura moderna de <em>Standalone Components</em>.</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Garantiza modularidad, renderizado dinámico y desacoplamiento total de la interfaz frente a la base de datos.</li>
+</ul>
+<h4>2. TypeScript (v5.9)</h4>
+<ul>
+<li><strong>Qué es:</strong> Superconjunto tipado de JavaScript desarrollado por Microsoft.</li>
+<li><strong>Función en el Sistema:</strong> Lenguaje en el que está desarrollado el frontend. Define modelos e interfaces de dominio (<code>Ticket</code>, <code>Usuario</code>, <code>Servicio</code>).</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Detección temprana de errores en tiempo de compilación y robustez en la integración con la API.</li>
+</ul>
+<h4>3. Tailwind CSS (v4.1)</h4>
+<ul>
+<li><strong>Qué es:</strong> Framework de diseño CSS utilitario de última generación.</li>
+<li><strong>Función en el Sistema:</strong> Estilizado completo y responsivo de paneles, tablas interactivas, formularios de incidencias y modales.</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Permite construir interfaces modernas, adaptables a teléfonos y computadoras con máxima velocidad de carga.</li>
+</ul>
+<h4>4. Angular Router y Guards de Navegación</h4>
+<ul>
+<li><strong>Qué es:</strong> Sistema de rutas de Angular con mecanismos de protección.</li>
+<li><strong>Función en el Sistema:</strong> Gobierna las rutas de la aplicación y protege vistas críticas mediante:<ul>
+<li><code>AuthGuard</code>: Bloquea el acceso a usuarios no identificados.</li>
+<li><code>AdminGuard</code> / <code>RoleGuard</code>: Bloquea el panel administrativo a usuarios sin roles técnicos o de superadministrador.</li>
+</ul>
+</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Primera barrera de seguridad perimetral a nivel de interfaz de usuario.</li>
+</ul>
+<h4>5. Interceptor HTTP (<code>authInterceptor</code>)</h4>
+<ul>
+<li><strong>Qué es:</strong> Middleware del cliente HTTP de Angular (<code>provideHttpClient</code>).</li>
+<li><strong>Función en el Sistema:</strong> Intercepta automáticamente cada petición saliente hacia la API e inyecta la cabecera <code>Authorization: Bearer &lt;token&gt;</code> leyendo el JWT desde el almacenamiento local (<code>localStorage</code>).</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Centralización de la seguridad en el cliente: ningún componente necesita gestionar manualmente las cabeceras de autorización.</li>
+</ul>
+<h4>6. Chart.js (v4.5)</h4>
+<ul>
+<li><strong>Qué es:</strong> Librería de renderizado de gráficos interactivos basada en HTML5 Canvas.</li>
+<li><strong>Función en el Sistema:</strong> Alimenta los indicadores clave de rendimiento (KPIs) en el panel de administración (volumen de tickets por estado, incidencias por gerencia, etc.).</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Apoya la toma de decisiones gerenciales mediante tableros visuales analíticos.</li>
+</ul>
+<h4>7. jsPDF (v4.2)</h4>
+<ul>
+<li><strong>Qué es:</strong> Librería JavaScript para creación y exportación de documentos PDF.</li>
+<li><strong>Función en el Sistema:</strong> Permite que los técnicos y administradores generen reportes impresos de fallas o resúmenes de casos directamente desde el navegador.</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Generación distribuida en el cliente sin sobrecargar el procesador del servidor backend.</li>
+</ul>
+<h4>8. RxJS (v7.8)</h4>
+<ul>
+<li><strong>Qué es:</strong> Librería para programación reactiva con Observables.</li>
+<li><strong>Función en el Sistema:</strong> Maneja las operaciones asíncronas del cliente, flujos de datos y respuestas HTTP del backend.</li>
+</ul>
+<hr>
+<h3>B. Backend (Servidor, Lógica de Negocio y APIs)</h3>
+<h4>1. Node.js</h4>
+<ul>
+<li><strong>Qué es:</strong> Entorno de ejecución (runtime) de JavaScript del lado del servidor basado en el motor V8 de Google Chrome.</li>
+<li><strong>Función en el Sistema:</strong> Plataforma de ejecución orientada a eventos con entrada/salida (I/O) no bloqueante.</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Gran capacidad para procesar altas peticiones concurrentes de farmacias a nivel nacional con mínimo consumo de memoria.</li>
+</ul>
+<h4>2. Express.js (v5.2)</h4>
+<ul>
+<li><strong>Qué es:</strong> Framework web minimalista y robusto para Node.js.</li>
+<li><strong>Función en el Sistema:</strong> Expone todos los servicios RESTful (rutas para tickets, usuarios, autenticación, notificaciones y reportes de servicios).</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Manejo ágil de enrutamiento y soporte moderno para promesas y cadenas de middlewares.</li>
+</ul>
+<h4>3. Arquitectura por Capas (Patrón MVC Modular)</h4>
+<ul>
+<li><strong>Estructura Interna:</strong><ul>
+<li><code>src/routes/</code>: Definición de endpoints y métodos HTTP (GET, POST, PUT, DELETE).</li>
+<li><code>src/controllers/</code>: Orquestación del flujo, recepción de datos y respuestas JSON.</li>
+<li><code>src/services/</code>: Lógica de negocio dura y ejecución de sentencias SQL.</li>
+<li><code>src/middlewares/</code>: Filtros de seguridad, auditoría y carga de archivos.</li>
+<li><code>src/config/</code>: Conexión a base de datos y variables de entorno.</li>
+</ul>
+</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Separación de responsabilidades que garantiza mantenibilidad y código limpio.</li>
+</ul>
+<h4>4. express-validator (v7.3)</h4>
+<ul>
+<li><strong>Qué es:</strong> Conjunto de middlewares de validación y sanitización para Express.</li>
+<li><strong>Función en el Sistema:</strong> Valida rigurosamente formatos de entrada (cédula numérica, correos válidos, contraseñas seguras, longitud de descripciones de tickets).</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Blindaje contra datos corruptos e inyecciones a nivel de entrada de API.</li>
+</ul>
+<h4>5. Multer (v2.1)</h4>
+<ul>
+<li><strong>Qué es:</strong> Middleware para procesamiento de solicitudes con formato <code>multipart/form-data</code>.</li>
+<li><strong>Función en el Sistema:</strong> Gestiona la carga de fotos de perfil y archivos de evidencia adjuntos a los reportes (capturas de error, facturas o actas técnicas).</li>
+<li><strong>Medidas de Seguridad:</strong> Filtra tipos MIME (JPG, PNG, GIF, PDF) y restringe el tamaño a un máximo de 5MB por archivo.</li>
+</ul>
+<h4>6. CORS (Cross-Origin Resource Sharing v2.8)</h4>
+<ul>
+<li><strong>Qué es:</strong> Estándar de seguridad del navegador para peticiones de origen cruzado.</li>
+<li><strong>Función en el Sistema:</strong> Permite la conexión segura entre el puerto del frontend (4201) y la API del backend (3000).</li>
+</ul>
+<h4>7. Dotenv (v17.4)</h4>
+<ul>
+<li><strong>Qué es:</strong> Gestor de variables de entorno.</li>
+<li><strong>Función en el Sistema:</strong> Mantiene ocultas y aisladas las credenciales de PostgreSQL, secretos JWT y puertos en el archivo <code>.env</code>.</li>
+</ul>
+<h4>8. Nodemon (v3.1)</h4>
+<ul>
+<li><strong>Qué es:</strong> Monitor de desarrollo.</li>
+<li><strong>Función en el Sistema:</strong> Reinicia en caliente el servidor Node.js al detectar cambios en el código.</li>
+</ul>
+<hr>
+<h3>C. Seguridad, Criptografía y Control de Acceso</h3>
+<h4>1. JSON Web Tokens - JWT (<code>jsonwebtoken</code> v9.0)</h4>
+<ul>
+<li><strong>Mecanismo:</strong> Autenticación sin estado (<em>Stateless</em>).</li>
+<li><strong>Función en el Sistema:</strong> Al iniciar sesión, el servidor firma un token digital que contiene el ID y Rol del usuario con caducidad de 8 horas.</li>
+<li><strong>Concepto Clave para la Tesis:</strong> No ocupa memoria en base de datos para sesiones y permite una verificación criptográfica ultrarrápida.</li>
+</ul>
+<h4>2. Bcrypt.js (v3.0)</h4>
+<ul>
+<li><strong>Mecanismo:</strong> Algoritmo de hashing adaptativo unidireccional con salting.</li>
+<li><strong>Función en el Sistema:</strong> Encripta las claves con un salt de 10 rondas antes de almacenarlas. Las contraseñas nunca se guardan en texto plano.</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Protección estándar de la industria contra ataques de fuerza bruta y tablas arcoíris (<em>Rainbow Tables</em>).</li>
+</ul>
+<h4>3. Autenticación de Dos Factores - 2FA / MFA (<code>speakeasy</code> + <code>qrcode</code>)</h4>
+<ul>
+<li><strong>Mecanismo:</strong> Algoritmo TOTP (Time-based One-Time Password).</li>
+<li><strong>Función en el Sistema:</strong> Proporciona un segundo factor de autenticación a usuarios administrativos generando códigos QR compatibles con Google Authenticator.</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Seguridad avanzada para mitigar robos de identidad y accesos indebidos.</li>
+</ul>
+<h4>4. Auditoría de Acciones Administrativas (<code>audit.middleware.js</code>)</h4>
+<ul>
+<li><strong>Mecanismo:</strong> Trazabilidad y no repudio.</li>
+<li><strong>Función en el Sistema:</strong> Guarda en la tabla <code>auditoria_root</code> cada operación crítica (modificación de roles, bloqueo de cuentas, etc.), registrando usuario, endpoint, detalles en JSONB y fecha/hora.</li>
+</ul>
+<h4>5. Manejador Global de Errores (<code>errorHandler.middleware.js</code>)</h4>
+<ul>
+<li><strong>Mecanismo:</strong> Resiliencia y Principio Fail-Safe.</li>
+<li><strong>Función en el Sistema:</strong> Atrapa fallos no controlados, evitando caídas del servidor (<code>crashes</code>) y previniendo que se filtren datos internos de PostgreSQL al usuario.</li>
+</ul>
+<hr>
+<h3>D. Base de Datos (Persistencia de Datos)</h3>
+<h4>1. PostgreSQL</h4>
+<ul>
+<li><strong>Qué es:</strong> Sistema Gestor de Bases de Datos Relacional (RDBMS) de clase empresarial.</li>
+<li><strong>Función en el Sistema:</strong> Garantiza almacenamiento seguro, atomicidad en las transacciones e integridad referencial por claves foráneas.</li>
+</ul>
+<h4>2. pg (<code>node-postgres</code> v8.20)</h4>
+<ul>
+<li><strong>Qué es:</strong> Cliente oficial no bloqueante de PostgreSQL para Node.js.</li>
+<li><strong>Función en el Sistema:</strong> Administra un <strong>Pool de conexiones</strong>, optimizando tiempos de respuesta al reutilizar conexiones abiertas.</li>
+</ul>
+<h4>Entidades Principales del Modelo de Datos:</h4>
+<ol>
+<li><strong><code>usuarios</code></strong>: Cédula, correo, nombre, apellido, contraseña encriptada, gerencia, farmacia, rol de permisos, estado (Activo/Inactivo/Bloqueado), avatar y credenciales MFA.</li>
+<li><strong><code>tickets</code></strong>: Reportes técnicos correlativos (<code>REP-XXXX</code>), creador, técnico asignado, estados de atención, ID de AnyDesk, clasificación de falla y evidencias adjuntas.</li>
+<li><strong><code>reportes_servicios</code></strong>: Reportes de indisponibilidad de suministros críticos (electricidad, internet, Cantv, agua) con tiempos sin servicio y proveedores.</li>
+<li><strong><code>notificaciones</code></strong>: Mensajería interna automatizada para alertar a los usuarios sobre avances en sus reportes.</li>
+<li><strong><code>auditoria_root</code></strong>: Bitácora de seguridad de acciones privilegiadas.</li>
+</ol>
+<hr>
+<h3>E. Infraestructura, Despliegue y Redes</h3>
+<h4>1. Cloudflare Tunnels (<code>cloudflared</code>)</h4>
+<ul>
+<li><strong>Qué es:</strong> Servicio perimetral de red cifrada de Cloudflare.</li>
+<li><strong>Función en el Sistema:</strong> Publica el sistema local a internet mediante un túnel saliente seguro (<code>trycloudflare.com</code>) sin abrir puertos en el router ni contratar IP fija.</li>
+<li><strong>Concepto Clave para la Tesis:</strong> Solución rentable y segura para pruebas de campo en distintas farmacias del país durante la evaluación del proyecto.</li>
+</ul>
+<h4>2. Scripts de Automatización en Lotes (<code>.bat</code>)</h4>
+<ul>
+<li><strong><code>iniciar_desarrollo.bat</code></strong>: Arranca en paralelo el backend y el frontend, abriendo el navegador en <code>http://localhost:4201</code>.</li>
+<li><strong><code>iniciar_produccion.bat</code></strong>: Arranca el servidor y establece de inmediato el túnel público con Cloudflare.</li>
+</ul>
+<hr>
+<h2>3. Flujo del Ciclo de Vida de los Tickets</h2>
+<p>Para la presentación de la tesis es fundamental explicar las 4 etapas del ciclo de atención:</p>
+<ol>
+<li><strong>Pendiente</strong>: El usuario de una farmacia detecta una falla, llena el formulario con clasificación, AnyDesk y evidencia, creándose el ticket correlativo.</li>
+<li><strong>En Progreso</strong>: Un técnico de soporte toma el ticket desde su panel. El sistema notifica al creador que su requerimiento está siendo atendido.</li>
+<li><strong>Sin Confirmar</strong>: El técnico solventa la avería (remota o presencialmente) y marca el ticket como concluido. El sistema solicita al usuario que verifique en su puesto de trabajo.</li>
+<li><strong>Resuelto</strong>: El usuario valida el correcto funcionamiento y pulsa &quot;Confirmar Solución&quot;. Si la falla persiste, selecciona &quot;Reportar Error Persistente&quot; y el ticket vuelve automáticamente a estado <strong>En Progreso</strong>.</li>
+</ol>
+<hr>
+<h2>4. Banco de Preguntas y Respuestas para Examen de Tesis</h2>
+<h3>Módulo 1: Arquitectura y Conceptos Generales</h3>
+<ol>
+<li><p><strong>Pregunta:</strong> ¿Cuál es la arquitectura general del sistema y por qué se escogió?</p>
+<ul>
+<li><strong>Respuesta:</strong> Se implementó una arquitectura Cliente-Servidor desacoplada (Frontend SPA en Angular 21 y Backend API RESTful en Node.js/Express 5). Se escogió porque permite escalabilidad independiente, mejor rendimiento de usuario sin recargas de página completa y facilita que la misma API pueda servir a futuras aplicaciones móviles.</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Cuál es la ventaja de utilizar una Single Page Application (SPA)?</p>
+<ul>
+<li><strong>Respuesta:</strong> En una SPA solo se carga el documento HTML una vez. Todas las interacciones subsiguientes descargan únicamente datos en formato JSON mediante llamadas asíncronas, logrando transiciones instantáneas y menor consumo de ancho de banda.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3>Módulo 2: Frontend (Angular &amp; TypeScript)</h3>
+<ol start="3">
+<li><p><strong>Pregunta:</strong> ¿Qué es un Guard en Angular y cuáles están presentes en el proyecto?</p>
+<ul>
+<li><strong>Respuesta:</strong> Es una interfaz que condiciona la navegación entre rutas según reglas de negocio. En el sistema existen <code>AuthGuard</code> (comprueba que el usuario esté autenticado con token válido) y <code>AdminGuard</code> (valida que el rol del usuario corresponda a personal técnico o administrador).</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Cómo garantiza el frontend que las peticiones a la API estén autenticadas?</p>
+<ul>
+<li><strong>Respuesta:</strong> A través de un <code>HttpInterceptor</code> (<code>authInterceptor</code>) registrado en la configuración de Angular. Captura todas las solicitudes salientes e inyecta automáticamente el encabezado <code>Authorization: Bearer &lt;token&gt;</code> obtenido del <code>localStorage</code>.</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Qué tecnologías se usaron para gráficos y reportes descargables?</p>
+<ul>
+<li><strong>Respuesta:</strong> Se usó <code>Chart.js</code> para los indicadores y gráficos interactivos del panel de control, y <code>jsPDF</code> para compilar y descargar reportes directamente en formato PDF desde el navegador del cliente.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3>Módulo 3: Backend y Seguridad (Node.js &amp; Express)</h3>
+<ol start="6">
+<li><p><strong>Pregunta:</strong> ¿Qué patrón de diseño sigue el backend y cuál es su beneficio?</p>
+<ul>
+<li><strong>Respuesta:</strong> Sigue una arquitectura por capas (MVC modular) separando <code>routes</code> (rutas), <code>controllers</code> (gestión de solicitudes), <code>services</code> (lógica de negocio y SQL) y <code>middlewares</code> (seguridad y validaciones). Evita código monolítico, mejora la lectura y facilita pruebas unitarias.</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Cómo se almacenan las contraseñas de forma segura en la base de datos?</p>
+<ul>
+<li><strong>Respuesta:</strong> Se encriptan mediante la librería <code>bcryptjs</code> utilizando un factor de salting de 10 rondas. Nunca se guardan en texto plano, lo que impide que las claves sean descubiertas aún ante accesos indebidos a la base de datos.</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Cómo funciona el mecanismo de autenticación mediante JWT?</p>
+<ul>
+<li><strong>Respuesta:</strong> Al hacer login, el servidor valida las credenciales y devuelve un token firmado digitalmente con clave secreta (válido por 8 horas). En cada solicitud posterior, el middleware <code>verificarToken</code> inspecciona la firma criptográfica y extrae el identificador y rol del usuario sin necesidad de consultar la base de datos.</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Qué es y cómo funciona el 2FA implementado en el sistema?</p>
+<ul>
+<li><strong>Respuesta:</strong> Es un sistema de autenticación en dos factores basado en TOTP (contraseñas de un solo uso por tiempo). Con <code>speakeasy</code> se genera un secreto criptográfico único y con <code>qrcode</code> se produce el código para escanear en apps como Google Authenticator.</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Cómo se controla la subida de archivos adjuntos para evitar ataques?</p>
+<ul>
+<li><strong>Respuesta:</strong> Mediante el middleware <code>multer</code>, que valida la extensión y el tipo MIME (admitiendo únicamente imágenes JPG/PNG y PDFs) e impone un límite máximo de tamaño de 5MB por archivo.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3>Módulo 4: Base de Datos (PostgreSQL)</h3>
+<ol start="11">
+<li><p><strong>Pregunta:</strong> ¿Qué ventaja tiene el uso de <code>Pool</code> en <code>node-postgres</code> frente a crear clientes individuales?</p>
+<ul>
+<li><strong>Respuesta:</strong> Un <code>Pool</code> mantiene abiertas conexiones listas para ser reutilizadas en memoria. Esto evita el costo de negociar el protocolo TCP y autenticar la sesión con PostgreSQL en cada consulta, multiplicando la capacidad de usuarios concurrentes.</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Cuáles son las tablas principales del sistema y cuál es su relación?</p>
+<ul>
+<li><strong>Respuesta:</strong> Las tablas principales son <code>usuarios</code> y <code>tickets</code> (relacionadas mediante claves foráneas por <code>usuario_id</code> y <code>tecnico_id</code>), <code>reportes_servicios</code> (para averías de servicios generales), <code>notificaciones</code> (alertas asociadas a usuarios) y <code>auditoria_root</code> (trazabilidad de administración).</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3>Módulo 5: Despliegue, Infraestructura y Redes</h3>
+<ol start="13">
+<li><p><strong>Pregunta:</strong> ¿Qué es Cloudflare Tunnels (<code>cloudflared</code>) y por qué fue elegido?</p>
+<ul>
+<li><strong>Respuesta:</strong> Es un conector seguro que establece un túnel saliente hacia los servidores de Cloudflare. Permite publicar la plataforma en internet con cifrado HTTPS (<code>trycloudflare.com</code>) sin tener que abrir puertos en el firewall de la organización, sin configurar NAT ni requerir una dirección IP pública estática.</li>
+</ul>
+</li>
+<li><p><strong>Pregunta:</strong> ¿Cuál es el procedimiento para encender el sistema en producción o pruebas?</p>
+<ul>
+<li><strong>Respuesta:</strong> Se ejecuta el archivo automatizado <code>iniciar_produccion.bat</code>, el cual levanta el servicio backend en Node.js y simultáneamente inicializa el túnel de Cloudflare, entregando de inmediato el enlace web público para acceder desde cualquier equipo con conexión a internet.</li>
+</ul>
+</li>
+</ol>
+
+</body>
+</html>

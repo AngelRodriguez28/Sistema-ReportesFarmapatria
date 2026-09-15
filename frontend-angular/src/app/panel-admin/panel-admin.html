@@ -60,7 +60,7 @@
             <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
         </button>
         <div class="flex flex-col">
-          <h2 class="m-0 text-lg md:text-xl font-extrabold tracking-tight hidden sm:block">Centro de Control</h2>
+          <h2 class="m-0 text-lg md:text-xl font-extrabold tracking-tight hidden sm:block">{{ tituloPestana() }}</h2>
         </div>
       </div>
       
@@ -120,7 +120,12 @@
             <!-- Vista para otros roles (Soporte, Monitoreo, etc.) -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               <!-- KPIs Dinámicos -->
-              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] flex items-center gap-4 transition-all hover:-translate-y-1 cursor-pointer"
+                   [class.ring-2]="filtroKpiSeleccionado() === 'Todos'"
+                   [class.ring-primary]="filtroKpiSeleccionado() === 'Todos'"
+                   [class.border]="filtroKpiSeleccionado() !== 'Todos'"
+                   [class.border-gray-100]="filtroKpiSeleccionado() !== 'Todos'"
+                   (click)="seleccionarFiltroKpi('Todos')">
                   <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl">
                       <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
                   </div>
@@ -130,7 +135,12 @@
                   </div>
               </div>
               
-              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] flex items-center gap-4 transition-all hover:-translate-y-1 cursor-pointer"
+                   [class.ring-2]="filtroKpiSeleccionado() === 'Pendiente'"
+                   [class.ring-secondary]="filtroKpiSeleccionado() === 'Pendiente'"
+                   [class.border]="filtroKpiSeleccionado() !== 'Pendiente'"
+                   [class.border-gray-100]="filtroKpiSeleccionado() !== 'Pendiente'"
+                   (click)="seleccionarFiltroKpi('Pendiente')">
                   <div class="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center text-2xl">
                       <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
                   </div>
@@ -140,7 +150,12 @@
                   </div>
               </div>
 
-              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] flex items-center gap-4 transition-all hover:-translate-y-1 cursor-pointer"
+                   [class.ring-2]="filtroKpiSeleccionado() === 'En Progreso'"
+                   [class.ring-blue-500]="filtroKpiSeleccionado() === 'En Progreso'"
+                   [class.border]="filtroKpiSeleccionado() !== 'En Progreso'"
+                   [class.border-gray-100]="filtroKpiSeleccionado() !== 'En Progreso'"
+                   (click)="seleccionarFiltroKpi('En Progreso')">
                   <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl">
                       <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
                   </div>
@@ -150,7 +165,12 @@
                   </div>
               </div>
 
-              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+              <div class="bg-white rounded-2xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] flex items-center gap-4 transition-all hover:-translate-y-1 cursor-pointer"
+                   [class.ring-2]="filtroKpiSeleccionado() === 'Resuelto'"
+                   [class.ring-green-500]="filtroKpiSeleccionado() === 'Resuelto'"
+                   [class.border]="filtroKpiSeleccionado() !== 'Resuelto'"
+                   [class.border-gray-100]="filtroKpiSeleccionado() !== 'Resuelto'"
+                   (click)="seleccionarFiltroKpi('Resuelto')">
                   <div class="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center text-2xl">
                       <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg>
                   </div>
@@ -160,6 +180,77 @@
                   </div>
               </div>
             </div>
+
+            <!-- TABLA DE DETALLE (Opción A) -->
+            @if (filtroKpiSeleccionado() && ticketsKpiFiltrados()) {
+              <div class="col-span-full mt-4 bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 p-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="text-primary font-extrabold text-lg flex items-center gap-2">
+                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/><path d="M4 4h8v2H4V4zm0 3h8v2H4V7zm0 3h8v2H4v-2z"/></svg>
+                     Listado de Tickets: {{ filtroKpiSeleccionado() === 'Todos' ? 'Todos' : filtroKpiSeleccionado() }}
+                  </h3>
+                  <button class="text-gray-400 hover:text-gray-600 p-1.5 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors" (click)="seleccionarFiltroKpi(filtroKpiSeleccionado()!)">
+                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                  </button>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-sm text-gray-600">
+                    <thead class="bg-gray-50 text-gray-700 text-[10px] uppercase font-extrabold border-b border-gray-100">
+                      <tr>
+                        <th class="px-4 py-3 rounded-tl-xl">N° Reporte</th>
+                        <th class="px-4 py-3">Unidad Afectada</th>
+                        <th class="px-4 py-3">Problema / Falla</th>
+                        <th class="px-4 py-3">Técnico Asignado</th>
+                        <th class="px-4 py-3 text-center">Estado</th>
+                        <th class="px-4 py-3 rounded-tr-xl text-center">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                      @for (ticket of ticketsKpiFiltrados(); track ticket.id) {
+                        <tr class="hover:bg-gray-50/50 transition-colors">
+                          <td class="px-4 py-3 font-extrabold text-primary">{{ ticket.numero_reporte }}</td>
+                          <td class="px-4 py-3">{{ ticket.unidad_afectada }}</td>
+                          <td class="px-4 py-3">
+                            <span class="block line-clamp-1 max-w-[200px]" [title]="ticket.tipificacion_falla">{{ ticket.tipificacion_falla }}</span>
+                          </td>
+                          <td class="px-4 py-3">
+                            @if (ticket.tecnico_id) {
+                              <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">
+                                  {{ ticket.tecnico_nombre?.substring(0,1)?.toUpperCase() }}
+                                </div>
+                                <span class="font-bold text-gray-800">{{ ticket.tecnico_nombre }} {{ ticket.tecnico_apellido }}</span>
+                              </div>
+                            } @else {
+                              <span class="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded-md font-bold">Sin Asignar</span>
+                            }
+                          </td>
+                          <td class="px-4 py-3 text-center">
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider inline-block"
+                                  [class.bg-red-50]="ticket.estado_ticket === 'Pendiente'" [class.text-secondary]="ticket.estado_ticket === 'Pendiente'"
+                                  [class.bg-blue-50]="ticket.estado_ticket === 'En Progreso'" [class.text-blue-700]="ticket.estado_ticket === 'En Progreso'"
+                                  [class.bg-yellow-50]="ticket.estado_ticket === 'Sin Confirmar'" [class.text-yellow-700]="ticket.estado_ticket === 'Sin Confirmar'"
+                                  [class.bg-green-50]="ticket.estado_ticket === 'Resuelto'" [class.text-green-700]="ticket.estado_ticket === 'Resuelto'">
+                              {{ ticket.estado_ticket }}
+                            </span>
+                          </td>
+                          <td class="px-4 py-3 text-center">
+                            <button class="text-primary hover:text-[#1a2352] p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-bold text-xs shadow-sm" (click)="abrirModalDetalle(ticket)">
+                              Ver Detalle
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                      @if (ticketsKpiFiltrados()?.length === 0) {
+                        <tr>
+                          <td colspan="6" class="px-4 py-8 text-center text-gray-400 font-medium">No hay tickets asociados a este filtro.</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
           }
           
           <!-- SECCIÓN DE EFICIENCIA (Solo Técnicos) -->
